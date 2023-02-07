@@ -1,0 +1,23621 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+  Persistable = 0  'NotPersistable
+  DataBindingBehavior = 0  'vbNone
+  DataSourceBehavior  = 0  'vbNone
+  MTSTransactionMode  = 0  'NotAnMTSObject
+END
+Attribute VB_Name = "clsGenOC_TratarAcessoEmbratel"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = True
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Public objDadosPendencia          As New clsblf_Pendencia
+Public objDadosAcesso             As New clsGenAcesso
+Public objMensagem                As New clsgenMensagem
+Public objdadosServico            As New clsGenServico
+
+Public objDadosCadastrais         As Object
+Public objDadosContrato           As Object
+Private FlagUtilizaInterfaceCLA   As Boolean
+
+Public FlagRecuperando            As Boolean
+
+Public objblfOC_SelecionarOTS     As clsgenOC_SelecionarOTS
+Public bFlagControlaAlteracao     As Boolean
+Public objForm                    As frmgenTratarAcessoEmbratel
+
+
+Public vMaskProvedor              As Variant
+Public vMensagemListaMsg          As Variant
+    
+Public AcessoConstruidoFaseID     As Long
+
+Public AcessoConstruidoFaseIDSwitch As Long
+Public Equipamento                  As String
+
+Public AcessoConstruidoServicoID  As Long
+Public objOc_EqptoNGN             As New clsVIPoc_CadastrarEqptoNGN
+
+Public FlagStatusAcessoCLA       As String
+Private sStatusEqptoNGN           As String
+
+Dim oobjPendencia                 As clsDNI_DadosPendencia
+Dim sTipoOperacao                 As String
+Dim sStatus_Fase                  As String
+Dim sSigla_Acao                   As String
+Dim lServico_ID                   As Long
+Dim lAcao_ID                      As Long
+Dim lServico_ID_Anterior          As Long
+Dim lProduto_ID                   As Long
+Dim lGrupo_ID                     As Long
+Dim lFase_Id                      As Long
+
+Dim lFase_ID_Switch               As Long
+
+Dim sDataFinalizacao              As String
+Dim lSequencia_Acao               As Long
+Dim sTextoAnotacao                As String
+Dim sTipoAcessoAnterior           As String
+Dim sPropriedadeAcessoAnterior    As String
+Dim sCaracteristicaAcessoAnterior As String
+Dim sSegurancaAcessoAnterior      As String
+Dim lNrLocalInsta                 As Long
+Dim lContratoID                   As Long
+Dim lCentroFuncID_Realoc          As Long
+Dim sPermiteExecucao              As String
+Dim lCentroFuncionalID            As Long
+Dim lNumeroOE                     As Long
+Dim lAnoOE                        As Long
+Dim lNumeroITemOE                 As Long
+Dim sFamilia_Produto              As String
+Dim lEnderecoID                   As Long
+Dim lItemServicoID                As Long
+Dim sIdLogico                     As String
+
+
+'Não resgata os dados da OTS anterior quando se altera o
+'endereço de instalação. IP VPN
+
+Dim sReplicaInformações As Boolean
+
+
+'======================================================================
+'CALBAT - 19/02/2009
+'Ajustado para gravar no caso de cancelamento e Desativação do Vipline IP
+'======================================================================
+Dim lFaseIDNGN As Long
+'======================================================================
+'======================================================================
+
+
+Dim bResgataAnterior              As Boolean
+Dim bFlagAcessoJaConstruido       As Boolean
+
+Dim cColecaoAcessos               As Collection
+Dim sStatusAcessoOTSAnterior      As String
+Public bFlagIndicaLegado          As Boolean
+Public bFlagLegadoEmAndamento     As Boolean
+Public bFlagEnviaCancelamentoCLA  As Boolean
+Public bFlagExibeMsgLegado        As Boolean
+
+
+'================================================================
+'Callbat - 07/04/2015
+'Chamado CH-74999UGL
+'================================================================
+Public bLimpaStatusCLA            As Boolean
+'================================================================
+'================================================================
+
+'=================================================================
+'CALLBAT - 26/06/2013 - Interface junto ao CFM
+'SO-ENGNQ-83669III
+'=================================================================
+Dim sTroncoTX As String
+Dim sOTSTX As String
+Dim sItemOTSTX As String
+Dim sUtilizaTroncoTX As String
+Dim lCircuito_ID As Long
+
+
+Public Property Get Circuito_ID() As Long
+
+    Circuito_ID = lCircuito_ID
+
+End Property
+
+Public Property Let Circuito_ID(ByVal sNewValue As Long)
+
+    lCircuito_ID = sNewValue
+
+End Property
+
+Public Property Get UtilizaTroncoTX() As String
+
+    UtilizaTroncoTX = sUtilizaTroncoTX
+
+End Property
+
+Public Property Let UtilizaTroncoTX(ByVal sNewValue As String)
+
+    sUtilizaTroncoTX = sNewValue
+
+End Property
+
+Public Property Get TroncoTX() As String
+    TroncoTX = sTroncoTX
+End Property
+
+Public Property Let TroncoTX(ByVal sNewValue As String)
+    sTroncoTX = sNewValue
+End Property
+
+Public Property Get OTSTX() As String
+    OTSTX = sOTSTX
+End Property
+
+Public Property Let OTSTX(ByVal sNewValue As String)
+    sOTSTX = sNewValue
+End Property
+
+Public Property Get ItemOTSTX() As String
+    ItemOTSTX = sItemOTSTX
+End Property
+
+Public Property Let ItemOTSTX(ByVal sNewValue As String)
+    sItemOTSTX = sNewValue
+End Property
+'=================================================================
+'=================================================================
+
+Public Property Get StatusEqptoNGN() As String
+
+     StatusEqptoNGN = sStatusEqptoNGN
+
+End Property
+
+Public Property Get Familia_Produto() As String
+
+    Familia_Produto = sFamilia_Produto
+
+End Property
+
+Public Property Let Familia_Produto(ByVal sNewValue As String)
+
+    sFamilia_Produto = sNewValue
+    
+End Property
+
+Public Property Get NumeroOE() As Long
+
+NumeroOE = lNumeroOE
+
+End Property
+
+Public Property Let NumeroOE(ByVal lNewValue As Long)
+
+lNumeroOE = lNewValue
+
+End Property
+
+Public Property Get AnoOE() As Long
+
+AnoOE = lAnoOE
+
+End Property
+
+Public Property Let AnoOE(ByVal lNewValue As Long)
+
+lAnoOE = lNewValue
+
+End Property
+
+Public Property Get NumeroItemOE() As Long
+
+NumeroItemOE = lNumeroITemOE
+
+End Property
+
+Public Property Let NumeroItemOE(ByVal lNewValue As Long)
+
+lNumeroITemOE = lNewValue
+
+End Property
+
+Public Property Get objPendencia() As clsDNI_DadosPendencia
+
+Set objPendencia = oobjPendencia
+
+End Property
+
+Public Property Let objPendencia(ByVal vNewValue As clsDNI_DadosPendencia)
+
+Set oobjPendencia = vNewValue
+
+End Property
+
+Public Property Get CentroFuncID_Realoc() As Long
+
+CentroFuncID_Realoc = lCentroFuncID_Realoc
+
+End Property
+
+Public Property Let CentroFuncID_Realoc(ByVal lNewValue As Long)
+
+lCentroFuncID_Realoc = lNewValue
+
+End Property
+
+Public Property Get CentroFuncionalID() As Long
+CentroFuncionalID = lCentroFuncionalID
+
+End Property
+
+Public Property Let CentroFuncionalID(ByVal lNewValue As Long)
+
+lCentroFuncionalID = lNewValue
+
+End Property
+
+Public Property Get ContratoID() As Long
+
+ContratoID = lContratoID
+
+End Property
+
+Public Property Let ContratoID(ByVal lNewValue As Long)
+
+lContratoID = lNewValue
+
+End Property
+
+Public Property Get EnderecoID() As Long
+
+EnderecoID = lEnderecoID
+
+End Property
+
+Public Property Let EnderecoID(ByVal lNewValue As Long)
+
+lEnderecoID = lNewValue
+
+End Property
+
+Public Property Get NrLocalInsta() As Long
+
+NrLocalInsta = lNrLocalInsta
+
+End Property
+
+Public Property Let NrLocalInsta(ByVal lNewValue As Long)
+
+lNrLocalInsta = lNewValue
+
+End Property
+
+Public Property Get PermiteExecucao() As String
+
+PermiteExecucao = sPermiteExecucao
+
+End Property
+
+Public Property Let PermiteExecucao(ByVal sNewValue As String)
+
+sPermiteExecucao = sNewValue
+
+End Property
+
+Public Property Get SegurancaAcessoAnterior() As String
+
+SegurancaAcessoAnterior = sSegurancaAcessoAnterior
+
+End Property
+
+Public Property Let SegurancaAcessoAnterior(ByVal sNewValue As String)
+
+sSegurancaAcessoAnterior = sNewValue
+
+End Property
+
+Public Property Get CaracteristicaAcessoAnterior() As String
+
+CaracteristicaAcessoAnterior = sCaracteristicaAcessoAnterior
+
+End Property
+
+Public Property Let CaracteristicaAcessoAnterior(ByVal sNewValue As String)
+
+sCaracteristicaAcessoAnterior = sNewValue
+
+End Property
+
+Public Property Get TipoAcessoAnterior() As String
+
+TipoAcessoAnterior = sTipoAcessoAnterior
+
+End Property
+
+Public Property Let TipoAcessoAnterior(ByVal sNewValue As String)
+
+sTipoAcessoAnterior = sNewValue
+
+End Property
+
+Public Property Get PropriedadeAcessoAnterior() As String
+
+PropriedadeAcessoAnterior = sPropriedadeAcessoAnterior
+
+End Property
+
+Public Property Let PropriedadeAcessoAnterior(ByVal sNewValue As String)
+
+sPropriedadeAcessoAnterior = sNewValue
+
+End Property
+
+
+Public Property Get TextoAnotacao() As String
+
+TextoAnotacao = sTextoAnotacao
+
+End Property
+
+Public Property Let TextoAnotacao(ByVal sNewValue As String)
+
+sTextoAnotacao = sNewValue
+
+End Property
+
+Public Property Get Sequencia_Acao() As Long
+
+Sequencia_Acao = lSequencia_Acao
+
+End Property
+
+Public Property Let Sequencia_Acao(ByVal lNewValue As Long)
+
+lSequencia_Acao = lNewValue
+
+End Property
+
+
+Public Property Get DataFinalizacao() As String
+
+DataFinalizacao = sDataFinalizacao
+
+End Property
+
+Public Property Let DataFinalizacao(ByVal sNewValue As String)
+
+sDataFinalizacao = sNewValue
+
+End Property
+
+Public Property Get Servico_ID() As Long
+
+Servico_ID = lServico_ID
+
+End Property
+Public Property Let Servico_ID(ByVal vNewValue As Long)
+
+lServico_ID = vNewValue
+
+End Property
+
+Public Property Get Servico_ID_Anterior() As Long
+
+Servico_ID_Anterior = lServico_ID_Anterior
+
+End Property
+
+Public Property Let Servico_ID_Anterior(ByVal vNewValue As Long)
+
+    lServico_ID_Anterior = vNewValue
+
+End Property
+Public Property Get Fase_ID_Switch() As Long
+
+    Fase_ID_Switch = lFase_ID_Switch
+
+End Property
+
+Public Property Let Fase_ID_Switch(ByVal vNewValue As Long)
+
+    Fase_ID_Switch = vNewValue
+
+End Property
+
+Public Property Get Fase_ID() As Long
+
+    Fase_ID = lFase_Id
+
+End Property
+
+Public Property Let Fase_ID(ByVal vNewValue As Long)
+
+    lFase_Id = vNewValue
+
+End Property
+'VIPLINE IP
+Public Property Get ItemServicoID() As Long
+
+ItemServicoID = lItemServicoID
+
+End Property
+
+Public Property Let ItemServicoID(ByVal lNewValue As Long)
+
+lItemServicoID = lNewValue
+
+End Property
+
+Public Function CarregarForm() As Boolean
+
+    Dim objAutenticacao        As New clsgenAutenticacao
+    Dim objOC_DadosSwitch      As clsVIPoc_CadastrarEqptoNGN
+    Dim objDadosFase           As New clsgenFase
+    Dim objPendenciaDNI        As New clsDNI_DadosPendencia
+    Dim objOc_TratarEqptoCompl As clsInterOC_TratarEqptoCompl
+    Dim objDadosProduto        As New clsGenProduto
+    Dim paPermissoes()         As Variant
+    Dim objDadosCtrlCorrecao   As clsGenDadosControleCorrecao
+    Dim sSituacaoOTS           As String
+    Dim numUltimaFaseRealizada As Long
+    Dim IdOTS                  As Long
+    Dim IDFase                 As Long
+    Dim lSequenciaFaseE1       As Long
+    Dim lSequenciaFaseRB       As Long
+    Dim cColecao               As Collection
+    Dim objDadosAcessoSOE      As Object
+    Dim objDadosAnalisarOE     As clsDNI_DadosAnalisarOE
+    Dim FlagInclusao           As Boolean
+    Dim flUsuarioDoCF          As Boolean
+    Dim objDniDadosTecnico     As clsDNI_DadosTecnicos
+    Dim sAcaoAux               As String
+    Dim sSiglaProduto          As String
+    Dim objDadosEqptoNGN       As VIP_Equipamento_NGN
+    Dim objDadosLogSGAP        As clsBLD_LogSGAPCLA
+    Dim objDLog                As clsBLD_LogSGAPCLA
+    Dim iAux                   As Long
+    Dim lServicoIDAux          As Long
+    Dim objOTS                 As clsGenServico
+    Dim objDadosEqptoNGN2       As VIP_Equipamento_NGN
+    
+    Dim lIDFase As Long
+    'Dim lUltIDServicoCLA      As Long
+    
+    '================================================================
+    'Callbat - 07/04/2015
+    'Chamado CH-74999UGL
+    '================================================================
+    Dim lUltIDServicoCLA  As Long
+    '================================================================
+    '================================================================
+    
+    
+    '=================================================================
+    'CALLBAT - 21/05/2012 - BSoD Net Light
+    '=================================================================
+    'Dim objDadosAcesso As New clsbldDadosAcesso
+    '=================================================================
+    '=================================================================
+    
+    'Não resgata os dados da OTS anterior quando se altera o
+    'endereço de instalação. IP VPN
+    
+    Dim sCNLAtual              As String
+    Dim sCNLAnterior           As String
+    Dim objdadosCircuito       As New clsgenCircuito
+    Dim sStatusSwitch          As String
+    Dim objVIPDadosEnder       As VIP_Aten_Endereco
+    Dim objVIPDadosContrato    As VIP_Aten_Contrato
+    Dim objVIPDadosAcesso      As VIP_Aten_Dados_Acesso
+    Dim objAtenItemServico     As VIP_Aten_Item_Servico
+    Dim vNumOEAux              As Long
+    Dim vAnoOEAux              As Integer
+
+    Dim sTabela_Interface      As String   'JAH
+    Dim sDescrRespCLA          As String
+    
+    'CALBAT
+    Dim objTratarAcessoEBT    As clsGenOC_TratarAcessoEmbratel
+    
+    Dim objOrderEntry_BLD     As clsbldOrderEntry
+
+    Dim Status_Combo As String
+    Dim sVar As Variant
+    
+    Dim objDadosIntegracaoWebip As clsBlf_IntegracaoWebIP
+    Dim sOTSAux As String
+    Dim sEBkp3G As Boolean
+    
+    '''=================================================================
+    '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+     Dim objDadosLogSGAPWireless        As clsBLD_LogSGAPCLA
+     Dim sIdLogicoWireless              As String
+    
+    ''' 04/2022
+     Dim sIndWireless                   As String
+    '''=================================================================
+    
+    On Error GoTo ErrorHandler
+    
+    FlagRecuperando = True
+    FlagUtilizaInterfaceCLA = False
+    bFlagExibeMsgLegado = True
+    
+    CarregarForm = False
+    'Verfica se a OTS selecionada ainda encontra-se em andamento
+    
+    objdadosServico.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objdadosServico.InformaMensagem objMensagem
+    
+    'AGRC - 04/11/2016 - SO-MKTIP-18424CTY
+    sEBkp3G = False
+       
+    sEBkp3G = objdadosServico.Verifica_EBackupPorServicoID(Servico_ID)
+
+  
+    If sEBkp3G = True Then
+        objMensagem.TipoMsg = "A"
+        objMensagem.Descricao = "Circuitos Backup 3G não envolvem a fase Tratar Acesso."
+        objMensagem.ExibeMensagem
+   
+        GoTo Finalizar
+    End If
+    
+    bRetorno = objdadosServico.RecuperarDados(Servico_ID)
+    
+    bFlagLegadoEmAndamento = False
+    
+    sSituacaoOTS = objdadosServico.StatusServico
+    
+    If objMensagem.TipoMsg <> "" Then
+       
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+       
+    End If
+    
+    If sSituacaoOTS = "CAN" Or sSituacaoOTS = "CR" Then
+       
+       objMensagem.TipoMsg = "A"
+       objMensagem.Descricao = "Esta OTS foi paralisada pelo SOE!"
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+       
+    End If
+    
+'VCB ---- 02/04/2020
+    Set cColecao = New Collection
+    
+    objDadosPendencia.ColecaoPendencia = cColecao
+    
+    'Circuito
+    Set objdadosCircuito = New clsgenCircuito
+    
+    objdadosCircuito.InformaMensagem objMensagem
+    objdadosCircuito.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    objPendenciaDNI.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objPendenciaDNI.InformaMensagem objMensagem
+             
+    objDadosPendencia.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosPendencia.InformaMensagem objMensagem
+             
+    'Verifica se a Fase ainda continua Em Andamento
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+
+'    Dim lCircuitoID As Long
+'    Dim lServicoIdCla As Long
+'    Dim sSituacaoIDEnviado As String
+'    'Dim objDadosLogSGAP         As clsBLD_LogSGAPCLA
+'
+'    Set objDadosLogSGAP = New clsBLD_LogSGAPCLA
+'
+'    objDadosLogSGAP.InformaBanco frmgenMDI_SGAPlus.objBanco
+'    objDadosLogSGAP.InformaMensagem objMensagem
+'
+'    lCircuitoID = objdadosServico.ObtemIDCircuito(Servico_ID)
+'    lServicoIdCla = objDadosLogSGAP.ObtemUltimo_ID_ENV_CLA(lCircuitoID, sSituacaoIDEnviado)
+
+    If objMensagem.Descricao <> "" Then
+
+       objMensagem.ExibeMensagem
+
+       GoTo Finalizar
+    Else
+       
+       objMensagem.TipoMsg = ""
+       objMensagem.Descricao = ""
+    
+    End If
+    
+    If (Not objDadosFase.RecuperarSituacaoFase(Fase_ID)) And DataFinalizacao = "" Then
+
+       objMensagem.ExibeMensagem
+
+       GoTo Finalizar
+    Else
+       
+       objMensagem.TipoMsg = ""
+       objMensagem.Descricao = ""
+    
+    End If
+    
+    'Obtem o número da última fase realizada
+    numUltimaFaseRealizada = objDadosFase.ObtemSequenciaUltimaFaseRealizada(Servico_ID, _
+                                             GbCodigoFaseProgramarCPE, Familia_Produto)
+    
+    objAutenticacao.IDUsuario = frmgenMDI_SGAPlus.objAutenticacao.IDUsuario
+    objAutenticacao.Login = frmgenMDI_SGAPlus.objAutenticacao.Login
+    objAutenticacao.InformaMensagem objMensagem
+    
+    Call objAutenticacao.InformaBanco(frmgenMDI_SGAPlus.objBanco)
+
+    Call objAutenticacao.RetornarPermissoesFase(objAutenticacao.IDUsuario, _
+                                                paPermissoes, _
+                                                GbCodigoFaseAcesso, _
+                                                Produto_ID, _
+                                                Acao_ID, _
+                                                CentroFuncionalID)
+    
+    'Coluna 3 - Checa Permissao de consulta
+    'Coluna 4 - Checa Permissao de Alteracao
+    'Coluna 5 - Checa Permissao de Exclusao
+    flUsuarioDoCF = objAutenticacao.VerificaUsuarioNoCF( _
+                                                        objAutenticacao.IDUsuario, _
+                                                        CentroFuncionalID)
+    
+    
+    If UBound(paPermissoes) = 0 Then
+        objMensagem.TipoMsg = "E"
+        objMensagem.Descricao = "O usuário não possui permissão de consulta!"
+        objMensagem.ExibeMensagem
+
+        GoTo Finalizar
+
+    End If
+   
+    If Familia_Produto = "D" And objdadosServico.DataRealizacao = "" Then
+            
+        bRetorno = VerificaUltimaVersaoContratoDNI(Servico_ID, objdadosServico.VersaoContrato, objMensagem)
+        
+        If Not bRetorno Then
+        
+            GoTo Finalizar
+            
+        End If
+        
+    End If
+    
+    'Seta o objeto mensagem da classe de dados
+    objDadosAcesso.InformaMensagem objMensagem
+    objDadosAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    Set objForm = New frmgenTratarAcessoEmbratel
+    
+    Call objForm.InformaClasseOC(Me)
+    objForm.ssTabAcesso.Tab = 0
+    objForm.ssTabAcesso.TabVisible(7) = False
+    
+    objForm.LblAcao_Status = Status_Fase
+    
+    
+    If GbNetnameUsuario = "W7RJO046760" Then
+        
+        objForm.CmdMotivoDevol(1).Visible = True
+        
+    End If
+    
+    objDadosProduto.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosProduto.InformaMensagem objMensagem
+    
+    bRetorno = objDadosProduto.RecuperarDados(Produto_ID)
+    
+    objForm.lblProduto.Caption = objDadosProduto.Descricao
+    objForm.Caption = objDadosProduto.Sigla & " - Aprovisionamento de Acesso"
+    
+    CarregarComboTipoAcessoEBT objForm.CboTipoAcessoEmbratel
+    
+    CarregarComboTipoAcessoTER objForm.CboTipoAcessoTerceiro
+     
+    'objForm.LblEstacaoEntrega.Caption = "Configuração       Embratel"
+    
+    objBlfCabecalho.ItemOE = objBlfCabecalho.ItemOE '& "-" & objdadosServico.SubItemOE
+    
+    'Carrega os Cabecalho
+    If Familia_Produto = "I" Then
+        
+        objForm.UsrDNICabecalhoAcesso.Visible = False
+        objForm.ssTabAcesso.TabVisible(5) = False
+        'IP VPN
+        If (Produto_ID = GbIDProdutoBIV) Then
+            
+            objForm.CmdConsultarOE.Visible = True
+            objForm.CmdConsultarOE.Left = 2865
+            
+            objForm.usrBIPVPNCabecalho.Visible = True
+            
+            objForm.UsrBLFCabecalho_Acesso.Visible = False
+            objForm.UsrDNICabecalhoAcesso.Visible = False
+            objForm.UsrVozBandaCabecalho.Visible = False
+            
+            Call CarregaCabecalho_BIV(objForm.usrBIPVPNCabecalho, objBlfCabecalho)
+            
+            objForm.UsrVIPEquipComplementares.Visible = False
+        'JRCRUZ - 22/02/2007
+        'ElseIf (Produto_ID = GbIDProdutoVIP) Then
+        ElseIf (Grupo_ID = GbIDGrupoVLI) Then
+            
+            objForm.UsrVozBandaCabecalho.Visible = True
+            
+            objForm.usrBIPVPNCabecalho.Visible = False
+            objForm.UsrBLFCabecalho_Acesso.Visible = False
+            objForm.UsrDNICabecalhoAcesso.Visible = False
+            
+           Call CarregaCabecalho_VIPLINEIP(objForm.UsrVozBandaCabecalho, objBlfCabecalho)
+            
+            objForm.ssTabAcesso.TabVisible(5) = True
+    
+            objForm.CmdConsultarOE.Visible = False
+            objForm.FrmCaracpastaEqpto.Visible = False
+            objForm.FrmEqptosBLF.Visible = False
+            objForm.FrameRespInfra.Visible = False
+            objForm.FrameProprietarioModem.Visible = False
+            objForm.FrameProvedorInterurbano.Visible = False
+            objForm.CmdAcessoContingente.Visible = False
+            objForm.CmdAcessoPrincipal.Visible = False
+            objForm.TxtEstacaoEntregaEbtConf.Visible = False
+            objForm.CmdConsultarOE.Visible = False
+            objForm.CmdRealocar.Visible = True
+            objForm.ssTabAcesso.TabVisible(5) = True
+            objForm.UsrVIPEquipComplementares.Visible = True
+            'objForm.LblEstacaoEntrega.Caption = "Embratel"
+            objForm.TxtEstacaoEntregaEbt.Left = 120
+            objForm.CmdCadastrarEqptoNGN.Visible = True
+            objForm.CmdCadastrarEqptoNGN.Enabled = True
+            
+            'objForm.UsrVIPDadosSwitch.CmdObterEnderecoIP.Visible = True
+            
+            objForm.FrameExecutarCentroLocal.Visible = True
+            objForm.FrameClassificacaoEndereco.Visible = True
+            objForm.LblFrameFlagProvedorIU.Visible = False
+            objForm.FrameFlagProvedorIU.Visible = False
+            
+            CarregarComboClassifEndereco objForm.CboClassificacaoEndereco
+            
+            'Verifica se existe motivo de devolucao pra ser exibido
+                        
+            lIDFase = objdadosServico.ObtemIDFase(Servico_ID, GbCodigoFaseConfiguracaoNGN)
+            
+            Set objDadosCtrlCorrecao = New clsGenDadosControleCorrecao
+            
+            objDadosCtrlCorrecao.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objDadosCtrlCorrecao.InformaMensagem objMensagem
+            
+            If objDadosCtrlCorrecao.RecuperarDados(lIDFase, "D") Then
+                
+                objForm.CmdMotivoDevol(0).Visible = True
+
+            End If
+            
+            Set objDadosCtrlCorrecao = Nothing
+        
+        Else
+            objForm.UsrBLFCabecalho_Acesso.Visible = True
+            
+            objForm.usrBIPVPNCabecalho.Visible = False
+            objForm.UsrDNICabecalhoAcesso.Visible = False
+            objForm.UsrVozBandaCabecalho.Visible = False
+            
+            Call CarregaCabecalho_BLF(objForm.UsrBLFCabecalho_Acesso, objBlfCabecalho)
+            
+            If Produto_ID = GbIDProdutoVBL Then
+               
+               objForm.CmdConsultarOE.Visible = True
+            
+            Else
+               
+               objForm.CmdConsultarOE.Visible = False
+            
+            End If
+            
+            objForm.UsrVIPEquipComplementares.Visible = False
+        
+        End If
+
+       If (Grupo_ID = GbIDGrupoBLD Or _
+           Produto_ID = GbIDProdutoVOIP) Then
+    '====================================================
+    '====================================================
+            'Carregar a combo de Velocidade
+            bRetorno = CarregarComboVelocidade(objDadosAcesso, _
+                                               objBlfCabecalho.Velocidade, _
+                                               "VELOCIDADE_BLD", objForm.CboVelocidadeAcesso)
+       
+       Else
+       
+            'Carregar a combo de Velocidade
+            bRetorno = CarregarComboVelocidade(objDadosAcesso, _
+                                               objBlfCabecalho.Velocidade, _
+                                               "VELOCIDADE", objForm.CboVelocidadeAcesso)
+       
+ 
+            If objMensagem.TipoMsg <> "" Then
+        
+               objMensagem.ExibeMensagem
+        
+               Unload objForm
+               Set objForm = Nothing
+               
+               GoTo Finalizar
+        
+            End If
+            
+      End If
+
+    ElseIf Familia_Produto = "D" Then
+        
+        objForm.cmdPendencia.Visible = False
+        
+        objForm.UsrDNICabecalhoAcesso.Visible = True
+        
+        objForm.UsrBLFCabecalho_Acesso.Visible = False
+        
+        objForm.CmdTrataPendencia.Left = 2190
+        
+        objForm.CmdTrataPendencia.Visible = True
+        objForm.CmdConsultarOE.Visible = True
+        objForm.CmdConsultarOE.Left = 4095
+        
+        'Recupera dados do Cabecalho
+        Call CarregaCabecalho_Diginet(objForm.UsrDNICabecalhoAcesso, Servico_ID, _
+                                      Fase_ID, objMensagem, GbCodigoFaseAcesso)
+    
+    End If
+    
+    If objForm.FrmEqptosBLF.Visible = True Then
+        
+        bRetorno = CarregarCombos(objDadosAcesso, "EQUIPAMENTO", objForm.CboTipoEquipamento_1)
+        bRetorno = CarregarCombos(objDadosAcesso, "EQUIPAMENTO", objForm.CboTipoEquipamento_2)
+        bRetorno = CarregarCombos(objDadosAcesso, "EQUIPAMENTO", objForm.CboTipoEquipamento_3)
+        
+        If objMensagem.TipoMsg <> "" Then
+           
+           objMensagem.ExibeMensagem
+           
+           Unload objForm
+           
+           Set objForm = Nothing
+           
+           GoTo Finalizar
+        
+        End If
+    
+        objForm.CboTipoEquipamento_1.ListIndex = -1
+        objForm.CboTipoEquipamento_2.ListIndex = -1
+        objForm.CboTipoEquipamento_3.ListIndex = -1
+    
+        If Not bRetorno Then
+           
+           Unload objForm
+           Set objForm = Nothing
+           
+           GoTo Finalizar
+        
+        End If
+    
+    End If
+    
+    'Carrega combo de tipos de plataforma
+    bRetorno = CarregarCombos(objDadosAcesso, "PLATAFORMA", objForm.CboPlataformas)
+    
+   'Carrega a combo de Provedor Urbano
+    bRetorno = CarregarCombos(objDadosAcesso, "PROVEDOR", objForm.CboProvedorUrbano)
+
+    If objMensagem.TipoMsg <> "" Then
+
+       objMensagem.ExibeMensagem
+
+       Unload objForm
+       Set objForm = Nothing
+       
+       GoTo Finalizar
+
+    End If
+
+    If Not bRetorno Then
+
+       Unload objForm
+       Set objForm = Nothing
+
+       GoTo Finalizar
+
+    End If
+
+    objForm.InformaClasseOC Me
+
+    If objForm.FrameProvedorInterurbano.Visible Then
+        'Carrega a combo de Provedor Interurbano
+        bRetorno = CarregarCombos(objDadosAcesso, "PROVEDOR", objForm.CboProvedorInterurbano)
+    
+        If objMensagem.TipoMsg <> "" Then
+    
+           objMensagem.ExibeMensagem
+    
+           Unload objForm
+           Set objForm = Nothing
+    
+           GoTo Finalizar
+    
+        End If
+    
+        If Not bRetorno Then
+    
+           Unload objForm
+           Set objForm = Nothing
+    
+           GoTo Finalizar
+    
+        End If
+    
+    End If
+    
+    'Carregar a combo de Interface de Embratel
+    
+    bRetorno = CarregarComboVelocidade(objDadosAcesso, "", "VELOCIDADE", objForm.CboVelocidadeAcesso)
+    
+    objDadosAcesso.DataFinalizacao = DataFinalizacao
+    
+    bRetorno = CarregarCombos(objDadosAcesso, "INTERFACEEBT", objForm.CboPadraoInterfaceEBT)
+
+    If objMensagem.TipoMsg <> "" Then
+
+       objMensagem.ExibeMensagem
+       
+       Unload objForm
+       Set objForm = Nothing
+
+       GoTo Finalizar
+
+    End If
+
+    'Carregar a combo de Interface Cliente
+    bRetorno = CarregarCombos(objDadosAcesso, "INTERFACECLI", objForm.CboInterfaceClienteMenor)
+
+    If objMensagem.TipoMsg <> "" Then
+
+       objMensagem.ExibeMensagem
+
+       Unload objForm
+       Set objForm = Nothing
+
+       GoTo Finalizar
+
+    End If
+
+    If Not bRetorno Then
+
+       Unload objForm
+       Set objForm = Nothing
+
+       GoTo Finalizar
+
+    End If
+
+    'Carregar a combo de Interface de Embratel
+    bRetorno = CarregarCombos(objDadosAcesso, "INTERFACEEBT", objForm.CboInterfaceEBTMenor)
+
+    If objMensagem.TipoMsg <> "" Then
+
+       objMensagem.ExibeMensagem
+
+       Unload objForm
+       Set objForm = Nothing
+       
+       GoTo Finalizar
+
+    End If
+
+    If Not bRetorno Then
+
+       Unload objForm
+       Set objForm = Nothing
+
+       GoTo Finalizar
+
+    End If
+
+    objForm.ssTabAcesso.Tab = 0
+    objForm.FlControlaAlteracao = False
+    
+    objForm.CboTipoAcessoEmbratel.ListIndex = -1
+    objForm.CboTipoAcessoTerceiro.ListIndex = -1
+        
+    objDadosAcesso.CaracteristicaAcesso = "P"
+    
+    If Not objDadosAcesso.FaseExistente(Fase_ID) Then
+       
+       TipoOperacao = "I"     'Indica que a fase não foi iniciada ainda
+       
+    Else
+       
+       TipoOperacao = "A"     'Indica que a fase já foi iniciada anteriormente
+       
+    End If
+
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+ 
+    If objMensagem.TipoMsg <> "" Then
+    
+        GoTo ErrorHandler
+        
+    End If
+        '=======================================
+        '=======================================
+        
+    bFlagAcessoJaConstruido = False
+    
+    AcessoConstruidoFaseID = 0
+    AcessoConstruidoServicoID = 0
+    
+    'JRCRUZ -22 / 2 / 2007
+    'If (Produto_ID = GbIDProdutoVIP) Then
+    If (Grupo_ID = GbIDGrupoVLI) Then
+    
+        Set objVIPDadosEnder = New VIP_Aten_Endereco
+        Set objVIPDadosContrato = New VIP_Aten_Contrato
+        Set objVIPDadosAcesso = New VIP_Aten_Dados_Acesso
+        
+        objVIPDadosAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objVIPDadosAcesso.InformaMensagem objMensagem
+        
+        objVIPDadosEnder.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objVIPDadosEnder.InformaMensagem objMensagem
+    
+        objVIPDadosContrato.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objVIPDadosContrato.InformaMensagem objMensagem
+        
+        bRetorno = objVIPDadosContrato.RecuperarDados(ContratoID)
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+            
+        End If
+        
+        bRetorno = objVIPDadosEnder.RecuperarDados(EnderecoID)
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+            
+        End If
+        
+        bRetorno = objVIPDadosAcesso.RecuperarDados(ItemServicoID)
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+            
+        End If
+        
+        If objVIPDadosAcesso.VerificaAcessoWiMax(Servico_ID) = "S" Then
+           
+           objForm.lblProduto.Caption = objForm.lblProduto.Caption & " - WiMax"
+        
+        End If
+        
+        objForm.LblDadosComplementares(0).Caption = objVIPDadosContrato.RazaoSocialCliente
+        objForm.LblDadosComplementares(1).Caption = objVIPDadosContrato.CdDiretoriaRegional & " " & _
+                                                    objVIPDadosContrato.NumeroContrato & "/" & objVIPDadosContrato.AnoContrato & "-" & _
+                                                    objVIPDadosContrato.NumeroAditivo
+       
+        objForm.LblDadosComplementares(2).Caption = objVIPDadosContrato.CNPJ
+        objForm.LblDadosComplementares(3).Caption = "" ' INTERFACE CLIENTE
+        objForm.LblDadosComplementares(4).Caption = objVIPDadosContrato.InscricaoEstadual
+        objForm.LblDadosComplementares(5).Caption = objVIPDadosContrato.InscricaoMunicipal
+        objForm.LblNumeroEstudoViabilidade.Caption = objVIPDadosAcesso.Nr_Estudo_Viab
+          ''''
+        
+        objForm.LblLogradouro.Caption = objVIPDadosEnder.Logradouro
+        objForm.LblBairroEndBR = objVIPDadosEnder.Bairro
+        objForm.LblCEP = objVIPDadosEnder.CEP
+        objForm.LblCidadeEndBR = objVIPDadosEnder.Cidade
+        objForm.LblComplementoEndBR = objVIPDadosEnder.Complemento
+        
+        iAux = InStr(objForm.LblLogradouro.Caption, ",")
+        objForm.LblNumeroEndBR = Mid(objForm.LblLogradouro.Caption, iAux + 1)
+        
+        'o ATEN Não possui este campo
+        objForm.LBlUFEndBR = objVIPDadosEnder.UF
+        
+        objForm.LblCNPJEndBR = objVIPDadosContrato.CNPJ
+        objForm.LblInscrEstadual = objVIPDadosContrato.InscricaoEstadual
+        objForm.LblInscrMunicEndBR = objVIPDadosContrato.InscricaoMunicipal
+        objForm.LblNomeContatoTecnico = objVIPDadosContrato.ResponsavelTecnicoNome
+        objForm.LblTelefoneContatoT1 = objVIPDadosContrato.ResponsavelTecnicoTelefone
+        objForm.optSegurancaAcesso(0).Value = False
+        objForm.optSegurancaAcesso(1).Value = True
+        
+        '===========================================================================
+        'CALBAT - 17/02/2009
+        'Ajuste feito para contemplar Desativação / Cancelamento de Vipline IP
+        '===========================================================================
+        'If TipoOperacao = "I"  THEN
+        If TipoOperacao = "I" And (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+        '===========================================================================
+        '===========================================================================
+
+            Set objAtenItemServico = New VIP_Aten_Item_Servico
+
+            objAtenItemServico.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objAtenItemServico.InformaMensagem objMensagem
+
+            bRetorno = objAtenItemServico.VerificaAcessoConstruido( _
+                                                             objVIPDadosEnder.UF, _
+                                                             objVIPDadosEnder.SiglaLocalidade, _
+                                                             objVIPDadosEnder.CEP, _
+                                                             objVIPDadosEnder.Logradouro, _
+                                                             AcessoConstruidoFaseID, _
+                                                             AcessoConstruidoServicoID, _
+                                                             AcessoConstruidoFaseIDSwitch _
+                                                             )
+
+            If bRetorno Then 'Caso já exista acesso construido no endereço
+
+                bFlagAcessoJaConstruido = True
+                
+                Set objTratarAcessoEBT = New clsGenOC_TratarAcessoEmbratel
+                
+                objForm.UsrVIPDadosSwitch.InformaBanco frmgenMDI_SGAPlus.objBanco
+                objForm.UsrVIPDadosSwitch.InformaMensagem objMensagem
+                
+                'objForm.UsrVIPDadosSwitch.RecebeForm (objForm)
+                
+                objForm.UsrVIPDadosSwitch.Fase_ID_Eqpto = AcessoConstruidoFaseIDSwitch
+                 
+                Call objForm.UsrVIPDadosSwitch.RecuperaEstacaoInstalacao(objVIPDadosEnder.UF, _
+                                                                   objVIPDadosEnder.SiglaLocalidade, _
+                                                                   objVIPDadosEnder.CEP, _
+                                                                   objVIPDadosEnder.Logradouro)
+
+            End If
+
+        End If
+        
+    End If
+    
+    'IP VPN
+    If (Produto_ID = GbIDProdutoBLF Or _
+            Produto_ID = GbIDProdutoBIV Or _
+            Produto_ID = GbIDProdutoJAH) Then
+        
+        Set objDadosCadastrais = New clsblfDadosCadastrais
+        
+        objDadosCadastrais.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosCadastrais.InformaMensagem objMensagem
+        
+        'Recupera dados de Local de Instalação
+        sTabela_Interface = ""
+        
+        If (lProduto_ID = GbIDProdutoJAH) Then
+            
+            sTabela_Interface = "ATEN_LOCAL_INSTA"
+            
+        End If
+        
+        bRetorno = objDadosCadastrais.RecuperarDados(ContratoID, NrLocalInsta, "T", sTabela_Interface)
+    
+        If objMensagem.TipoMsg <> "" Then
+            
+            GoTo ErrorHandler
+        
+        End If
+    
+    
+        'IP VPN
+        If objDadosProduto.Sigla = "VN" Then
+        
+            sSiglaProduto = GbCodigo_Produto_IPVPN
+            
+        End If
+
+        Set objDadosAcessoSOE = New clsblfDadosAcesso
+    
+        objDadosAcessoSOE.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosAcessoSOE.InformaMensagem objMensagem
+        
+        'Recupera Dados de Acesso
+        sTabela_Interface = ""
+        
+        If (lProduto_ID = GbIDProdutoJAH) Then
+            
+            sTabela_Interface = "ATEN_ACESS_FACIL"
+            sSiglaProduto = GbCodigo_Produto_JAH
+            
+        End If
+        
+        bRetorno = objDadosAcessoSOE.RecuperarDados(ContratoID, NrLocalInsta, sSiglaProduto, sTabela_Interface)
+        
+        If objMensagem.TipoMsg <> "" Then
+        
+            GoTo ErrorHandler
+            
+        End If
+        
+        If objDadosCadastrais.NomeFantasiaCliente <> "" Then
+           objForm.LblDadosComplementares(0).Caption = objDadosCadastrais.NomeFantasiaCliente
+        Else
+           objForm.LblDadosComplementares(0).Caption = objDadosCadastrais.Nm_Razao_Socia
+        End If
+        
+        objForm.LblDadosComplementares(1).Caption = objBlfCabecalho.Contrato
+       
+        objForm.LblDadosComplementares(2).Caption = objDadosCadastrais.CNPJ
+        
+        objForm.LblDadosComplementares(3).Caption = "" ' INTERFACE CLIENTE
+        objForm.LblDadosComplementares(4).Caption = objDadosCadastrais.InscricaoEstadual
+        objForm.LblDadosComplementares(5).Caption = objDadosCadastrais.InscricaoMunicipal
+        
+        objForm.LblNumeroEstudoViabilidade.Caption = objDadosAcessoSOE.EstudoViabilidade
+        
+        objForm.optSegurancaAcesso(0).Value = (objDadosAcessoSOE.SegurancaAcesso = "S")
+        objForm.optSegurancaAcesso(1).Value = (objDadosAcessoSOE.SegurancaAcesso = "N")
+        
+        objDadosAcesso.Cd_Veloc = objDadosAcessoSOE.CdVelocidadeAcesso
+        
+        If Val(objDadosAcessoSOE.CdVelocidadeAcesso) <> 0 Then
+          
+           Call SelecionaCombo(objForm.CboVelocidadeAcesso, _
+                               CLng(objDadosAcessoSOE.CdVelocidadeAcesso))
+        
+        End If
+        
+        'objForm.CboVelocidadeAcesso.Enabled = False
+        
+        Set objDadosAcessoSOE = Nothing
+        
+    'BLD
+    '====================================================
+    'CALBAT - 23/03/2007 - Line Trio                    =
+    '====================================================
+    'ElseIf (Produto_ID = GbIDProdutoBLD Or _
+                Produto_ID = GbIDProdutoVOIP) Then
+    
+    ElseIf (lGrupo_ID = GbIDGrupoBLD Or _
+                Produto_ID = GbIDProdutoVOIP) Then
+    
+        '====================================================
+        Set objDadosContrato = New clsbldDadosContrato
+        
+        objDadosContrato.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosContrato.InformaMensagem objMensagem
+        
+        'Recupera dados de Contrato
+        bRetorno = objDadosContrato.RecuperarDados(objdadosServico.NumOE, objdadosServico.AnoOE)
+    
+        If objMensagem.TipoMsg <> "" Then
+            objMensagem.ExibeMensagem
+
+           Unload objForm
+           Set objForm = Nothing
+            
+           GoTo Finalizar
+            
+        End If
+        
+        If Acao_ID <> 9 Then
+            
+            Set objOrderEntry_BLD = New clsbldOrderEntry
+            
+            objOrderEntry_BLD.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objOrderEntry_BLD.InformaMensagem objMensagem
+            vNumOEAux = 0
+            
+            bRetorno = objOrderEntry_BLD.VerificaExisteOECancelandoEsta(objDadosContrato.DescricaoDiretorRegional, _
+                                        "INN", _
+                                        objDadosContrato.Numero, _
+                                        objDadosContrato.Ano, _
+                                        objDadosContrato.Versao, _
+                                        vNumOEAux, _
+                                        vAnoOEAux)
+            If vNumOEAux <> 0 Then
+            
+                objMensagem.TipoMsg = "A"
+                objMensagem.Descricao = "Existe uma Order Entry de Cancelamento (" & vNumOEAux & "/" & vAnoOEAux & ") encaminhada para o SGA Plus. Não é possível prosseguir com esta OTS!"
+                objMensagem.ExibeMensagem
+                
+                Unload objForm
+                Set objForm = Nothing
+                
+                GoTo Finalizar
+                
+            End If
+        
+        End If
+        
+        objForm.LblDadosComplementares(0).Caption = objDadosContrato.NomeFantasiaCliente
+        objForm.LblDadosComplementares(1).Caption = objDadosContrato.DescricaoDiretorRegional & " " & objDadosContrato.Numero & "/" & _
+                                                    objDadosContrato.Ano & "-" & objDadosContrato.Versao
+        objForm.LblDadosComplementares(2).Caption = objDadosContrato.CNPJ
+        objForm.LblDadosComplementares(3).Caption = "" ' INTERFACE CLIENTE
+        objForm.LblDadosComplementares(4).Caption = objDadosContrato.InscricaoEstadual
+        objForm.LblDadosComplementares(5).Caption = objDadosContrato.InscricaoMunicipal
+        
+        Set objDadosCadastrais = New clsbld_dadosendInstalacao
+        
+        objDadosCadastrais.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosCadastrais.InformaMensagem objMensagem
+'Recupera o endereco desmembrado 'vcbxv
+        'Recupera dados de Local de Instalação
+        
+        'OTS atual
+        bRetorno = objdadosCircuito.RecuperarDados(Servico_ID)
+    
+        If objMensagem.TipoMsg <> "" Then
+        
+            GoTo ErrorHandler
+            
+        End If
+        
+        bRetorno = objDadosCadastrais.RecuperarDados(objdadosServico.NumOE, objdadosServico.AnoOE)
+    
+        If objMensagem.TipoMsg <> "" Then
+        
+            GoTo ErrorHandler
+            
+        End If
+    
+'        bRetorno = objDadosCadastrais.RecuperaEnderecoNaView(objdadosCircuito.ContaCliente)
+    
+'        If objMensagem.TipoMsg <> "" Then
+
+'            GoTo ErrorHandler
+            
+'        End If
+        
+        objForm.LblDadosComplementares(6).Caption = objDadosCadastrais.TipoLogradouro
+    
+        'IP VPN
+        If objDadosProduto.Sigla = "VN" Then
+    
+            sSiglaProduto = "IVN"
+        
+        End If
+
+        Set objDadosAcessoSOE = New clsbldDadosAcesso
+    
+        objDadosAcessoSOE.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosAcessoSOE.InformaMensagem objMensagem
+        
+        'Recupera Dados de Acesso
+        bRetorno = objDadosAcessoSOE.RecuperarDados(objdadosServico.NumOE, objdadosServico.AnoOE)
+        
+        If objMensagem.TipoMsg <> "" Then
+        
+            GoTo ErrorHandler
+            
+        End If
+        
+        objForm.lblPadraoInterface.Caption = objDadosAcessoSOE.PadraoInterface
+        objForm.LblNumeroEstudoViabilidade.Caption = objDadosAcessoSOE.EstudoViabilidade
+        
+        '=================================================================
+        '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+        '''---Se o numero de viabilidade for invalido e rejeitado no envio do xml ao Cla
+        ''''--- novo campo na tela permitira incluir novo numero e reenviar.  Este novo numero sera gravado somente no Plus.
+        '''--- Nao esta previsto no projeto a atualizacao desse dado novo no GSID.
+        If objdadosServico.Num_SEV <> "" Then
+            objForm.txtSEV_Wireless.Text = objdadosServico.Num_SEV
+        Else
+            objForm.txtSEV_Wireless.Text = objDadosAcessoSOE.EstudoViabilidade
+        End If
+        '''
+        
+        If objDadosAcessoSOE.FlagMigracaoAcesso = "S" Then
+
+            objForm.optFlagMigracao(0).Value = True
+
+        Else
+
+            objForm.optFlagMigracao(1).Value = True
+
+        End If
+
+        If objdadosServico.Origem = "SGA" And objdadosServico.FlagMotivoCorrecao = "M" Then
+
+            objForm.optFlagMigracao(0).Value = True
+
+        End If
+        
+        
+        
+        
+        'No caso da família BLD, não existe segurança de acesso
+        objForm.optSegurancaAcesso(0).Value = False
+        objForm.optSegurancaAcesso(1).Value = True
+        
+        '====================================================
+        'CALBAT - 23/03/2007 - Line Trio                    =
+        '====================================================
+        
+        objDadosAcesso.Cd_Veloc = objDadosAcessoSOE.VelocidadeAcesso
+        
+        '====================================================
+        '====================================================
+        
+        If objDadosAcessoSOE.VelocidadeAcesso <> "" Then
+           
+           '====================================================
+           'CALBAT - 23/03/2007 - Line Trio                    =
+           '====================================================
+'           objForm.CboVelocidadeAcesso.Text = objDadosAcessoSOE.VelocidadeAcesso
+           
+           'Call SelecionaCombo(objForm.CboVelocidadeAcesso, CLng(objDadosAcessoSOE.CdVelocidadeAcesso))
+                     
+            If Produto_ID <> GbIDProdutoVBL Then
+
+            'If lGrupo_ID <> GbIDGrupoBLD Then
+
+                Call SelecionaComboTexto(objForm.CboVelocidadeAcesso, objDadosAcessoSOE.VelocidadeAcesso)
+
+            Else
+
+                If TipoOperacao = "I" Then
+                    'Conforme usuário, veloc. de acesso para LIne trio será sempre 2M e
+                    'a interface ebt sempre G.703
+                    Call SelecionaComboTexto(objForm.CboVelocidadeAcesso, "2M")
+                    'INTERFACE G.703
+                    Call SelecionaCombo(objForm.CboPadraoInterfaceEBT, 3)
+
+                End If
+            End If
+            '====================================================
+            '====================================================
+        
+        End If
+        
+        'objForm.CboVelocidadeAcesso.Enabled = False
+        
+        'Set objDadosAcessoSOE = Nothing
+        
+    ElseIf (Produto_ID = GbIDProdutoWID) Or _
+           (Produto_ID = GbIDProdutoVPN_RA) Or _
+           (Produto_ID = GbIDProdutoVPN_DIRECT) Then
+        
+        Set objDadosCadastrais = New clswidDadosCadastrais
+        
+        objDadosCadastrais.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosCadastrais.InformaMensagem objMensagem
+        
+        'Recupera dados de Local de Instalação
+        bRetorno = objDadosCadastrais.RecuperarDados(ContratoID, NrLocalInsta, "C")
+    
+        Set objDadosAcessoSOE = New clswidDadosAcesso
+    
+        objDadosAcessoSOE.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosAcessoSOE.InformaMensagem objMensagem
+        
+        'Recupera Dados de Acesso
+        bRetorno = objDadosAcessoSOE.RecuperarDados(ContratoID, NrLocalInsta)
+        
+        If objMensagem.TipoMsg <> "" Then
+        
+            GoTo ErrorHandler
+            
+        End If
+        
+        objForm.LblNumeroEstudoViabilidade.Caption = objDadosAcessoSOE.EstudoViabilidade
+        
+        
+    ElseIf Familia_Produto = "D" Then
+        
+'        objForm.optPropriedadeAcesso(0).Enabled = False
+'        objForm.optPropriedadeAcesso(1).Enabled = False
+        
+        Set objDniDadosTecnico = New clsDNI_DadosTecnicos
+        
+        objDniDadosTecnico.InformaMensagem objMensagem
+        objDniDadosTecnico.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDniDadosTecnico.RecuperarDados(NumeroOE, _
+                                                     AnoOE, _
+                                                     NumeroItemOE, _
+                                                     ContratoID)
+        
+        If bRetorno And Sigla_Acao <> "CAN" And Sigla_Acao <> "DES" And TipoOperacao = "I" Then
+            
+            With objDniDadosTecnico
+                
+                objForm.LBLPropriedadeAcessoContingente.Caption = .Seguranca_Acesso
+                
+                objForm.optSegurancaAcesso(0).Value = _
+                                     (.Seguranca_Acesso <> "N" And .Seguranca_Acesso <> "")
+                
+                objForm.optSegurancaAcesso(1).Value = _
+                                     (.Seguranca_Acesso = "N" Or .Seguranca_Acesso = "")
+                
+                If .Seguranca_Acesso <> "N" And .Seguranca_Acesso <> "" Then
+                   
+                   objDadosAcesso.SegurancaAcesso = "S"
+                   
+                Else
+                   
+                   objDadosAcesso.SegurancaAcesso = "N"
+                
+                End If
+                   
+                objDadosAcesso.PropridedadeAcesso = .Propriedade_Acesso
+                
+                If .Seguranca_Acesso = "" Then
+                   
+                   objForm.optSegurancaAcesso(1).Value = True
+                
+                End If
+                
+            End With
+        
+        End If
+        
+        'Carrega os Dados Vindos do SOE
+        Set objDadosAnalisarOE = New clsDNI_DadosAnalisarOE
+    
+        objDadosAnalisarOE.InformaMensagem objMensagem
+        objDadosAnalisarOE.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        sAcaoAux = objDadosAnalisarOE.ObtemAcaoOrderEntry(Servico_ID)
+        
+        bRetorno = objDadosAnalisarOE.ObtemDadosAnalisarOE(ContratoID, _
+                                                           objDadosProduto.Sigla, _
+                                                           sAcaoAux)
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+            
+        End If
+                
+        If Produto_ID = GbIDProdutoDiginet Then
+        
+            objForm.LblNumeroEstudoViabilidade.Caption = objDadosAnalisarOE.NrEstudoViab
+        
+        ElseIf Produto_ID = GbIDProdutoEmbratelIPL Then
+            
+            objForm.LblNumeroEstudoViabilidade.Caption = objDadosAnalisarOE.NrEstudoViabIPL
+        
+        End If
+    
+    End If
+    
+    If Familia_Produto = "I" And (Grupo_ID <> GbIDGrupoVLI) Then
+        
+        '====================================================
+        'CALBAT - 26/03/2007 - Line Trio                    =
+        '====================================================
+        'objForm.LblLogradouro.Caption = objDadosCadastrais.Logradouro
+        
+        objForm.LblLogradouro.Caption = Trim(objDadosCadastrais.Endereco)
+        
+        '====================================================
+        '====================================================
+        
+        objForm.LblBairroEndBR = objDadosCadastrais.Bairro
+    
+        objForm.LblCEP = objDadosCadastrais.CEP
+    
+        objForm.LblCidadeEndBR = objDadosCadastrais.Cidade
+        objForm.LblComplementoEndBR = objDadosCadastrais.Complemento
+        
+        If Grupo_ID = GbIDGrupoBLD Then
+           objForm.LblNumeroEndBR = objDadosCadastrais.NumeroEnd
+        Else
+           objForm.LblNumeroEndBR = objDadosCadastrais.Numero
+        End If
+        
+        objForm.LBlUFEndBR = objDadosCadastrais.UF
+        
+        'If Produto_ID <> GbIDProdutoVBL Then
+        If lGrupo_ID <> GbIDGrupoBLD Then
+            
+            objForm.LblInscrEstadual = objDadosCadastrais.InscricaoEstadual
+            objForm.LblInscrMunicEndBR = objDadosCadastrais.InscricaoMunicipal
+            objForm.LblNomeContatoTecnico = objDadosCadastrais.ResponsavelTecnicoNome
+            objForm.LblTelefoneContatoT1 = objDadosCadastrais.ResponsavelTecnicoTelefone
+        
+        Else
+            
+            objForm.LblCNPJEndBR = objDadosContrato.CNPJ
+            objForm.LblInscrEstadual = objDadosContrato.InscricaoEstadual
+            objForm.LblInscrMunicEndBR = objDadosContrato.InscricaoMunicipal
+            objForm.LblNomeContatoTecnico = objDadosContrato.ResponsavelTecnicoNome
+            objForm.LblTelefoneContatoT1 = objDadosContrato.ResponsavelTecnicoTelefone
+        
+        End If
+        
+    ElseIf Familia_Produto = "D" Then
+    
+        objForm.LblLogradouro.Caption = objDadosAnalisarOE.LogradouroEndBR
+        objForm.LblBairroEndBR = objDadosAnalisarOE.BairroEndBR
+        objForm.LblCidadeEndBR = objDadosAnalisarOE.CidadeEndBR
+        objForm.LblCNPJEndBR = objDadosAnalisarOE.CNPJEndBR
+        objForm.LblComplementoEndBR = objDadosAnalisarOE.ComplementoEndBR
+        objForm.LblInscrEstadual = objDadosAnalisarOE.InscrEstadualEndBR
+        objForm.LblInscrMunicEndBR = objDadosAnalisarOE.InscrMunicBR
+        objForm.LblNomeContatoTecnico = objDadosAnalisarOE.NomeContatoTecnico
+        objForm.LblNumeroEndBR = objDadosAnalisarOE.NumeroEndBR
+        objForm.LblTelefoneContatoT1 = "(" & objDadosAnalisarOE.CodAreaContatoTec1 & ") " & _
+                                       objDadosAnalisarOE.TelefoneContatoTec1 & _
+                                       IIf(objDadosAnalisarOE.RamalContatoTec1 = "", "", _
+                                           " - " & objDadosAnalisarOE.RamalContatoTec1)
+        
+        objForm.LBlUFEndBR = objDadosAnalisarOE.UFEndBR
+        objForm.LblCEP = objDadosAnalisarOE.CEPEndBR
+    
+    End If
+    
+    Set objDadosCadastrais = Nothing
+    'Caso exista Servico Anterior e a fase ainda não foi iniciada,
+    'Obtem os dados da OTS anterior
+    ''''=================================================================
+    '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    '''=== Incluido a verificacao se nao eh wireless
+    ''''=== Os dados do circuito anterior nao se aplica se estiver mudando para circuito Wireless
+    '''===If (Servico_ID_Anterior <> 0) then
+    If GbIDGrupoBLD = objDadosProduto.ID_Grupo Then
+        sIndWireless = objDadosAcessoSOE.WIRELESS
+    Else
+        sIndWireless = ""
+    End If
+    '' 04/2022 - FabiMendonca - ajuste para casos de circuitos que nao sejam do Grupo BLD
+    'If (Servico_ID_Anterior <> 0) And objDadosAcessoSOE.WIRELESS <> "S" Then
+    If (Servico_ID_Anterior <> 0) And sIndWireless <> "S" Then
+       
+       'Não resgata os dados da OTS anterior quando se altera o
+       'endereço de instalação. IP VPN
+        bResgataAnterior = True
+
+        'Local de instalação da nova OTS
+        If (Produto_ID = GbIDProdutoBIV) And _
+           (objdadosServico.Id_Acao = GbIDAcaoAlteracao Or _
+            objdadosServico.Id_Acao = GbIDAcaoCorrecaoAtivacao Or _
+            objdadosServico.Id_Acao = GbIDAcaoCorrecaoAlteracao) Then
+            
+           'OTS atual
+            bRetorno = objdadosCircuito.RecuperarDados(Servico_ID)
+            
+            If (Not bRetorno) Then
+               
+               objMensagem.ExibeMensagem
+        
+               Unload objForm
+               'Set objForm = Nothing
+               
+               GoTo Finalizar
+            
+            End If
+            
+            'OTS atual
+            sCNLAtual = objdadosCircuito.CNL_Ponta_A
+            
+            'OTS anterior
+            bRetorno = objdadosCircuito.RecuperarDados(Servico_ID_Anterior)
+
+            If (Not bRetorno) Then
+               
+               objMensagem.ExibeMensagem
+        
+               Unload objForm
+               Set objForm = Nothing
+               
+               GoTo Finalizar
+            End If
+
+            'OTS anterior
+            sCNLAnterior = objdadosCircuito.CNL_Ponta_A
+
+            If (sCNLAtual <> sCNLAnterior) Then
+
+                bResgataAnterior = False
+
+            End If
+
+        End If
+
+        objDadosAcesso.CaracteristicaAcesso = "P"
+       
+        If (Not objDadosAcesso.FaseExistente(Fase_ID) And bResgataAnterior) Then
+           
+           IdOTS = Servico_ID_Anterior
+           
+           'Problema identificado durante os testes do BLD
+           If (Sigla_Acao = "DES" Or Sigla_Acao = "CAN") Then
+                
+                'GbCodigoFaseAcesso - ID da fase na tabela Tipo_Fase
+                IDFase = objdadosServico.ObtemIDFase_Recursivo(Servico_ID_Anterior, _
+                            GbCodigoFaseAcesso)
+                            
+           Else
+                'GbCodigoFaseAcesso - ID da fase na tabela Tipo_Fase
+                IDFase = objdadosServico.ObtemIDFase(Servico_ID_Anterior, _
+                        GbCodigoFaseAcesso)
+           End If
+
+        Else
+              
+           IdOTS = Servico_ID
+           IDFase = Fase_ID
+          
+        End If
+        
+        If AcessoConstruidoServicoID <> 0 Then
+            
+            IdOTS = AcessoConstruidoServicoID
+            
+            '=================================================================================
+            'CALBAT - 16/02/2009
+            'Ajuste feito para adequar ao processo de Cancelamento / Desativação, para que o sistema
+            'recupere as informações originais
+            '=================================================================================
+            IDFase = AcessoConstruidoFaseID
+            '=================================================================================
+            '=================================================================================
+
+        End If
+           
+    Else
+       
+       IdOTS = Servico_ID
+       IDFase = Fase_ID
+       
+        If AcessoConstruidoServicoID <> 0 Then
+            
+            objDadosAcesso.CaracteristicaAcesso = "P"
+            
+            If (Not objDadosAcesso.FaseExistente(Fase_ID)) Then
+                
+                IdOTS = AcessoConstruidoServicoID
+                IDFase = AcessoConstruidoFaseID
+            
+            End If
+            
+        End If
+       
+       
+    End If
+        
+    'Atribui ao objeto de dados a acao e a situacao da OTS selecionada
+    
+    'objDadosAcesso.Acao = Sigla_Acao
+    objForm.LblAcao_Status = Status_Fase
+    
+'---- INTERFACE SGAP X CLA. VCB
+    Set objDadosLogSGAP = New clsBLD_LogSGAPCLA
+    
+    objDadosLogSGAP.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosLogSGAP.InformaMensagem objMensagem
+    ' verificar se a OTS já foi enviada e finalizada no CLA, caso não tenha sido enviada e seja OTS diferente de ATV, carregar os dados
+    ' da OTS anterior
+    
+    If Produto_ID <> GbIDProdutoVIP Then
+       
+       bRetorno = objDadosLogSGAP.RecuperarDados(Servico_ID)
+       
+    Else
+       
+       bRetorno = objDadosLogSGAP.RecuperarDadosPorContrato(Servico_ID)
+       
+    End If
+    
+    FlagStatusAcessoCLA = ""
+    
+    
+    
+    '=================================================================
+    'CALLBAT - 21/05/2012 - BSoD Net Light
+    '=================================================================
+    If GbIDGrupoBLD = objDadosProduto.ID_Grupo Then
+    
+            If objDadosAcessoSOE.BSoDNetLight <> "S" Then
+            
+                objForm.optPropriedadeAcesso(1).Value = False
+                objForm.optPropriedadeAcesso(0).Value = False
+                objForm.CboTipoAcessoEmbratel.Visible = False
+                objForm.CboTipoAcessoTerceiro.Visible = False
+                
+                '=================================================================
+                'CALLBAT - 26/06/2013 - Interface junto ao CFM
+                'SO-ENGNQ-83669III
+                '=================================================================
+                objForm.UsrGenDadosAcessoTroncoTX.PropriedadeAcesso = ""
+                '=================================================================
+                '=================================================================
+                
+                objForm.CboTipoAcessoTerceiro.Enabled = False
+                
+                objForm.optPropriedadeAcesso(0).Enabled = True
+                objForm.optPropriedadeAcesso(1).Enabled = True
+                
+                objForm.UsrBLFCabecalho_Acesso.BandaLarga = "N"
+                objForm.UsrBLFCabecalho_Acesso.UserName = ""
+                objForm.UsrBLFCabecalho_Acesso.Senha = ""
+                
+                
+                
+                'objForm.CboTipoAcessoTerceiro.RemoveItem (objForm.CboTipoAcessoTerceiro.ItemData(5))
+                
+            Else
+            
+                 'Marca como acesso terceiro e seleciona na combo como Tipo de Acesso BSoD Net Light
+                 objForm.optPropriedadeAcesso(1).Value = True
+                 
+                objForm.CboTipoAcessoTerceiro.ListIndex = objForm.CboTipoAcessoTerceiro.ItemData(5)
+                 
+                'Impossibilita o usuário trocar essa informação, já que a mesma é encaminhada pelo GSI x SOE
+                'objForm.Frame18.Enabled = False
+                
+                objForm.optPropriedadeAcesso(0).Enabled = False
+                objForm.optPropriedadeAcesso(1).Enabled = False
+                
+                
+                objForm.optTipoTecnologia(0).Enabled = False
+                objForm.optTipoTecnologia(1).Enabled = False
+                objForm.optTipoTecnologia(2).Enabled = False
+                
+                '=================================================================
+                'CALLBAT - 21/05/2012 - BSoD Net Light
+                '=================================================================
+                'objForm.CboTipoAcessoTerceiro.Enabled = False
+                
+                If objDadosAcessoSOE.BSoDNetLight = "S" Then
+                    objForm.CboTipoAcessoTerceiro.Enabled = False
+                End If
+                '=================================================================
+                '=================================================================
+                
+                objForm.UsrBLFCabecalho_Acesso.BandaLarga = "S"
+                
+                
+        '        Set objDadosAcesso = New clsbldDadosAcesso
+        '
+        '        objDadosAcesso.InformaMensagem objMensagem
+        '        objDadosAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+        '
+                'bRetorno = objDadosAcessoSOE.RecuperarLoginSenhaBLVPE(Servico_ID)
+        
+                'If bRetorno = False Then
+                '    GoTo ErrorHandler
+                'End If
+        
+                'Carregar dados interface SAIP e Preencher
+                'objForm.UsrBLFCabecalho_Acesso.UserName = objDadosAcessoSOE.UsuarioNetLight
+                'objForm.UsrBLFCabecalho_Acesso.Senha = objDadosAcessoSOE.SenhaNetLight
+        '
+        '        Set objDadosAcesso = Nothing
+                
+            End If
+            
+            '=================================================================
+            'FABIMENDONCA - 09/2020 - SO-RES-54649KGE- BLC WIFI
+            'FABIMENDONCA - 01/2021 - BLC COM WIFI - Dominio wifi: <vazio>, S ou N
+            '=================================================================
+            If objDadosAcessoSOE.WiFi = "S" Then
+                objForm.UsrBLFCabecalho_Acesso.WiFi = "S"
+                
+            ElseIf objDadosAcessoSOE.WiFi = "N" Then
+               objForm.UsrBLFCabecalho_Acesso.WiFi = "N"
+               
+            Else
+               objForm.UsrBLFCabecalho_Acesso.WiFi = " "
+            End If
+       
+            '=================================================================
+            '
+            '=================================================================
+            '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+            '=================================================================
+             objForm.FrameSEVWireles.Visible = False
+             objForm.txtSEV_Wireless.Visible = False
+             
+             If objDadosAcessoSOE.WIRELESS = "S" Then
+                 
+                 If objdadosServico.Num_SEV = "" Then
+                    objForm.txtSEV_Wireless.Text = objDadosAcessoSOE.EstudoViabilidade
+                 Else
+                    objForm.txtSEV_Wireless.Text = objdadosServico.Num_SEV
+                 End If
+                 
+                 objForm.UsrBLFCabecalho_Acesso.WIRELESS = "S"
+                 objForm.txtSEV_Wireless.Enabled = True
+                 objForm.FrameSEVWireles.Visible = True
+                 objForm.txtSEV_Wireless.Visible = True
+                 
+                 
+             ElseIf objDadosAcessoSOE.WIRELESS = "N" Then
+                 objForm.UsrBLFCabecalho_Acesso.WIRELESS = "N"
+                 
+             Else
+                 objForm.UsrBLFCabecalho_Acesso.WIRELESS = " "
+             
+             End If
+            
+            '=================================================================
+    End If
+    '=================================================================
+    '=================================================================
+    
+    If bRetorno Then
+        
+        FlagStatusAcessoCLA = objDadosLogSGAP.StatusAcesso
+                
+        If (Not objDadosFase.RecuperarSituacaoFase(Fase_ID)) And DataFinalizacao = "" And FlagStatusAcessoCLA = "2" Then
+            
+            If objMensagem.Descricao = "Esta Fase já foi finalizada por outro usuário!" Then
+                
+                objMensagem.Descricao = "Esta fase foi concluída automaticamente pela interface SGAPxCLA."
+                
+            End If
+            
+           objMensagem.ExibeMensagem
+           objForm.FlControlaAlteracao = False
+           
+           Unload objForm
+           
+           GoTo Finalizar
+        Else
+           
+           objMensagem.TipoMsg = ""
+           objMensagem.Descricao = ""
+        
+        End If
+        
+        objForm.LblEstacConfigCLA.Caption = objDadosLogSGAP.EstacaoConfiguracao
+        objForm.UsrVozBandaCabecalho.IDLogico = objDadosLogSGAP.IDLogico   '-- CARREGAR ID LOGICO NO CABECALHO - #VCBB
+        objBlfCabecalho.IDLogico = objDadosLogSGAP.IDLogico
+        objForm.LblIdSolicitcaoCLA(3).Caption = objDadosLogSGAP.IDLogico
+        
+        objForm.TxtEstacaoConfiguracao.Text = objDadosLogSGAP.EstacaoConfiguracao
+        
+        If objDadosLogSGAP.PropriedadeAcesso = "TER" Then
+            
+            objForm.optPropriedadeAcesso(1).Value = True
+            objForm.TxtEstacaoEntregaTercConf.Text = objDadosLogSGAP.EstacaoConfiguracao
+        
+        ElseIf objDadosLogSGAP.PropriedadeAcesso = "EBT" Then
+            
+            objForm.optPropriedadeAcesso(0).Value = True
+            objForm.TxtEstacaoEntregaEbtConf.Text = objDadosLogSGAP.EstacaoConfiguracao
+            
+        End If
+        
+        FlagUtilizaInterfaceCLA = True
+        
+        
+        
+    Else
+        If (Not objDadosFase.RecuperarSituacaoFase(Fase_ID)) And DataFinalizacao = "" Then
+            
+           objMensagem.ExibeMensagem
+    
+           GoTo Finalizar
+        Else
+           
+           objMensagem.TipoMsg = ""
+           objMensagem.Descricao = ""
+
+        End If
+
+    End If
+
+
+    bFlagEnviaCancelamentoCLA = False
+    sStatusAcessoOTSAnterior = ""
+    '
+    '''=================================================================
+    '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    ''If Acao_ID <> 7 And (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "0" Or FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "7" Or FlagStatusAcessoCLA = "9") Then
+    ''If Acao_ID <> 7 And objDadosAcessoSOE.WIRELESS <> "S" And (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "0" Or FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "7" Or FlagStatusAcessoCLA = "9") Then
+    If Acao_ID <> 7 And sIndWireless <> "S" And (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "0" Or FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "7" Or FlagStatusAcessoCLA = "9") Then
+        
+        lServicoIDAux = Servico_ID_Anterior
+        
+        '=================================================================
+        '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+        '''=== Incluir veriricacao se eh circuito diferente de Wireless pois o tratamento do serviço anterior náo se aplica ao Wireless
+        '''=== para o Wireless a fase do CLA náo tem configuraçao de acesso e o retorno eh um xml padrao sempre.
+        ''If Acao_ID <> 9 AThen
+        ''FABIMENDONCA - 04/2022
+        ''If Acao_ID <> 9 And objDadosAcessoSOE.WIRELESS <> "S" Then
+        If Acao_ID <> 9 And sIndWireless <> "S" Then
+
+            'Obtem o ID do servico anterior mais recente com status 'FF' ou 'AN'
+'            lServicoIDAux = objdadosServico.ObtemServicoAnteriorValido(objdadosServico.ID_CIRCUITO, Servico_ID)
+            lServicoIDAux = objdadosServico.ObtemIDAnteriorPorFaseReal(Servico_ID, 6)
+            
+            If lServicoIDAux = 0 Or TipoOperacao = "I" Then
+            
+                lServicoIDAux = Servico_ID_Anterior
+            
+            End If
+
+        End If
+        
+        'Recupera os dados da OTS Anterior
+        Set objDLog = New clsBLD_LogSGAPCLA
+
+        objDLog.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDLog.InformaMensagem objMensagem
+
+        If Produto_ID <> GbIDProdutoVIP Then
+           
+           bRetorno = objDLog.RecuperarDados(lServicoIDAux)
+        
+        Else
+           
+           bRetorno = objDLog.RecuperarDadosPorContrato(lServicoIDAux)
+        
+        End If
+        
+        If bRetorno Then
+        
+            sStatusAcessoOTSAnterior = objDLog.StatusAcesso
+            objBlfCabecalho.IDLogico = objDLog.IDLogico
+            objForm.LblIdSolicitcaoCLA(3).Caption = objDLog.IDLogico
+            
+            bFlagIndicaLegado = False
+        End If
+        
+        If objdadosServico.FlagMotivoCorrecao = "A" And objDadosLogSGAP.StatusAcesso <> "" Then
+           
+           'Verificar status da OTS anterior, caso tenha sido enviada para o CLA e esteja com status de
+           'Confirmar com a Ruth/monica se caso a OTS anterior não esteja finalizada, o sistema deve perguntar ao usuário
+           'se a OTS atual de correção para Alteração de Dados de Configuração deve ser considerada legado ou não, alertando que
+           'em caso afirmativo, o sistema enviará um cancelamento para o CLA da solicitação enviada anteriormente
+           
+           'Verificar a data da OTS de correção da OTS anterior é menor que a data de implantação da interface
+           
+           If objDadosLogSGAP.StatusAcesso <> "6" And objDadosLogSGAP.StatusAcesso <> "9" Then
+           
+               
+               
+               Set objDLog = New clsBLD_LogSGAPCLA
+                
+               objDLog.InformaBanco frmgenMDI_SGAPlus.objBanco
+               objDLog.InformaMensagem objMensagem
+                
+               
+                '================================================================
+                'Callbat - 07/04/2015
+                'Chamado CH-74999UGL
+                '================================================================
+                'bRetorno = objDLog.RecuperarDados(objdadosServico.ID_Servico_Anterior)
+                
+                lUltIDServicoCLA = objDLog.ObtemServicoEnviadoAoCLA(objdadosServico.ID_CIRCUITO)
+                
+                bRetorno = objDLog.RecuperarDados(lUltIDServicoCLA)
+                
+                '================================================================
+                '================================================================
+               
+               If objMensagem.TipoMsg <> "" Then
+            
+                  objMensagem.ExibeMensagem
+            
+                  Exit Function
+            
+               End If
+                
+               If bRetorno Then
+                
+                  If objDLog.StatusAcesso = "0" Then
+'Caso o tipo de acesso seja BSOD, não exibir pergunta
+                     'Verifica se o circuito já passou pela interface CLA, caso não tenha passado, o sistema deve tratar como Legado
+                     bRetorno = objDadosLogSGAP.VerificaLegadoFinalizadoCLA(objdadosServico.ID_CIRCUITO)
+                    
+                     If Not bRetorno Then
+                    
+                        objMensagem.Descricao = "A OTS anterior foi enviada para o CLA e está aguardando o retorno da construção do acesso. " & _
+                                             "Deseja cancelar a solicitação enviada anteriormente ao CLA?"
+                        objMensagem.TipoMsg = "Q"
+                     
+                        If objMensagem.ExibeMensagem = "S" Then
+                     
+                           '================================================================
+                           'Callbat - 07/04/2015
+                           'Chamado CH-74999UGL
+                           '================================================================
+                            'bFlagIndicaLegado = True
+                            'bFlagLegadoEmAndamento = True
+                            'bFlagEnviaCancelamentoCLA = True
+                           
+                           bFlagEnviaCancelamentoCLA = True
+                           bLimpaStatusCLA = True
+                                                    
+                           '==================================================
+                       
+                        End If
+                  
+                     End If
+                  
+                  End If
+               
+               End If
+           Else
+                
+                If objDadosLogSGAP.StatusAcesso = "9" Then
+                    
+                    bFlagIndicaLegado = True
+                    bFlagLegadoEmAndamento = True
+                
+                End If
+           
+           End If
+        
+        Else
+            
+            If objdadosServico.FlagMotivoCorrecao = "A" And objDadosLogSGAP.StatusAcesso = "" Then
+                
+                bRetorno = objDadosLogSGAP.VerificaEnvioCla(Servico_ID)
+                
+                If Not bRetorno Then
+                
+                    bFlagIndicaLegado = True
+                    bFlagLegadoEmAndamento = True
+                
+                End If
+            
+            End If
+        
+        End If
+            
+        'Caso seja uma OTS que já existe e que o acesso não foi finalizado, obtem o id fase acesso da ots anterior
+        If TipoOperacao = "A" Then
+            
+            bRetorno = objDadosAcesso.RecuperarDados(objDadosAcesso.CaracteristicaAcesso, Servico_ID, Fase_ID, objMensagem)
+            
+            If objDadosAcesso.PropridedadeAcesso = "" And FlagStatusAcessoCLA <> "" Then
+            
+               IDFase = objdadosServico.ObtemIDFase(Servico_ID_Anterior, GbCodigoFaseAcesso)
+            
+            End If
+            
+        End If
+
+    Else
+        
+        Set objDLog = objDadosLogSGAP
+        
+    End If
+    
+    If FlagStatusAcessoCLA = "" Then
+                    
+        If Sigla_Acao = "CAN" Then
+       
+            bRetorno = objdadosCircuito.RecuperarDados(Servico_ID)
+            
+            bFlagIndicaLegado = objDadosLogSGAP.VerificaCCTO_Legado(objdadosCircuito.ID_CIRCUITO)
+            
+            
+            'CALLBAT - NKJ
+            ' Após verificar se o circuito foi encaminhado para o CLA, o sistema verifica se a fase foi iniciada,
+            '   mas deveria verificar se existe esse servico_ID na tabela de interface com o CLA, se já tiver, não encaminhar.
+            
+            If objDadosFase.FaseIniciada(Fase_ID) Then
+                
+                bFlagLegadoEmAndamento = True
+            
+            End If
+            
+            If Not bFlagIndicaLegado Then
+               
+                Set objOTS = New clsGenServico
+                
+                objOTS.InformaBanco frmgenMDI_SGAPlus.objBanco
+                objOTS.InformaMensagem objMensagem
+                
+                bRetorno = objOTS.RecuperarDados(Servico_ID_Anterior)
+                
+                'Verifica se a OTS que está sendo cancelada foi enviada para o CLA, em caso afirmativo,
+                If objDLog.ServicoID_CLA <> 0 And objOTS.FlagMotivoCorrecao = "A" Then 'ID CLA # 0 significa que a OTS anterior não foi enviada para o CLA
+                   
+                   bFlagIndicaLegado = True
+                   bFlagExibeMsgLegado = False
+                   
+                End If
+                
+            End If
+        Else
+        
+            If objDadosFase.FaseIniciada(Fase_ID) And objdadosServico.FlagMotivoCorrecao <> "A" Then
+    
+                bFlagLegadoEmAndamento = True
+                bFlagIndicaLegado = True
+                
+            End If
+        
+        End If
+        
+        If Not bFlagIndicaLegado Then
+            
+            bFlagLegadoEmAndamento = False
+            
+            'objForm.optPropriedadeAcesso(0).Enabled = False
+            'objForm.optPropriedadeAcesso(1).Enabled = False
+            'objForm.CboPadraoInterfaceEBT.Enabled = False
+            
+            objForm.CboVelocidadeAcesso.Visible = False
+            objForm.CboVelocidadeAcesso.Enabled = False
+            objForm.ssTabAcesso.TabEnabled(2) = False
+            objForm.ssTabAcesso.TabEnabled(3) = False
+            
+        
+        End If
+    
+    End If
+    
+    If Produto_ID = GbIDProdutoBLF Or Produto_ID = GbIDProdutoWID Or Produto_ID = GbIDProdutoVPN_DIRECT Or Produto_ID = GbIDProdutoVPN_RA Or Produto_ID = 13 Then
+'    If Produto_ID = GbIDProdutoWID Or Produto_ID = GbIDProdutoVPN_DIRECT Or Produto_ID = GbIDProdutoVPN_RA Or Produto_ID = 13 Then
+    
+        bFlagLegadoEmAndamento = True
+        bFlagIndicaLegado = True
+        
+    End If
+    
+    If Not bFlagIndicaLegado Then
+        
+        'objForm.optPropriedadeAcesso(0).Enabled = False
+        'objForm.optPropriedadeAcesso(1).Enabled = False
+       
+        objForm.CboTipoAcessoEmbratel.Enabled = False
+        objForm.CboTipoAcessoTerceiro.Enabled = False
+        
+    
+    Else
+        
+        If objdadosServico.FlagMotivoCorrecao <> "A" Then
+           
+           objForm.optPropriedadeAcesso(0).Enabled = True
+           objForm.optPropriedadeAcesso(1).Enabled = True
+           objForm.CboTipoAcessoEmbratel.Enabled = True
+           objForm.CboTipoAcessoTerceiro.Enabled = True
+        
+        End If
+        
+        objForm.CboVelocidadeAcesso.Visible = True
+        objForm.CboVelocidadeAcesso.Enabled = True
+        
+'        objForm.CboPadraoInterfaceEBT.Enabled = False
+'        objForm.TxtEstacaoConfiguracao.Enabled = False
+       
+        If Not bFlagLegadoEmAndamento And FlagStatusAcessoCLA = "" Then
+           
+           objForm.CboPadraoInterfaceEBT.Enabled = True
+           objForm.TxtEstacaoConfiguracao.Enabled = True
+        
+        End If
+        
+    End If
+    
+'    FlagStatusAcessoCLA = objDLog.StatusAcesso
+    
+    If objMensagem.TipoMsg <> "" Then
+
+       objMensagem.ExibeMensagem
+
+       GoTo Finalizar
+
+    End If
+    
+    If FlagStatusAcessoCLA = "0" Then
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "Solicitação Enviada ao CLA"
+        objDLog.StatusCla = "Solicitação Enviada ao CLA"
+    
+    ElseIf FlagStatusAcessoCLA = "1" Then
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "Solicitação iniciada no CLA"
+        objDLog.StatusCla = "Solicitação iniciada no CLA"
+    
+    ElseIf FlagStatusAcessoCLA = "2" Then
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "Acesso finalizado no CLA"
+        objDLog.StatusCla = "Acesso finalizado no CLA"
+    
+    ElseIf FlagStatusAcessoCLA = "3" Then
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "Pendencia em aberto no CLA"
+        objDLog.StatusCla = "Pendencia em aberto no CLA"
+    
+    ElseIf FlagStatusAcessoCLA = "4" Then
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "Aguardando cancelamento da solicitação anterior"
+        objDLog.StatusCla = "Aguardando cancelamento da solicitação anterior"
+    
+    ElseIf FlagStatusAcessoCLA = "5" Then
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "XML Rejeitado pelo SGA Plus - " & objDLog.DescrErro
+        objDLog.StatusCla = "XML Rejeitado pelo SGA Plus" & objDLog.DescrErro
+    
+    ElseIf FlagStatusAcessoCLA = "6" Then
+        
+        sDescrRespCLA = ""
+        
+        If Trim(objDLog.XMLRetornoSinc) <> "" And _
+           InStr(1, objDLog.XMLRetornoSinc, "<mensagem>") > 0 And _
+           InStr(1, objDLog.XMLRetornoSinc, "</mensagem>") > 0 Then
+           
+           sDescrRespCLA = Mid(objDLog.XMLRetornoSinc, InStr(1, objDLog.XMLRetornoSinc, "<mensagem>") + 10, _
+                                       InStr(1, objDLog.XMLRetornoSinc, "</mensagem>") - 10 - InStr(1, objDLog.XMLRetornoSinc, "<mensagem>"))
+        
+        End If
+        
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "Solicitação recusada pelo CLA" & " - " & sDescrRespCLA
+        objDLog.StatusCla = "Solicitação recusada pelo CLA" & " - " & sDescrRespCLA
+    
+    ElseIf FlagStatusAcessoCLA = "7" Then
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "OTS enviada ao SAIP"
+        objDLog.StatusCla = "OTS enviada ao SAIP"
+    
+    ElseIf FlagStatusAcessoCLA = "8" Then
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = "OTS finalizada no SAIP"
+        objDLog.StatusCla = "OTS finalizada no SAIP"
+    
+    Else
+        objForm.UsrBLFCabecalho_Acesso.StatusCla = " "
+    End If
+
+    objForm.UsrVozBandaCabecalho.StatusCla = objForm.UsrBLFCabecalho_Acesso.StatusCla
+    objForm.UsrBLFCabecalho_Acesso.ID_Logico = objDLog.IDLogico  '- #VCBB
+    objForm.UsrVozBandaCabecalho.IDLogico = objDLog.IDLogico
+    
+    objBlfCabecalho.IDLogico = objDLog.IDLogico
+    sIdLogico = objDLog.IDLogico
+    
+    '''=================================================================
+    '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless    Set objDadosLogSGAP = New clsBLD_LogSGAPCLA
+    '''=== Recuperar o IDlogico caso seja uma ALT de WIreless, solicitado em UAT nao resgatar os dados anteriores quando for um circuito wireless
+    '''=== porem o IDlogico eh necessario resgatar para que seja enviado ao CLA no xml de ALT.
+    '''If Servico_ID_Anterior <> 0 And objDadosAcessoSOE.WIRELESS = "S" Then
+    '''04/2022 - ajustar a verificação do wireless em variavel e nao em objeto para nao dar erro em casos de circuitos Não BLD
+    If Servico_ID_Anterior <> 0 And sIndWireless = "S" Then
+        '' pegar o Idlogico da OTS anterior
+        Set objDadosLogSGAPWireless = New clsBLD_LogSGAPCLA
+        
+        objDadosLogSGAPWireless.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosLogSGAPWireless.InformaMensagem objMensagem
+        
+        bRetorno = objDadosLogSGAPWireless.RecuperarDados(Servico_ID_Anterior)
+        
+        objForm.LblEstacConfigCLA.Caption = objDadosLogSGAPWireless.EstacaoConfiguracao
+        objForm.UsrVozBandaCabecalho.IDLogico = objDadosLogSGAPWireless.IDLogico   '-- CARREGAR ID LOGICO NO CABECALHO - #VCBB
+        'sIdLogicoWireless = (objDadosLogSGAPWireless.IDLogico)
+        objForm.UsrBLFCabecalho_Acesso.ID_Logico = objDadosLogSGAPWireless.IDLogico
+        objBlfCabecalho.IDLogico = objDadosLogSGAPWireless.IDLogico
+        objForm.LblIdSolicitcaoCLA(3).Caption = objDadosLogSGAPWireless.IDLogico
+    
+        objForm.TxtEstacaoConfiguracao.Text = objDadosLogSGAPWireless.EstacaoConfiguracao
+        
+        sIdLogico = objDadosLogSGAPWireless.IDLogico
+        
+        Set objDadosLogSGAPWireless = Nothing
+        
+    End If
+
+    
+
+    If objDLog.StatusAcesso = "2" Or sStatusAcessoOTSAnterior = "2" Then  'se acesso finalizado no CLA
+       'Carrega Lista de acessos quando for acesso misto
+       
+       Call CarregaListaAcessos(IDFase)
+       objForm.ssTabAcesso.Tab = 0
+       
+    Else
+        objForm.SpdListaAcessos.MaxRows = 0
+       objForm.ssTabAcesso.Tab = 1
+    
+    End If
+    
+    objDadosAcesso.CaracteristicaAcesso = "P"
+        
+    'Obtem dados de Local de Instalacao
+'    Call LimpaCamposTela
+    
+    objForm.ssTabAcesso.TabEnabled(5) = True
+
+    'Caso a fase não tenha sido iniciada e seja uma OTS de Desativacao ou Cancelamento,
+    'Exibe os dados da OTS original
+'
+'---vcbb
+
+    'Verifica se existe alguma fase posterior a esta já iniciada, em caso afirmativo,
+    'desabilitar os campos da tela os os botões de ações ou caso o usuário não possua
+    'permissão de atualização
+    If Familia_Produto = "D" Then
+    
+        'Problema identificado por Faquino em 18/12/2003
+        If UBound(paPermissoes) = 0 Then
+
+           'Uma fase posterior a esta já foi iniciada
+           
+           Call DesabilitaCamposTela
+           
+           objForm.CmdTrataPendencia.Enabled = False
+
+        'CALBAT - 05/10/2007 =====================================
+        'Tratar Acesso Paralelismo.                                                          =
+        '=========================================================
+        ElseIf (numUltimaFaseRealizada > Sequencia_Acao) Or _
+            (paPermissoes(4, 1) = 0) Or (Not flUsuarioDoCF) Then
+           
+           Call DesabilitaCamposTela
+           
+           objForm.CmdTrataPendencia.Enabled = False
+            
+        ElseIf (paPermissoes(4, 1) = 0) Or (Not flUsuarioDoCF) Then
+        '=========================================================
+        '=========================================================
+          
+           'Uma fase posterior a esta já foi iniciada
+           Call DesabilitaCamposTela
+           
+           objForm.CmdTrataPendencia.Enabled = False
+           
+        End If
+    
+    Else
+        'Problema identificado por Faquino em 18/12/2003
+        If UBound(paPermissoes) = 0 Then
+    
+           'Uma fase posterior a esta já foi iniciada
+           Call DesabilitaCamposTela
+        
+        'JRCRUZ - 22/02/2007
+        'ElseIf (DataFinalizacao <> "" And PermiteExecucao <> "S" And _
+                Produto_ID <> GbIDProdutoVIP) Or _
+               (numUltimaFaseRealizada > Sequencia_Acao And PermiteExecucao <> "S" And _
+                Produto_ID = GbIDProdutoVIP) Or _
+               paPermissoes(4, 1) = 0 Or Not flUsuarioDoCF Then
+               
+'        ElseIf (DataFinalizacao <> "" And PermiteExecucao <> "S" And _
+                Produto_ID <> GbIDProdutoVIP) Or _
+               (Grupo_ID = GbIDGrupoVLI) Or _
+               paPermissoes(4, 1) = 0 Or Not flUsuarioDoCF Then
+           
+        ElseIf (DataFinalizacao <> "" And PermiteExecucao <> "S" And _
+                Produto_ID <> GbIDProdutoVIP) Or _
+               paPermissoes(4, 1) = 0 Or Not flUsuarioDoCF Then
+           
+           Call DesabilitaCamposTela
+           
+        ElseIf _
+ _
+               paPermissoes(4, 1) = 0 Or Not flUsuarioDoCF Then
+        '=========================================================
+        '=========================================================
+        
+           'Uma fase posterior a esta já foi iniciada
+           Call DesabilitaCamposTela
+        
+        End If
+    
+    End If
+'
+    'JRCRUZ - 22/02/2007
+    'If Produto_ID = GbIDProdutoVIP Then
+    If Grupo_ID = GbIDGrupoVLI Then
+        
+       Set objOc_TratarEqptoCompl = New clsInterOC_TratarEqptoCompl
+        
+        'Obtem os dados de Equipamento Complementar
+       bRetorno = objDadosAcesso.RecuperarDadosEquipamentos(objDadosAcesso.iD, objMensagem)
+          
+       If objMensagem.TipoMsg <> "" Then
+           
+          GoTo ErrorHandler
+         
+       End If
+        
+       Call objOc_TratarEqptoCompl.CarregarUsrControl(objDadosAcesso, objForm, False)
+    
+       If AcessoConstruidoServicoID = 0 Then
+            
+            If (DataFinalizacao = "" And (Sigla_Acao = "DES" Or Sigla_Acao = "CAN")) Then
+                
+                Set objDadosEqptoNGN2 = New VIP_Equipamento_NGN
+                
+                objDadosEqptoNGN2.InformaBanco frmgenMDI_SGAPlus.objBanco
+                objDadosEqptoNGN2.InformaMensagem objMensagem
+                
+                
+                bRetorno = objDadosEqptoNGN2.RecuperarDados(IDFase)
+                
+                
+                If bRetorno = False Then
+                
+                    IDFase = objDadosFase.ObtemIDFase(Servico_ID_Anterior, GbCodigoFaseAcesso)
+                
+                End If
+                
+                Set objDadosEqptoNGN2 = Nothing
+                
+                
+            End If
+            
+            Call CarregarComboEqpto(IDFase)
+            Call VerificarStatusEqpto(IDFase)
+            
+       End If
+        
+    End If
+    
+    objForm.InformaClasseOC Me
+
+    If Grupo_ID = GbIDGrupoVLI Then
+
+        If TipoOperacao = "I" And bFlagAcessoJaConstruido Then
+'            Call DesabilitaCamposTela
+            objForm.CmdSalvar.Enabled = True
+            objForm.CmdLimpar.Enabled = True
+            objForm.CmdRealocar.Enabled = True
+
+        End If
+
+    End If
+    
+    If TipoOperacao = "I" Or (Grupo_ID = GbIDGrupoVLI) Then
+    
+       objForm.CmdAcessoContingente.Visible = False
+       objForm.CmdAcessoPrincipal.Visible = False
+    
+    End If
+
+    If FlagStatusAcessoCLA <> "2" And Not bFlagLegadoEmAndamento Then
+
+'        objForm.CboClassificacaoEndereco.Enabled = False
+'        objForm.optExecCentroLocal(0).Enabled = False
+'        objForm.optExecCentroLocal(1).Enabled = False
+'
+'        objForm.TxtTroncoOTS.Enabled = False
+'
+'        'objForm.OptTipoRede(0).Enabled = False
+'        'objForm.OptTipoRede(1).Enabled = False
+'        'objForm.OptTipoRede(2).Enabled = False
+'
+'        objForm.CboPlataformas.Enabled = False
+'
+'        objForm.OptResponsavelInfra(0).Enabled = False
+'        objForm.OptResponsavelInfra(1).Enabled = False
+'
+'        objForm.TxtRIT.Enabled = False
+'        objForm.TxtEMailGic.Enabled = False
+'
+'        If Acao_ID = 7 Then
+'
+'            objForm.optProprietarioModem(0).Value = False
+'            objForm.optProprietarioModem(1).Value = False
+'
+'            objForm.optPropriedadeAcesso(0).Value = False
+'            objForm.optPropriedadeAcesso(1).Value = False
+'
+'            objForm.ssTabAcesso.TabEnabled(2) = False
+'            objForm.ssTabAcesso.TabEnabled(4) = False
+'            objForm.ssTabAcesso.TabEnabled(5) = False
+'
+'        End If
+'
+'        objForm.TxtPredioEBT_ADE.Enabled = False
+'        objForm.TxtNumeroCabo_ADE.Enabled = False
+'        objForm.TxtNumeroPar_ADE.Enabled = False
+'
+'        objForm.CmdCadastrarEqptoNGN.Enabled = False
+'        objForm.TxtEstacaoCliente.Enabled = False
+'
+'        If FlagStatusAcessoCLA <> "" Then
+'
+'            objForm.TxtEstacaoConfiguracao.Enabled = False
+'            objForm.CboPadraoInterfaceEBT.Enabled = False
+'
+'        End If
+'
+'        objForm.SpdDataPedidoAcesso.Enabled = False
+'        objForm.CboTipoAcessoEmbratel.Enabled = False
+'        objForm.CboTipoAcessoTerceiro.Enabled = False
+'        objForm.TxtEstacaoEntregaEbtConf.Enabled = False
+'        objForm.TxtEstacaoEntregaTercConf.Enabled = False
+'        objForm.TxtEstacaoEntregaEbt.Enabled = False
+'        objForm.TxtDesignacaoAcessoEBT.Enabled = False
+'        objForm.SpdDataAtivacaoAcessoEBT.Enabled = False
+'        objForm.TxtDesignacaoAcessoTerceiro.Enabled = False
+'        objForm.SpdDataAtivacaoAcessoTerc.Enabled = False
+                
+        Call DesabilitaCamposTela
+        
+        If (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "6") And Acao_ID <> 8 And Acao_ID <> 9 Then
+            
+            If objdadosServico.FlagMotivoCorrecao <> "A" Then
+               
+                '=================================================================
+                'CALLBAT - 21/05/2012 - BSoD Net Light
+                '=================================================================
+                If objDadosAcessoSOE.BSoDNetLight <> "S" Then
+                    
+                    objForm.optPropriedadeAcesso(0).Enabled = True
+                    objForm.optPropriedadeAcesso(1).Enabled = True
+                    objForm.CboTipoAcessoEmbratel.Enabled = True
+                    objForm.CboTipoAcessoTerceiro.Enabled = True
+                    
+                End If
+                '=================================================================
+                '=================================================================
+            
+            End If
+            
+'            objForm.CboPadraoInterfaceEBT.Enabled = True
+'            objForm.TxtEstacaoConfiguracao.Enabled = True
+            
+        End If
+        
+        objForm.CmdSalvar.Enabled = True
+        objForm.CmdLimpar.Enabled = True
+        objForm.CmdTrataPendencia.Enabled = True
+        
+        '=================================================================
+        'CALLBAT - 26/06/2013 - Interface junto ao CFM
+        'SO-ENGNQ-83669III
+        '=================================================================
+        objForm.UsrGenDadosAcessoTroncoTX.Circuito_ID = objdadosCircuito.ID_CIRCUITO
+        objForm.UsrGenDadosAcessoTroncoTX.StatusOTS = objdadosServico.StatusServico
+        
+        objForm.UsrGenDadosAcessoTroncoTX.AcaoOTS = objdadosServico.Id_Acao
+        
+        objForm.UsrGenDadosAcessoTroncoTX.HabilitaOpcaoTX (True)
+        '=================================================================
+        '=================================================================
+        
+'        If Acao_ID <> 7 Then
+'            objForm.CmdSalvar.Enabled = False
+'            objForm.CmdCriticas.Enabled = False
+'        End If
+        
+        '================================================================
+        'Callbat - 07/04/2015
+        'Chamado CH-74999UGL
+        '================================================================
+        'If (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "5" Or FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "8") And Status_Fase <> "Finalizado" Then
+        
+        If (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "0" Or FlagStatusAcessoCLA = "5" Or FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "8") And Status_Fase <> "Finalizado" Then
+        '================================================================
+        '================================================================
+            
+            '================================================================
+            'Callbat - 07/04/2015
+            'Chamado CH-74999UGL
+            '================================================================
+            'If objdadosServico.FlagMotivoCorrecao <> "A" Or (objdadosServico.FlagMotivoCorrecao = "A" And FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "8") Then
+            If objdadosServico.FlagMotivoCorrecao <> "A" Or (objdadosServico.FlagMotivoCorrecao = "A" And FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "8" Or FlagStatusAcessoCLA = "0") Then
+            '================================================================
+            '================================================================
+               
+               objForm.CmdEnviarSolicCLA.Enabled = True
+            
+            End If
+            
+        End If
+    Else
+        If Not bFlagLegadoEmAndamento Then
+           
+           objForm.CmdEnviarSolicCLA.Enabled = False
+           objForm.CmdEnviarSAIP.Enabled = False
+           objForm.TxtDesignacaoAcessoEBT.Enabled = False
+           objForm.SpdDataPedidoAcesso.Enabled = False
+           objForm.SpdDataAtivacaoAcessoEBT.Enabled = False
+           objForm.TxtEstacaoEntregaEbt.Enabled = False
+           'objForm.TxtEstacaoEntregaEbtConf.Enabled = False
+           
+           'objForm.OptTipoRede(0).Enabled = False
+           'objForm.OptTipoRede(1).Enabled = False
+           'objForm.OptTipoRede(2).Enabled = False
+           
+           objForm.CboPlataformas.Enabled = False
+           
+           objForm.CboProvedorUrbano.Enabled = False
+           objForm.SpdDataAtivacaoAcessoTerc.Enabled = False
+           objForm.TxtPredioEBT_ADE.Enabled = False
+           objForm.optExisteAcessoIU(0).Enabled = False
+           objForm.optExisteAcessoIU(1).Enabled = False
+           objForm.SpdDataEntregaUrbano.Enabled = False
+           objForm.TxtCNLPontaA_Urbano.Enabled = False
+           'objForm.SpdNumeroAcessoUrbano.Enabled = False
+           'objForm.SpdNumeroAcessoInterurbano.Enabled = False
+           objForm.TxtCNLPontaA.Enabled = False
+           objForm.TxtCNLPontaB.Enabled = False
+           objForm.SpdDataEntregaInterUrbano.Enabled = False
+           objForm.SpdDataEntregaUrbano.Enabled = False
+           objForm.TxtDesignacaoAcessoTerceiro.Enabled = False
+           objForm.TxtDIDFila_Rede.Enabled = False
+           objForm.TxtDIDArmacao_Rede.Enabled = False
+           objForm.TxtDIDPosicao_Rede.Enabled = False
+           objForm.TxtDIDRegua_Rede.Enabled = False
+           objForm.TxtTronco.Enabled = False
+           objForm.TxtPar.Enabled = False
+           
+           '=================================================================
+           'CALLBAT - 26/06/2013 - FO EDD
+           'SO-TVASS-56728SLA
+           '=================================================================
+           'objForm.TxtDesigAcessoBSoD.Enabled = False
+           'objForm.TxtVLANVia.Enabled = False
+           'objForm.TxtLinkRedeVIA.Enabled = False
+           'objForm.TxtPortaVIA.Enabled = False
+           'objForm.TxtPE.Enabled = False
+           
+           'objForm.TxtSVLAN.Enabled = False
+           
+           'objForm.TxtVLAN_NET.Enabled = False
+           '=================================================================
+           
+           objForm.optPropriedadeAcesso(0).Enabled = False
+           objForm.optPropriedadeAcesso(1).Enabled = False
+           
+'           objForm.OptResponsavelInfra(0).Enabled = False
+'           objForm.OptResponsavelInfra(1).Enabled = False
+           '''=================================================================
+            '''=================================================================
+            ''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+            objForm.txtSEV_Wireless.Enabled = False
+        End If
+    
+    End If
+
+    'Obtem ID_fase da Alocacao Configuraçao
+    lIdFaseAlocacaoConfiguracao = objDadosFase.ObtemIDFase(objdadosServico.ID_Servico, GbCodigoFaseConfiguracao)
+         
+    If objMensagem.TipoMsg <> "" Then
+       
+         GoTo Finalizar
+     
+    End If
+    
+    If FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "2" Then
+    
+    
+        If Not bFlagLegadoEmAndamento And FlagStatusAcessoCLA = "" Then
+           
+            '=================================================================
+            'CALLBAT - 21/05/2012 - BSoD Net Light
+            '=================================================================
+            If objDadosAcessoSOE.BSoDNetLight <> "S" Then
+                    objForm.CboPadraoInterfaceEBT.Enabled = True
+                    objForm.TxtEstacaoConfiguracao.Enabled = True
+            End If
+            '=================================================================
+            '=================================================================
+        End If
+    
+    End If
+
+    If Grupo_ID = GbIDGrupoBLD Or Grupo_ID = GbIDGrupoBLF Then
+        
+        Set objDadosIntegracaoWebip = New clsBlf_IntegracaoWebIP
+        
+        objDadosIntegracaoWebip.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosIntegracaoWebip.InformaMensagem objMensagem
+        
+        bRetorno = objDadosIntegracaoWebip.ObtemOTSIntegracao(Servico_ID, sOTSAux)
+        
+        If sOTSAux <> "" Then
+    
+            objForm.CboPadraoInterfaceEBT.Enabled = False
+            objForm.TxtEstacaoConfiguracao.Enabled = False
+            
+            
+            '=================================================================
+            '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+            '''---se campo nao veio preenchido do CLA habilitar preenchimento
+            If objForm.CboPadraoInterfaceEBT.Text = "" Then
+                objForm.CboPadraoInterfaceEBT.Enabled = True
+                objForm.TxtEstacaoConfiguracao.Enabled = True
+            End If
+    
+        ElseIf sOTSAux = "" And objForm.CmdSalvar.Enabled = True Then
+    
+'            If (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "2" Or FlagStatusAcessoCLA = "6") Then
+                
+            '=================================================================
+            'CALLBAT - 21/05/2012 - BSoD Net Light
+            '=================================================================
+            
+            If Grupo_ID = GbIDGrupoBLD Then
+                If objDadosAcessoSOE.BSoDNetLight <> "S" Then
+                    objForm.CboPadraoInterfaceEBT.Enabled = True
+                    objForm.TxtEstacaoConfiguracao.Enabled = True
+                End If
+            Else
+                objForm.CboPadraoInterfaceEBT.Enabled = True
+                objForm.TxtEstacaoConfiguracao.Enabled = True
+            End If
+            '=================================================================
+            '=================================================================
+'            End If
+
+
+        End If
+        
+    End If
+    
+    '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    '''---Preenchimento fixo para circuitos WIreless (campos NAO obrigatorios preenchimento no retorno do CLA e que podem vir em branco)
+    If objForm.UsrBLFCabecalho_Acesso.WIRELESS = "S" And objForm.CmdSalvar.Enabled = True And FlagStatusAcessoCLA = "2" Then
+        ''Definido pelo usuario fixar campos para o Wireless, (no CLA  o preenchimento 'e opcional).
+        ''Dados serao preenchidos apos enviosolicitacaoCLA realizado e apos retorno do CLA.
+        
+        ''se nao informado fixo informacao Estação de Configuração: 'RJO'
+        objForm.TxtEstacaoConfiguracao.Text = "RJO"
+        objForm.TxtEstacaoConfiguracao.Enabled = False
+        
+                
+        ''se nao informado fixo informacao Estação do Cliente: RJO
+        objForm.TxtEstacaoCliente.Text = "RJO"
+        objForm.TxtEstacaoCliente.Enabled = False
+            
+        ''Marca sempre como TroncoTX = NAO
+        objForm.UsrGenDadosAcessoTroncoTX.LimpaCampos
+        objForm.UsrGenDadosAcessoTroncoTX.MarcaOpcaoTXNao (True)
+        ''objForm.UsrGenDadosAcessoTroncoTX.ItemOTSTX
+        
+        ''Interface EBT:  LTE objForm.CboPadraoInterfaceEBT.Text = "LTE"
+        Call SelecionaCombo(objForm.CboPadraoInterfaceEBT, 450)
+        objForm.CboPadraoInterfaceEBT.Enabled = False
+        
+        ''Interface Cliente:GIGA -ETH
+        objForm.lblPadraoInterface.Caption = "GIGA-ETH"
+        
+        ''Responsabilidade da Infra: Embratel
+        objForm.OptResponsavelInfra(0).Value = True ''Embratel
+        objForm.OptResponsavelInfra(1).Value = False  ''Cliente
+        objForm.OptResponsavelInfra(0).Enabled = False ''Embratel
+        objForm.OptResponsavelInfra(1).Enabled = False  ''Cliente
+        
+    End If
+
+
+'    If ((Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") And Status_Fase <> "Finalizado" And bFlagLegadoEmAndamento) And objForm.CmdSalvar.Enabled = True Then
+'
+'           objForm.optPropriedadeAcesso(0).Enabled = True
+'           objForm.optPropriedadeAcesso(1).Enabled = True
+'           objForm.CboTipoAcessoEmbratel.Enabled = True
+'           objForm.CboTipoAcessoTerceiro.Enabled = True
+'
+'    End If
+
+    If TipoOperacao = "I" And Acao_ID = 7 And (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "7") Then
+        
+        objForm.optCaracAcessoEmbratel(0).Value = True
+        objForm.optCaracAcessoTerceiro(0).Value = True
+        objForm.optCaracAcessoEqpto(0).Value = True
+        objForm.optCaracAcessoGen(0).Value = True
+        objForm.FlControlaAlteracao = False
+        
+        
+        objPendencia = objPendenciaDNI
+        
+        'Caso o usuário não possua permissão de atualização
+        'Problema identificado por Faquino em 18/12/2003
+        If UBound(paPermissoes) = 0 Then
+        
+            Call DesabilitaCamposTela
+        
+        'Caso o usuário não possua permissão de atualização
+        ElseIf paPermissoes(4, 1) = 0 Or Not flUsuarioDoCF Then
+           
+           Call DesabilitaCamposTela
+        
+        End If
+        
+        objForm.Show
+        
+        GoTo Finalizar
+        
+    End If
+        'Popula os campos da tela
+        'If (FlagStatusAcessoCLA <> "2" And Acao_ID <> 7 And objForm.SpdListaAcessos.DataRowCnt = 0) Or bFlagLegadoEmAndamento Then
+    
+    If (FlagStatusAcessoCLA <> "2" And objForm.SpdListaAcessos.DataRowCnt = 0) Or bFlagLegadoEmAndamento Then
+        ''''=================================================================
+        '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+        '''===Nao se aplica para o Wireless pois os dados do acesso anterior (se houver) nao sao usados
+        '''04/2022 - FABIMENDONCA - ajustar verificacao para variavel para nao dar erro no caso de circuitos Não BLD
+        '''If objDadosAcessoSOE.WIRELESS <> "S" Then
+        If sIndWireless <> "S" Then
+        
+            bRetorno = RecuperaDadosAcesso("P", IdOTS, IDFase, FlagInclusao)
+            
+            Call PopulaCamposTela(objDadosAcesso)
+        End If
+        
+    End If
+    
+    'Caso seja uma OTS de desativacao ou cancelamento, desabilita os campos da tela
+    If (Sigla_Acao = "DES" Or Sigla_Acao = "CAN") And Status_Fase <> "Finalizado" Then
+
+       Call DesabilitaCamposTela
+       
+       If (FlagStatusAcessoCLA = "6" Or FlagStatusAcessoCLA = "8" Or FlagStatusAcessoCLA = "") Then
+          
+          objForm.CmdEnviarSolicCLA.Enabled = True
+          
+       End If
+       
+       objForm.CmdSalvar.Enabled = True
+       objForm.CmdLimpar.Enabled = False
+       
+
+    End If
+    
+    '================================================================
+    'Callbat - 07/04/2015
+    'Chamado CH-74999UGL
+    '================================================================
+    'If FlagStatusAcessoCLA = "0" Or _
+        FlagStatusAcessoCLA = "2" Or _
+        FlagStatusAcessoCLA = "7" Or _
+        FlagStatusAcessoCLA = "1" Or _
+        FlagStatusAcessoCLA = "5" Or _
+        FlagStatusAcessoCLA = "9" Then
+        
+    If (FlagStatusAcessoCLA = "0" Or _
+        FlagStatusAcessoCLA = "2" Or _
+        FlagStatusAcessoCLA = "7" Or _
+        FlagStatusAcessoCLA = "1" Or _
+        FlagStatusAcessoCLA = "5" Or _
+        FlagStatusAcessoCLA = "9") And bFlagEnviaCancelamentoCLA = False Then
+    '================================================================
+    '================================================================
+    
+       objForm.CmdEnviarSolicCLA.Enabled = False
+    
+    End If
+           
+'     If DataFinalizacao <> "" And FlagStatusAcessoCLA = "A" Then
+    
+    '================================================================
+    'Callbat - 07/04/2015
+    'Chamado CH-74999UGL
+    '================================================================
+    'If DataFinalizacao <> "" Or (objdadosServico.FlagMotivoCorrecao = "A" And objDadosLogSGAP.StatusAcesso <> "6" And objDadosLogSGAP.StatusAcesso <> "8") Then
+    If DataFinalizacao <> "" Or (objdadosServico.FlagMotivoCorrecao = "A" And objDadosLogSGAP.StatusAcesso <> "6" And objDadosLogSGAP.StatusAcesso <> "8" And bFlagEnviaCancelamentoCLA = False) Then
+    '================================================================
+    '================================================================
+    
+       objForm.CmdEnviarSolicCLA.Enabled = False
+        
+    End If
+    
+    objForm.InformaClasseOC Me
+    
+    'Caso exista pendencia para a fase obtem os dados de pendencia e carrega a
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+
+    If (FlagStatusAcessoCLA = "" Or FlagStatusAcessoCLA = "6") And Acao_ID <> 8 And Acao_ID <> 9 Then
+        
+        If objdadosServico.FlagMotivoCorrecao <> "A" Then
+             
+            If FlagStatusAcessoCLA = "6" And objForm.CboTipoAcessoTerceiro.ListIndex = 4 Then
+            
+                objForm.optPropriedadeAcesso(0).Enabled = False
+                objForm.optPropriedadeAcesso(1).Enabled = False
+                
+                objForm.CboTipoAcessoEmbratel.Enabled = False
+                objForm.CboTipoAcessoTerceiro.Enabled = False
+            Else
+                objForm.optPropriedadeAcesso(0).Enabled = True
+                objForm.optPropriedadeAcesso(1).Enabled = True
+                
+                '=================================================================
+                'CALLBAT - 21/05/2012 - BSoD Net Light
+                '=================================================================
+                If GbIDGrupoBLD = objDadosProduto.ID_Grupo Then
+                    If objDadosAcessoSOE.BSoDNetLight <> "S" Then
+                        objForm.CboTipoAcessoEmbratel.Enabled = True
+                        objForm.CboTipoAcessoTerceiro.Enabled = True
+                    End If
+                End If
+                '=================================================================
+                '=================================================================
+                
+            End If
+        
+        End If
+    
+    End If
+        '========================================
+        '========================================
+
+    'propriedade do formulário com o objeto Pendencia
+    
+    If objForm.cmdPendencia.Enabled = True And Familia_Produto = "I" Then
+           
+        If Not objDadosPendencia.RecuperarDados(Fase_ID) Then
+    
+           If objMensagem.TipoMsg <> "" Then
+              
+              objMensagem.ExibeMensagem
+        
+              GoTo Finalizar
+    
+           End If
+           
+           'Caso não exista pendencia, cria uma colecao  vazia no objeto pendencia
+           Set cColecao = New Collection
+           
+           objDadosPendencia.ColecaoPendencia = cColecao
+    
+        End If
+    
+    End If
+
+    If Familia_Produto = "D" Then
+    
+       If Not objPendenciaDNI.RecuperarDados(Fase_ID) Then
+            
+          If objMensagem.TipoMsg <> "" Then
+             
+             objMensagem.ExibeMensagem
+             
+             GoTo Finalizar
+             
+          End If
+       
+       End If
+    
+        If objPendenciaDNI.iD <> 0 Then
+           
+           objForm.CmdTrataPendencia.Caption = "&Retirar Pendência"
+        
+        End If
+        
+        objForm.CmdTrataPendencia.Visible = True
+        
+        objPendencia = objPendenciaDNI
+        
+    End If
+    
+    'If DataFinalizacao = "" Then
+        
+'        If Not objDadosAcesso.objPropriedadeEBT Is Nothing Then
+'
+'            If (objDadosAcesso.objPropriedadeEBT.NumeroOTSTX = "" Or objDadosAcesso.objPropriedadeEBT.ItemOTSTX = "" Or _
+'               objDadosAcesso.TroncoOTSTx = "") And objForm.CmdSalvar.Enabled = False Then
+'
+'               objForm.TxtNumeroOtsTx_EBT.Enabled = True
+'               objForm.TxtItemOtsTxEBT.Enabled = True
+'               objForm.TxtTroncoOTS.Enabled = True
+'               objForm.CmdSalvar.Enabled = True
+'
+'             End If
+'        Else
+'            If Not objDadosAcesso.objPropriedadeTerceiros Is Nothing Then
+'
+'                If (objDadosAcesso.objPropriedadeTerceiros.NumeroOTSTX = "" Or objDadosAcesso.objPropriedadeTerceiros.ItemOTSTX = "" Or _
+'                   objDadosAcesso.TroncoOTSTx = "") And objForm.CmdSalvar.Enabled = False Then
+'
+'                   objForm.cmdPendencia.Enabled = False
+'                   objForm.TxtNumeroOTSTXTerc.Enabled = True
+'                   objForm.TxtItemOTSTxTerc.Enabled = True
+'                   objForm.TxtTroncoOTS.Enabled = True
+'
+'                   objForm.CmdSalvar.Enabled = True
+'
+'                 End If
+'
+'            End If
+'
+'        End If
+'
+    'End If
+    
+    If objdadosServico.DataRealizacao <> "" Then
+       
+       'Circuito já ativado
+       Call DesabilitaCamposTela
+    
+    'Caso a fase esteja finalizada e o campo numero ots tx estiver vazio, permite alteracao desses campos
+    ElseIf DataFinalizacao <> "" Then
+        
+        Call DesabilitaCamposTela
+           
+        'objForm.TxtEstacaoConfiguracao.Enabled = True
+        'objForm.TxtEstacaoEntregaEbtConf.Enabled = True
+        'objForm.TxtEstacaoEntregaTercConf.Enabled = True
+                
+        '=================================================================
+        'CALLBAT - 26/06/2013 - Interface junto ao CFM
+        'SO-ENGNQ-83669III
+        '=================================================================
+        objForm.UsrGenDadosAcessoTroncoTX.StatusOTS = objdadosServico.StatusServico
+        objForm.UsrGenDadosAcessoTroncoTX.AcaoOTS = objdadosServico.Id_Acao
+        
+        
+        Call RecuperaDadosTroncoTX(Circuito_ID, objMensagem)
+        
+        'Habilita o botão de salvar quando estiver nas seguintes situações:
+        '   Existe no CFM e não está marcado no SGA Plus
+        '   Não existe no CFM e está marcado no SGA Plus
+        '   Existe no CFM e está marcado no SGA Plus, mas os valores do Tronco tx são diferentes
+        If objDadosAcesso.PropridedadeAcesso = "T" Then
+        
+            If (objMensagem.TipoMsg = "00" And UtilizaTroncoTX <> "S") Or _
+               (objMensagem.TipoMsg = "02" And UtilizaTroncoTX = "S") Or _
+               (objMensagem.TipoMsg = "00" And UtilizaTroncoTX = "S" And _
+               (Trim(TroncoTX) <> Trim(objDadosAcesso.TroncoOTSTx) Or _
+               (Trim(OTSTX) <> Trim(objDadosAcesso.objPropriedadeTerceiros.NumeroOTSTX) Or _
+               (CLng(0 & ItemOTSTX) <> CLng(Trim(objDadosAcesso.objPropriedadeTerceiros.ItemOTSTX)))))) Then
+
+
+               objForm.CmdSalvar.Enabled = True
+               objForm.CmdAnotacao.Enabled = True
+               
+               Call objForm.UsrGenDadosAcessoTroncoTX.HabilitaOpcaoTX(True)
+            
+            End If
+            
+        ElseIf objDadosAcesso.PropridedadeAcesso = "E" Then
+        
+            If (objMensagem.TipoMsg = "00" And UtilizaTroncoTX <> "S") Or _
+               (objMensagem.TipoMsg = "02" And UtilizaTroncoTX = "S") Or _
+               (objMensagem.TipoMsg = "00" And UtilizaTroncoTX = "S" And _
+               (Trim(TroncoTX) <> Trim(objDadosAcesso.TroncoOTSTx) Or _
+               (Trim(OTSTX) <> Trim(objDadosAcesso.objPropriedadeEBT.NumeroOTSTX) Or _
+               (CLng(0 & ItemOTSTX) <> CLng(0 & Trim(objDadosAcesso.objPropriedadeEBT.ItemOTSTX)))))) Then
+
+                '=================================================================
+                '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+                '''----Circuito wireless nao terá TroncoTX, logo a regra so sera mantida para os demais tipos
+                If objDadosAcesso.objPropriedadeEBT.TipoAcesso <> "W" Then
+                    objForm.CmdSalvar.Enabled = True
+                    objForm.CmdAnotacao.Enabled = True
+                    
+                    Call objForm.UsrGenDadosAcessoTroncoTX.HabilitaOpcaoTX(True)
+                End If
+            End If
+        
+        End If
+        
+        objMensagem.TipoMsg = ""
+        objMensagem.Descricao = ""
+        '=================================================================
+        '=================================================================
+                
+                
+                
+                
+'        If objForm.optPropriedadeAcesso(0).Value = True Then
+'            If (Trim(objForm.TxtNumeroOtsTx_EBT) = "" Or Trim(objForm.TxtItemOtsTxEBT.Text) = "" Or _
+'               Trim(objForm.txtTroncoOTS.Text) = "") And (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+'
+'               objForm.txtTroncoOTS.Enabled = True
+'               objForm.TxtNumeroOtsTx_EBT.Enabled = True
+'               objForm.TxtItemOtsTxEBT.Enabled = True
+'               objForm.CmdSalvar.Enabled = True
+'               objForm.CmdAnotacao.Enabled = True
+'
+'            End If
+'
+'        Else
+'            If (Trim(objForm.TxtNumeroOTSTXTerc.Text) = "" Or Trim(objForm.TxtItemOTSTxTerc.Text) = "" Or _
+'            Trim(objForm.txtTroncoOTS.Text) = "") And (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+'
+'                objForm.TxtNumeroOTSTXTerc.Enabled = True
+'                objForm.TxtItemOTSTxTerc.Enabled = True
+'                objForm.txtTroncoOTS.Enabled = True
+'                objForm.CmdSalvar.Enabled = True
+'                objForm.CmdAnotacao.Enabled = True
+'
+'            End If
+'
+'        End If
+        
+        
+    End If
+    
+'    If objForm.optPropriedadeAcesso(0).Value = True Then
+'
+'        If (Sigla_Acao = "ALT" Or Sigla_Acao = "ATG" Or Sigla_Acao = "ALG") _
+'            And objDadosServico.Origem = "SGA" Then
+'
+''            objForm.SpdDataAtivacaoAcessoEBT.Enabled = False
+'
+'        End If
+'
+'    ElseIf objForm.optPropriedadeAcesso(1).Value = True Then
+'
+'        If (Sigla_Acao = "ALT" Or Sigla_Acao = "ATG" Or Sigla_Acao = "ALG") _
+'           And objDadosServico.Origem = "SGA" Then
+'
+''            objForm.SpdDataAtivacaoAcessoTerc.Enabled = False
+''            objForm.SpdDataEntregaUrbano.Enabled = False
+''            objForm.SpdDataEntregaInterUrbano.Enabled = False
+'
+'        End If
+'
+'    End If
+'
+    
+    If objForm.optPropriedadeAcesso(0).Value = False And objForm.optPropriedadeAcesso(1).Value = False Then
+        
+        objForm.ssTabAcesso.TabEnabled(2) = False
+        objForm.ssTabAcesso.TabEnabled(3) = False
+    
+    End If
+    
+    If bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+    
+        objForm.ssTabAcesso.TabVisible(0) = False
+        
+    End If
+    
+    If FlagStatusAcessoCLA = "2" And Not bFlagLegadoEmAndamento And objForm.CmdSalvar.Enabled = True Then
+        
+        sVar = ""
+        Call objForm.SpdListaAcessos.GetText(2, objForm.SpdListaAcessos.ActiveRow, sVar)
+        
+        If sVar = "" Then
+            
+            bFlagIndicaLegado = True
+            
+        End If
+        
+        If Sigla_Acao <> "DES" And Sigla_Acao <> "CAN" And DataFinalizacao = "" And objForm.CmdSalvar.Enabled = True Then
+        
+            If Trim(objForm.TxtEstacaoCliente.Text) = "" Then
+                
+                objForm.TxtEstacaoCliente.Enabled = True
+                
+            End If
+            
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+
+            If objForm.CboPlataformas.ListIndex >= 0 Then
+                
+                If objForm.CboPlataformas.List(objForm.CboPlataformas.ListIndex) <> "" Then
+                    
+                    objForm.TxtDescricaoRedeDeterministica.Enabled = True
+                    'objForm.txtTSI.Enabled = True
+                    'objForm.txtTSF.Enabled = True
+                    
+                End If
+            End If
+        '========================================
+        '========================================
+        End If
+        
+    End If
+    
+    If objForm.CboTipoAcessoEmbratel.ListIndex = -1 Then
+        objForm.CboTipoAcessoEmbratel.Visible = False
+    End If
+    
+    If objForm.CboTipoAcessoTerceiro.ListIndex = -1 Then
+        objForm.CboTipoAcessoTerceiro.Visible = False
+    End If
+    
+    objForm.FlControlaAlteracao = False
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    objForm.UsrGenDadosAcessoTroncoTX.StatusOTS = objdadosServico.StatusServico
+    objForm.UsrGenDadosAcessoTroncoTX.AcaoOTS = objdadosServico.Id_Acao
+        
+    Call objForm.UsrGenDadosAcessoTroncoTX.CarregaCampos
+    If objdadosServico.StatusServico = "FF" Then
+        objForm.UsrGenDadosAcessoTroncoTX.HabilitaBotaoValidacao (False)
+    End If
+    
+    '=================================================================
+    '=================================================================
+    
+    '=================================================================
+    '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    '=================================================================
+    ''Nao considerar dados de troncoTX quando Rede Wireless
+    '''04/2022-FabiMendonca
+    '''If objDadosAcessoSOE.WIRELESS = "S" Then
+     If sIndWireless = "S" Then
+         ''Marca sempre como TroncoTX = NAO e limpa os campos
+        objForm.UsrGenDadosAcessoTroncoTX.MarcaOpcaoTXNao (True)
+        ''objForm.UsrGenDadosAcessoTroncoTX.ItemOTSTX
+     End If
+    
+    'Executa método para popular os campos do Controle Cabecalho
+    CarregarForm = True
+   
+Finalizar:
+    
+    bFlagControlaAlteracao = False
+    
+    FlagRecuperando = False
+    
+    Set objAutenticacao = Nothing
+    Set objDadosFase = Nothing
+    Set objPendenciaDNI = Nothing
+    Set objDadosProduto = Nothing
+    Set objdadosCircuito = Nothing
+
+    '=================================================================
+    'CALLBAT - 21/05/2012 - BSoD Net Light
+    '=================================================================
+    Set objDadosAcessoSOE = Nothing
+    '=================================================================
+    '=================================================================
+    
+    Exit Function
+    
+ErrorHandler:
+
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                           vbCrLf & " Houve um erro de execução no método: " & vbCrLf & vbCrLf & "CarregarForm do Objeto Controle " & _
+                          "clsGenOC_TratarAcessoEmbratel"
+       
+    objMensagem.ExibeMensagem
+       
+    GoTo Finalizar
+       
+End Function
+
+Private Sub CarregaListaAcessos(plFaseId As Long)
+    
+     Dim objAcessoCLA           As clsGenAcessoCLA
+     Dim objListaAcessosCLA     As clsGenListaAcessoCLA
+     Dim iAux                   As Integer
+     Dim sVar                   As Variant
+     Set objAcessoCLA = New clsGenAcessoCLA
+     
+     Set cColecaoAcessos = New Collection
+     
+     objAcessoCLA.InformaBanco frmgenMDI_SGAPlus.objBanco
+     objAcessoCLA.InformaMensagem objMensagem
+     
+     bRetorno = objAcessoCLA.RecuperarAcessos(plFaseId, objMensagem)
+     
+     If bRetorno Then
+     
+        iAux = 1
+        
+        objForm.SpdListaAcessos.MaxRows = 1
+        objForm.SpdListaAcessos.Col = 1
+        objForm.SpdListaAcessos.Col2 = 5
+        objForm.SpdListaAcessos.UserColAction = UserColActionDefault
+
+        For Each objListaAcessosCLA In objAcessoCLA.CollectAcessos
+            
+            If Trim(objForm.LblIdSolicitcaoCLA(3).Caption) = "" Then
+               
+               objForm.LblIdSolicitcaoCLA(3).Caption = objListaAcessosCLA.IDLogico
+            
+            End If
+            
+            With objForm.SpdListaAcessos
+                
+                .MaxRows = iAux
+                .Row = iAux
+                
+                .Col = 1
+                .Text = objListaAcessosCLA.IDLogico
+            
+                .Col = 2
+                .Text = objListaAcessosCLA.IdFisico
+                
+                .Col = 3
+                .Text = objListaAcessosCLA.Propriedade
+                
+                .Col = 4
+                .Text = objListaAcessosCLA.TipoAcesso
+                
+                .Col = 6
+                .Text = objListaAcessosCLA.iD
+                
+                'Call ArmazenaDadosPorAcesso(CLng(objListaAcessosCLA.iD), .Row)
+'                Call CarregaDadosAcessoCLA(CLng(objListaAcessosCLA.iD))
+                
+                'Carrega a coleção de acessos
+                bRetorno = RecuperaDadosAcessoPorID(CLng(objListaAcessosCLA.iD), True)
+                
+                If VerPreenchimentoInstancia(objDadosAcesso) = "O" Then 'O - Dados preenchidos OK
+     
+                   objForm.SpdListaAcessos.Row = iAux
+                   objForm.SpdListaAcessos.Col = 5
+                   objForm.SpdListaAcessos.Text = 1
+                   objForm.SpdListaAcessos.Lock = True
+                   objForm.SpdListaAcessos.CellType = CellTypeCheckBox
+                   objForm.SpdListaAcessos.TypeCheckCenter = True
+                   objForm.SpdListaAcessos.Protect = True
+                Else
+                   objForm.SpdListaAcessos.Row = iAux 'IIf(IsEmpty(plActiveRow), 1, plActiveRow)
+                   objForm.SpdListaAcessos.Col = 5
+                   objForm.SpdListaAcessos.CellType = CellTypeCheckBox
+                   objForm.SpdListaAcessos.TypeCheckCenter = True
+                   objForm.SpdListaAcessos.Protect = True
+                   objForm.SpdListaAcessos.Text = False
+                   
+                End If
+            
+            End With
+            
+            iAux = iAux + 1
+
+        Next
+        
+        objForm.SpdListaAcessos.Row = 1
+        objForm.SpdListaAcessos.Col = 6
+        
+        sVar = objForm.SpdListaAcessos.Text
+        
+        If sVar = "" Then Exit Sub
+        
+        If CLng("0" & sVar) <> 0 Then
+               
+            CarregaDadosAcessoCLA (CLng(sVar))
+        
+        End If
+    
+    End If
+    
+End Sub
+
+'--- Acesso Misto
+Public Function CarregaDadosAcessoCLA(plId As Long) As Boolean
+
+    Dim lPosColecao As Byte
+    Dim bRetorno As Boolean
+    
+    'verifica se o acesso já existe na coleção de acessos, caso não exista, executa procedure abaixo, caso exista, executa populacampostela
+    lPosColecao = ObtemPosicaoColecaoAcesso(plId)
+    bRetorno = False
+    
+    If lPosColecao = 0 Then
+       
+       bRetorno = RecuperaDadosAcessoPorID(plId, True)
+    
+    Else
+        Set objDadosAcesso = cColecaoAcessos.Item(lPosColecao)
+    
+    End If
+    
+    Call LimpaCamposTela
+    
+    If objDadosAcesso Is Nothing Then Exit Function
+    
+    If objDadosAcesso.PropridedadeAcesso <> "" Then
+        
+        If objDadosAcesso.PropridedadeAcesso = "E" Then
+           
+                  '========================================
+                  'VAGNER - 21/09/2012
+                  'Projeto Causa Raiz
+          '========================================
+           'If objDadosAcesso.objPropriedadeEBT.TipoAcesso = "F" Or objDadosAcesso.objPropriedadeEBT.TipoAcesso = "C" Then
+                   'If objDadosAcesso.objPropriedadeEBT.TipoAcesso = "F" Or objDadosAcesso.objPropriedadeEBT.TipoAcesso = "C" And objForm.CmdSalvar.Enabled = True Then
+          '========================================
+          '--=================================================================
+          '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+          '--=================================================================
+          ' If objDadosAcesso.objPropriedadeEBT.TipoAcesso = "F" Or objDadosAcesso.objPropriedadeEBT.TipoAcesso = "C" Or & objDadosAcesso.objPropriedadeEBT.TipoAcesso = "M" And objForm.CmdSalvar.Enabled = True Then
+          '=================================================================
+          '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+          '' Inclui verificacao do tipo de acesso W (Wireless)
+          '=================================================================
+          If objDadosAcesso.objPropriedadeEBT.TipoAcesso = "F" Or _
+             objDadosAcesso.objPropriedadeEBT.TipoAcesso = "C" Or _
+             objDadosAcesso.objPropriedadeEBT.TipoAcesso = "M" Or _
+             objDadosAcesso.objPropriedadeEBT.TipoAcesso = "W" And _
+             objForm.CmdSalvar.Enabled = True Then
+            
+          '--=================================================================
+              objForm.TxtDesignacaoAcessoEBT.Enabled = True
+           
+           End If
+        
+        End If
+        
+        If objDadosAcesso.PropridedadeAcesso = "E" Then
+           
+           If objDadosAcesso.objPropriedadeEBT.TipoAcesso = "C" And Sigla_Acao <> "DES" And Sigla_Acao <> "CAN" And objForm.CmdSalvar.Enabled = True Then
+              
+              objForm.SpdDataAtivacaoAcessoEBT.Enabled = True
+           
+           End If
+        
+           If objDadosAcesso.objPropriedadeEBT.TipoAcesso <> "A" And Sigla_Acao <> "DES" And Sigla_Acao <> "CAN" And objForm.CmdSalvar.Enabled = True Then
+              
+              objForm.optProprietarioModem(0).Enabled = True
+              objForm.optProprietarioModem(1).Enabled = True
+           
+           End If
+           
+'           If bFlagIndicaLegado Then
+'
+'               If Sigla_Acao <> "DES" And Sigla_Acao <> "CAN" Then
+'
+'                   objForm.optTipoRede(0).Enabled = True
+'                   objForm.optTipoRede(1).Enabled = True
+'                   objForm.optTipoRede(2).Enabled = True
+'
+'               End If
+'
+'           End If
+            
+'        ElseIf objDadosAcesso.PropridedadeAcesso = "T" And objDadosAcesso.objPropriedadeTerceiros.TipoAcesso <> "R" Then
+'
+'           If bFlagIndicaLegado Then
+'
+'               If Sigla_Acao <> "DES" And Sigla_Acao <> "CAN" Then
+'
+'                   objForm.optTipoRede(0).Enabled = True
+'                   objForm.optTipoRede(1).Enabled = True
+'                   objForm.optTipoRede(2).Enabled = True
+'
+'                End If
+'
+'            End If
+            
+        End If
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+        If Sigla_Acao <> "DES" And Sigla_Acao <> "CAN" And objForm.CmdSalvar.Enabled = True Then
+        
+            If objForm.CboPlataformas.ListIndex <> -1 Then
+            
+                objForm.TxtDescricaoRedeDeterministica.Enabled = True
+                'objForm.txtTSI.Enabled = True
+                'objForm.txtTSF.Enabled = True
+                
+            End If
+            
+        End If
+        '========================================
+        '========================================
+
+    End If
+'-------
+ 
+    If objDadosAcesso.PropridedadeAcesso = "T" Then
+        
+        objForm.optPropriedadeAcesso(1).Value = True
+        
+        If objForm.LblEstacConfigCLA.Caption <> "" Then
+           
+           objForm.TxtEstacaoEntregaTercConf.Text = objForm.LblEstacConfigCLA.Caption
+           objForm.TxtEstacaoConfiguracao.Text = objForm.LblEstacConfigCLA.Caption
+        
+        End If
+    
+    Else
+        
+        objForm.optPropriedadeAcesso(0).Value = True
+        
+        If objForm.LblEstacConfigCLA.Caption <> "" Then
+           
+           objForm.TxtEstacaoEntregaEbtConf.Text = objForm.LblEstacConfigCLA.Caption
+        
+        End If
+        
+    End If
+        
+
+    'Popula os campos da tela
+    Call PopulaCamposTela(objDadosAcesso)
+    
+
+End Function
+
+Public Function ObtemPosicaoColecaoAcesso(plId As Long) As Byte
+
+    Dim iAux       As Long
+    Dim oobjAcesso As clsGenAcesso
+    Dim FlagExiste As Boolean
+    
+    'Dim obj As clsGenAcesso
+    
+    'Set obj = cColecaoAcessos.Item(1)f
+        
+    FlagExiste = False
+    
+    If cColecaoAcessos Is Nothing Then
+    
+        ObtemPosicaoColecaoAcesso = 0
+        Exit Function
+        
+    End If
+    
+    iAux = 0
+    
+    For Each oobjAcesso In cColecaoAcessos
+     
+        iAux = iAux + 1
+        Set oobjAcesso = cColecaoAcessos.Item(iAux)
+
+        If oobjAcesso.iD = plId Then
+            
+            FlagExiste = True
+            Exit For
+        
+        End If
+     
+    Next
+    
+    If Not FlagExiste Then
+        iAux = 0
+    End If
+    
+    ObtemPosicaoColecaoAcesso = iAux
+
+End Function
+
+'Public Function ObtemInstanciaObjAcesso(plContingenciaID) As clsGenAcesso
+'
+'    Dim iAux       As Long
+'    Dim oobjAcesso As clsGenAcesso
+'
+'    Set ObtemInstanciaObjAcesso = Nothing
+'
+'    If cColecaoAcessos Is Nothing Then
+'
+'        Exit Function
+'
+'    End If
+'
+'    iAux = 0
+'
+'    For Each oobjAcesso In cColecaoAcessos
+'
+'        iAux = iAux + 1
+'
+'        If oobjAcesso.iD = plContingenciaAcessoID Then
+'
+'            Set ObtemPosicaoColecaoAcesso = oobjAcesso
+'            Exit For
+'
+'        End If
+'
+'    Next
+'
+'End Function
+
+Public Sub ArmazenaDadosPorAcesso(plContigenciaAcessoID As Long, plActiveRow As Long)
+
+     'Carrega as propriedades da classe de dados e executa o método de Inclusao ou alteracao
+     'Popula dados da Pasta Dados Gerais
+     Dim lPosColecao As Byte
+     Dim oobjAcesso As clsGenAcesso
+     
+     Dim objDadosPlataforma As clsBLDPlataforma
+     
+     Set oobjAcesso = New clsGenAcesso
+     
+     oobjAcesso.iD = plContigenciaAcessoID
+     
+     If objForm.optCaracAcessoEmbratel(0).Value = True Then
+        oobjAcesso.CaracteristicaAcesso = "P"
+     Else
+        oobjAcesso.CaracteristicaAcesso = "C"
+     End If
+     
+     If objForm.optSegurancaAcesso(0).Value = True Then
+        oobjAcesso.SegurancaAcesso = "S"
+     Else
+        oobjAcesso.SegurancaAcesso = "N"
+     End If
+     
+     oobjAcesso.eMailUsuario = TrataPlick(objForm.TxtEMailGic.Text)
+     oobjAcesso.RIT = objForm.TxtRIT.Text
+     oobjAcesso.estacaoCliente = objForm.TxtEstacaoCliente.Text
+     
+     oobjAcesso.IdSolicitacaoCLA = objForm.LblIdSolicitcaoCLA(0).Caption
+     oobjAcesso.DataEntregaCLA = objForm.LblIdSolicitcaoCLA(1).Caption
+     oobjAcesso.IdFisico = objForm.LblIdSolicitcaoCLA(2).Caption
+     oobjAcesso.IDLogico = objForm.LblIdSolicitcaoCLA(3).Caption
+     
+   '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+     'oobjAcesso.TroncoOTSTx = Trim(TrataPlick(objForm.txtTroncoOTS.Text))
+     oobjAcesso.TroncoOTSTx = Trim(TrataPlick(objForm.UsrGenDadosAcessoTroncoTX.TroncoTX))
+     oobjAcesso.UtilizaTroncoTX = objForm.UsrGenDadosAcessoTroncoTX.UsaTX
+    '=================================================================
+    '=================================================================
+     
+     oobjAcesso.EstacaoConfiguracao = Trim(TrataPlick(objForm.TxtEstacaoConfiguracao.Text))
+     
+     If objForm.CboPadraoInterfaceEBT.ListIndex > 0 Then
+        oobjAcesso.PadraoInterfaceEBT_ID = objForm.CboPadraoInterfaceEBT.ItemData( _
+                                               objForm.CboPadraoInterfaceEBT.ListIndex)
+     Else
+        oobjAcesso.PadraoInterfaceEBT_ID = 0
+     
+     End If
+     
+     If objForm.SpdDataPedidoAcesso.Text <> "" Then
+         oobjAcesso.DataPedidoAcesso = Format(objForm.SpdDataPedidoAcesso.Text, "dd/mm/yyyy")
+     Else
+         oobjAcesso.DataPedidoAcesso = ""
+     End If
+     
+       If Familia_Produto = "I" And Produto_ID <> GbIDProdutoVOIP Then
+         
+         oobjAcesso.Ds_Veloc_CLA = objForm.LblVelocidadeAcesso
+    
+     End If
+     
+     oobjAcesso.ProprietarioModem = ""
+     
+     
+     If objForm.optProprietarioModem(0).Value = True Then
+         oobjAcesso.ProprietarioModem = "E"
+     Else
+         
+         If objForm.optProprietarioModem(1).Value = True Then
+            oobjAcesso.ProprietarioModem = "C"
+         End If
+         
+     End If
+     
+     If objForm.OptResponsavelInfra(0).Value = True Then
+         oobjAcesso.ResponsavelInfra = "E"
+     Else
+         If objForm.OptResponsavelInfra(1).Value = True Then
+            oobjAcesso.ResponsavelInfra = "C"
+         End If
+     End If
+     
+'     If objForm.OptTipoRede(0).Value = True Then
+'         oobjAcesso.TipoRede = "E"      'Rede E1
+'     ElseIf objForm.OptTipoRede(1).Value = True Then
+'            oobjAcesso.TipoRede = "T"   'Tellabs
+'     ElseIf objForm.OptTipoRede(2).Value = True Then
+'            oobjAcesso.TipoRede = "D"   'DataCom
+'     End If
+     
+     Set objDadosPlataforma = New clsBLDPlataforma
+     
+     objDadosPlataforma.InformaBanco frmgenMDI_SGAPlus.objBanco
+     objDadosPlataforma.InformaMensagem objMensagem
+     
+     If objForm.CboPlataformas.ListIndex > 0 Then
+        
+        bRetorno = objDadosPlataforma.RecuperarDados(objForm.CboPlataformas.ItemData(objForm.CboPlataformas.ListIndex))
+        
+        If bRetorno Then
+        
+            oobjAcesso.TipoRede = objDadosPlataforma.DominioPlataforma
+            
+        End If
+     End If
+     
+     oobjAcesso.TSI = objForm.txtTSI.Text
+     oobjAcesso.TSF = objForm.txtTSF.Text
+     oobjAcesso.DescricaoRedeDeterministica = TrataPlick(objForm.TxtDescricaoRedeDeterministica.Text)
+     oobjAcesso.UsuarioAtualizacao_ID = frmgenMDI_SGAPlus.objAutenticacao.IDUsuario
+     
+     oobjAcesso.FlagExecutaCentrolocal = ""
+     
+     If objForm.FrameExecutarCentroLocal.Visible = True Then
+        oobjAcesso.FlagExecutaCentrolocal = IIf(objForm.optExecCentroLocal(0).Value = True, "S", "N")
+     End If
+     
+     If objForm.FrameClassificacaoEndereco.Visible = True Then
+        oobjAcesso.ClassificacaoEndereco = objForm.CboClassificacaoEndereco.ListIndex
+     End If
+     
+     
+     If objForm.optPropriedadeAcesso(0).Value = True Then
+        oobjAcesso.PropridedadeAcesso = "E"
+     Else
+        oobjAcesso.PropridedadeAcesso = "T"
+     End If
+     
+     If oobjAcesso.PropridedadeAcesso = "E" Then
+        Set objDadosPropriedadeEBT = New clsGenPropriedadeEmbratel
+        oobjAcesso.objPropriedadeEBT = objDadosPropriedadeEBT
+        Set objDadosPropriedadeEBT = Nothing
+        Call CarregaAtributosPropriedadesEBT(oobjAcesso)
+     Else
+        Set objDadosPropriedadeTerc = New clsGenPropriedadeTerceiros
+        oobjAcesso.objPropriedadeTerceiros = objDadosPropriedadeTerc
+        Set objDadosPropriedadeTerc = Nothing
+        Call CarregaAtributosPropriedadesTerceiros(oobjAcesso.objPropriedadeTerceiros)
+     End If
+     
+     'Carrega os atributos de Equipamentos Complementares
+     If Produto_ID <> GbIDProdutoVIP Then   'Se vipline IP
+         
+         Call CarregaAtributosEqtos(oobjAcesso)
+     
+     End If
+         
+     If VerPreenchimentoInstancia(oobjAcesso) = "O" Then
+     
+        objForm.SpdListaAcessos.Row = plActiveRow
+        objForm.SpdListaAcessos.Col = 5
+        objForm.SpdListaAcessos.Text = True
+     Else
+        objForm.SpdListaAcessos.Row = plActiveRow
+        objForm.SpdListaAcessos.Col = 5
+        objForm.SpdListaAcessos.Text = False
+        
+     End If
+         
+     'verifica se o acesso já existe na coleção de acessos, caso não exista, executa procedure abaixo, caso exista, executa populacampostela
+     lPosColecao = ObtemPosicaoColecaoAcesso(oobjAcesso.iD)
+    
+     If lPosColecao <> 0 Then
+         
+         'Set cColecaoAcessos(lPosColecao) = oobjAcesso
+         
+         cColecaoAcessos.Remove (lPosColecao)
+         cColecaoAcessos.Add oobjAcesso
+     End If
+
+End Sub
+
+Public Function GravarDados(FlagDescarregaForm As Boolean, Optional Flag_Atualiza_Pendencia As Boolean, Optional bFlagEnviaCLA As Boolean) As Boolean
+
+    Dim objDadosFase                As New clsgenFase
+    Dim ObjEqpto                    As clsGenEqptoComplementar
+    Dim objDadosPropriedadeTerc     As clsGenPropriedadeTerceiros
+    Dim objWEBIP                    As clsInterOC_TrataWebIP
+    Dim objDadosAtivacaoFinal       As clsblf_AtivacaoFinalizacao
+    Dim objDadosAnalisarOE          As clsDNI_DadosAnalisarOE
+    Dim objOc_TrataEqptoCompl       As clsInterOC_TratarEqptoCompl
+    
+    Dim sSituacaoOTS                As String
+    Dim bRetorno                    As Boolean
+    Dim FlagIniciouTransacao        As Boolean
+    Dim numUltimaFaseRealizada      As Long
+    Dim bTemAcessoRedundante        As Boolean
+    Dim lIdContingencia             As Long
+    Dim lID_Fase_Seguinte           As Long
+    Dim lSeqUltimaFaseOTS           As Long
+    Dim iQtEquipamento              As Integer
+    Dim lIDEquip                    As Long
+    Dim lIDNGN                      As Long
+    Dim iSequenciaAcaoAux           As Integer
+    Dim FlagTemPendenciaEmAberto    As Boolean
+    Dim FlagFaseFinalizadaOK        As Boolean
+    Dim FlagTemPendenciaCliente     As Boolean
+    Dim FlagManterPeriodo           As Boolean
+    Dim bFlagIniciaFaseConf         As Boolean
+    
+    Dim lIdFaseCentroLocal          As Long
+    
+    '=================================================================
+    'CALLBAT - 05/07/2012 - BSoD Light II
+    '=================================================================
+    Dim lIdFaseConfiguracao          As Long
+    '=================================================================
+    '=================================================================
+    
+    Dim lIDCentroFuncional          As Long
+    Dim iSeqAux                     As Integer
+    
+    Dim lIdFaseAlocacaoConfiguracao As Long
+    
+    Dim sCodigoCFCentroLocal        As String
+    Dim sDesignacaoSOE              As String
+    Dim bRetornoCriticaOk           As Boolean
+    Dim bFlagNaoExecutaCentroLocal  As Boolean
+    Dim objDadosDuracaoFase         As clsgenDuracaoFase
+    
+    Dim objDadosPlataforma As clsBLDPlataforma
+    Dim objDadosIntegracaoWebip As clsBlf_IntegracaoWebIP
+    Dim sOTSAux                     As String
+    Dim objDLog                     As clsBLD_LogSGAPCLA
+    Dim sResp                       As String
+    
+    '' ----========================================================================================================
+    '' --- FABIMENDONCA- 10/2019- CH-95954OTQ
+    Dim lIDFase_CentroLocal         As Long
+    Dim lIDFase_PreAtivacao         As Long
+    Dim objDadosTratarCentroLocal   As New clsblf_CentroLocal
+    Dim laux                        As Long
+    '' ----========================================================================================================
+   
+    
+    '===========================================
+    'CALBAT - 18/08/2008                       =
+    'Portabilidade                             =
+    'Criado para atender a portabilidade       =
+    '===========================================
+    Dim lCodigoFase                     As Long
+    
+    sReplicaInformações = False
+    
+    '===========================================
+    '===========================================
+    
+    On Error GoTo ErrorHandler
+    
+    ReDim vMensagemListaMsg(1)
+    
+    FlagIniciouTransacao = False
+    
+    GravarDados = False
+    
+    bRetornoCriticaOk = False
+    
+    
+    'CALBAT - 05/10/2007 =====================================
+    'Tratar Acesso Paralelismo.
+    '=========================================================
+    
+'    If objForm.SpdDataAtivacaoAcessoEBT.Text <> "" Then
+'        DataFinalizacao = objForm.SpdDataAtivacaoAcessoEBT.Text
+'    ElseIf objForm.SpdDataAtivacaoAcessoTerc.Text <> "" Then
+'        DataFinalizacao = objForm.SpdDataAtivacaoAcessoTerc.Text
+'    End If
+'     If (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") And _
+       (objForm.SpdDataAtivacaoAcessoEBT.Text <> "" Or objForm.SpdDataAtivacaoAcessoTerc.Text <> "") Then
+    
+  
+    If (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+    '=========================================================
+    '=========================================================
+       If (bFlagLegadoEmAndamento Or bFlagIndicaLegado) Then
+          
+          bRetornoCriticaOk = VerificaFinalizacaoOK(objDadosAcesso, True)
+       
+       ElseIf FlagStatusAcessoCLA = "2" Or Not bFlagEnviaCLA Then
+          
+          bRetornoCriticaOk = VerificaFinalizacaoOK(objDadosAcesso, False)
+       
+       End If
+       
+       If bRetornoCriticaOk = False Then
+            
+            FlagDescarregaForm = False
+       
+       End If
+       
+    Else
+        bRetornoCriticaOk = True
+    
+        If (bFlagLegadoEmAndamento) Or (bFlagIndicaLegado And Acao_ID = 9) And bFlagExibeMsgLegado Then
+            
+            objMensagem.TipoMsg = "A"
+            
+            If Acao_ID = 9 Then
+               
+               objMensagem.Descricao = "Cancelamento de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                       "Executar o Cancelamento do serviço/acesso no CLA."
+            
+            ElseIf Acao_ID = 10 Then
+    
+               objMensagem.Descricao = "Alteração de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                       "Executar a Alteração do serviço/acesso no CLA."
+    
+    
+            ElseIf Acao_ID = 14 Or Acao_ID = 15 Then
+    
+               objMensagem.Descricao = "Correção de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                       "Executar a Correção do serviço/acesso no CLA."
+    
+            ElseIf Acao_ID = 7 Then
+    
+               objMensagem.Descricao = "Ativação de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                       "Executar a Ativação do serviço/acesso no CLA."
+    
+            ElseIf Acao_ID = 8 And FlagStatusAcessoCLA <> "2" Then
+    
+               objMensagem.Descricao = "Desativação de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                       "Executar a Desativação do serviço/acesso no CLA."
+    
+            End If
+            
+            objMensagem.ExibeMensagem
+            
+        End If
+        
+    End If
+    '
+    bFlagNaoExecutaCentroLocal = False
+    
+    'JRCRUZ - 22/02/2007
+    'If Produto_ID = GbIDProdutoVIP Then
+    If Grupo_ID = GbIDGrupoVLI Then
+    
+        If bRetornoCriticaOk And objForm.optExecCentroLocal(1).Value = True Then
+            
+            objMensagem.TipoMsg = "Q"
+            objMensagem.Descricao = "A fase Tratar Centro Local não será executada! Confirma S/N? "
+            
+            If objMensagem.ExibeMensagem = "S" Then
+            
+               bFlagNaoExecutaCentroLocal = True
+               
+'            Else
+
+'               bRetornoCriticaOk = False
+               
+            End If
+        
+        End If
+        
+    End If
+    
+    bRetorno = objdadosServico.RecuperarDados(Servico_ID)
+    
+    If (objMensagem.TipoMsg <> "") Then
+       
+       GoTo ErrorHandler
+       
+    End If
+    
+    sSituacaoOTS = objdadosServico.StatusServico
+    
+    If (sSituacaoOTS = "CAN" Or sSituacaoOTS = "CR") Then
+       
+       objMensagem.TipoMsg = "A"
+       objMensagem.Descricao = "Esta OTS foi paralisada pelo SOE!"
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+    
+    End If
+
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+
+    If (Not objDadosFase.RecuperarSituacaoFase(Fase_ID)) And _
+       DataFinalizacao = "" Then
+
+       Set objDadosFase = Nothing
+       objMensagem.ExibeMensagem
+
+       GravarDados = True
+
+       GoTo Finalizar
+    
+    Else
+       
+       objMensagem.TipoMsg = ""
+    
+    End If
+
+    'Checa se o produto pode alocar vários CFs para a fase Tratar Centro Local
+    Set objDadosDuracaoFase = New clsgenDuracaoFase
+    objDadosDuracaoFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosDuracaoFase.InformaMensagem objMensagem
+
+    'Obtem o número da última fase realizada
+    numUltimaFaseRealizada = objDadosFase.ObtemSequenciaUltimaFaseRealizada(Servico_ID, _
+                                         GbCodigoFaseProgramarCPE, Familia_Produto)
+
+    If (objMensagem.TipoMsg <> "") Then
+       
+       objMensagem.ExibeMensagem
+       GoTo Finalizar
+    
+    End If
+    
+    'CALBAT - 21/09/2007
+    '====================================================
+    'If (numUltimaFaseRealizada > Sequencia_Acao) And _
+            (PermiteExecucao <> "S") Then
+    '====================================================
+    'CALBAT - 05/10/2007 =====================================
+    'Tratar Acesso Paralelismo.                                                          =
+    'Retirada para adenter ao Parelelismo                                          =
+    '=========================================================
+'    If (numUltimaFaseRealizada > Sequencia_Acao) And _
+'            (PermiteExecucao <> "S") And (lProduto_ID <> GbIDProdutoVBL) Then
+'
+'
+'       objMensagem.TipoMsg = "A"
+'       objMensagem.Descricao = "Os dados desta fase não poderão ser alterados! Pois, a fase seguinte já foi iniciada."
+'       objMensagem.ExibeMensagem
+'
+'       GravarDados = True
+'
+'       GoTo Finalizar
+'
+'    End If
+     '===================================================================
+    
+    If bFlagEnviaCancelamentoCLA Then
+            
+        Call EnviaCancelamentoLegadoCLA
+    
+    End If
+    
+    
+    If Familia_Produto = "D" And objdadosServico.DataRealizacao = "" Then
+            
+        bRetorno = VerificaUltimaVersaoContratoDNI(Servico_ID, objdadosServico.VersaoContrato, objMensagem)
+        
+        If Not bRetorno Then
+        
+            GoTo Finalizar
+            
+        End If
+        
+    End If
+
+    'Carrega as propriedades da classe de dados e executa o método de Inclusao ou alteracao
+    
+    'Popula dados da Pasta Dados Gerais
+    
+    If objForm.optCaracAcessoEmbratel(0).Value = True Then
+       
+       objDadosAcesso.CaracteristicaAcesso = "P"
+    
+    Else
+       
+       objDadosAcesso.CaracteristicaAcesso = "C"
+    
+    End If
+    
+    If objForm.optSegurancaAcesso(0).Value = True Then
+       
+       objDadosAcesso.SegurancaAcesso = "S"
+    
+    Else
+       
+       objDadosAcesso.SegurancaAcesso = "N"
+    
+    End If
+    
+    objDadosAcesso.eMailUsuario = TrataPlick(objForm.TxtEMailGic.Text)
+    objDadosAcesso.RIT = objForm.TxtRIT.Text
+    objDadosAcesso.IDLogico = objForm.UsrBLFCabecalho_Acesso.ID_Logico
+    objDadosAcesso.EstacaoConfiguracao = TrataPlick(objForm.TxtEstacaoConfiguracao.Text)
+    
+    If objForm.CboPadraoInterfaceEBT.ListIndex > 0 Then
+       
+       objDadosAcesso.PadraoInterfaceEBT_ID = objForm.CboPadraoInterfaceEBT.ItemData( _
+                                              objForm.CboPadraoInterfaceEBT.ListIndex)
+    Else
+       
+       objDadosAcesso.PadraoInterfaceEBT_ID = 0
+    
+    End If
+     
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objDadosAcesso.TroncoOTSTx = "" & TrataPlick(Trim(objForm.txtTroncoOTS.Text))
+    objDadosAcesso.TroncoOTSTx = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTroncoTX.TroncoTX))
+    
+    objDadosAcesso.UtilizaTroncoTX = objForm.UsrGenDadosAcessoTroncoTX.UsaTX
+    
+    '=================================================================
+    '=================================================================
+    
+    If objForm.SpdDataPedidoAcesso.Text <> "" Then
+        
+        objDadosAcesso.DataPedidoAcesso = Format(objForm.SpdDataPedidoAcesso.Text, "dd/mm/yyyy")
+    
+    Else
+    
+        objDadosAcesso.DataPedidoAcesso = ""
+    
+    End If
+    
+    'Esta regra não á válida para OTS do produto BLD
+    
+    'If Familia_Produto = "I" And _
+            (Produto_ID <> GbIDProdutoBLD And Produto_ID <> GbIDProdutoVBL And _
+                Produto_ID <> GbIDProdutoVOIP) Then
+                
+      'CALBAT - REDE VIP
+      If Familia_Produto = "I" And _
+            Produto_ID <> GbIDProdutoVOIP Then
+    
+'        If objForm.CboVelocidadeAcesso.ListIndex >= 0 Then
+           
+'           objDadosAcesso.Cd_Veloc = Format(objForm.CboVelocidadeAcesso.ItemData( _
+                                     objForm.CboVelocidadeAcesso.ListIndex), "00000")
+                                     
+'        Else
+           
+'           objDadosAcesso.Cd_Veloc = ""
+        
+'        End If
+        
+        objDadosAcesso.Ds_Veloc_CLA = objForm.LblVelocidadeAcesso
+        
+   
+    ElseIf Familia_Produto = "D" Then
+    
+'        If objForm.CboVelocidadeAcesso.ListIndex > 0 Then
+'
+'            objDadosAcesso.Cd_Veloc = vVelocidadeDNI(objForm.CboVelocidadeAcesso.ListIndex).CodigoAlpha
+    
+'        Else
+        
+'            objDadosAcesso.Cd_Veloc = ""
+        
+'        End If
+        
+    End If
+    
+    objDadosAcesso.ProprietarioModem = ""
+    
+    If objForm.optProprietarioModem(0).Value = True Then
+        
+        objDadosAcesso.ProprietarioModem = "E"
+    
+    Else
+    
+        If objForm.optProprietarioModem(1).Value = True Then
+          
+           objDadosAcesso.ProprietarioModem = "C"
+        
+        End If
+    
+    End If
+    
+    If objForm.OptResponsavelInfra(0).Value = True Then
+        
+        objDadosAcesso.ResponsavelInfra = "E"
+    
+    Else
+    
+        If objForm.OptResponsavelInfra(1).Value = True Then
+         
+           objDadosAcesso.ResponsavelInfra = "C"
+    
+        End If
+        
+    End If
+    
+    'If objForm.OptTipoRede(0).Value = True Then
+        
+    '    objDadosAcesso.TipoRede = "E"      'Rede E1
+    
+    'ElseIf objForm.OptTipoRede(1).Value = True Then
+         
+    '       objDadosAcesso.TipoRede = "T"   'Tellabs
+    
+    'CALBAT - 05/10/2007 =====================================
+    'Tratar Acesso Paralelismo.                                                          =
+    '=========================================================
+    'ElseIf objForm.OptTipoRede(2).Value = True Then
+         
+    '       objDadosAcesso.TipoRede = "D"   'DataCom
+    '=========================================================
+    '=========================================================
+        
+    'End If
+    
+    If objForm.CboPlataformas.ListIndex > 0 Then
+        
+        Set objDadosPlataforma = New clsBLDPlataforma
+         
+        objDadosPlataforma.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosPlataforma.InformaMensagem objMensagem
+         
+        bRetorno = objDadosPlataforma.RecuperarDados(objForm.CboPlataformas.ItemData(objForm.CboPlataformas.ListIndex))
+         
+        If bRetorno Then
+         
+            objDadosAcesso.TipoRede = objDadosPlataforma.DominioPlataforma
+             
+        End If
+    Else
+        objDadosAcesso.TipoRede = ""
+    End If
+    
+    'CALBAT - 05/10/2007 =====================================
+    'Tratar Acesso Paralelismo.                                                          =
+    '=========================================================
+    
+    objDadosAcesso.TSI = objForm.txtTSI.Text
+    objDadosAcesso.TSF = objForm.txtTSF.Text
+    objDadosAcesso.DescricaoRedeDeterministica = TrataPlick(objForm.TxtDescricaoRedeDeterministica.Text)
+    
+    '=========================================================
+    '=========================================================
+    
+    'Corrigido por Mozart Simões em 06/10/2003
+    'Acerto de lançamento de código de usuário nas alterações da
+    'Fase de Tratamento de Acesso.
+    'objDadosAcesso.UsuarioAtualizacao_ID = GbIDAcaoAlteracao
+    objDadosAcesso.UsuarioAtualizacao_ID = frmgenMDI_SGAPlus.objAutenticacao.IDUsuario
+    
+    objDadosAcesso.FlagExecutaCentrolocal = ""
+    
+    If objForm.FrameExecutarCentroLocal.Visible = True Then
+       
+       objDadosAcesso.FlagExecutaCentrolocal = _
+                                          IIf(objForm.optExecCentroLocal(0).Value = True, _
+                                                                                   "S", "N")
+    End If
+    
+    '-- JRCRUZ ------------------------------------------------------**
+    If objForm.FrameClassificacaoEndereco.Visible = True Then
+       objDadosAcesso.ClassificacaoEndereco = objForm.CboClassificacaoEndereco.ListIndex
+    End If
+    '-- JRCRUZ ------------------------------------------------------**
+    objDadosAcesso.PropridedadeAcesso = ""
+    If objForm.optPropriedadeAcesso(0).Value = True Then
+       
+       objDadosAcesso.PropridedadeAcesso = "E"
+       
+    ElseIf objForm.optPropriedadeAcesso(1).Value = True Then
+    
+       objDadosAcesso.PropridedadeAcesso = "T"
+    
+    End If
+    
+    If objDadosAcesso.PropridedadeAcesso = "E" Then
+       
+       Set objDadosPropriedadeEBT = New clsGenPropriedadeEmbratel
+       objDadosAcesso.objPropriedadeEBT = objDadosPropriedadeEBT
+       Set objDadosPropriedadeEBT = Nothing
+       
+       
+       Call CarregaAtributosPropriedadesEBT(objDadosAcesso)
+    
+    ElseIf objDadosAcesso.PropridedadeAcesso = "T" Then
+    
+        'AGRC - BSOD UNIFICADO - 21/07/014 - INCLUIR MIGRAÇÃO DE ACESSO NO BOOK
+        If (Sigla_Acao <> "ATV" And Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+         If (objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "N" Or objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "V") And objForm.CboTipoAcessoTerceiro.ListIndex = 8 Then
+           If objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "N" Then
+             If Trim(TextoAnotacao) <> "" Then
+                 TextoAnotacao = TextoAnotacao & " -" & " Troca de HFC BSOD NET para HFC BSOD em função da migração de acesso. "
+             Else
+                 TextoAnotacao = "Troca de HFC BSOD NET para HFC BSOD em função da migração de acesso. "
+             End If
+           Else
+              If Trim(TextoAnotacao) <> "" Then
+                 TextoAnotacao = TextoAnotacao & " -" & " Troca de HFC BSOD VIA para HFC BSOD em função da migração de acesso. "
+             Else
+                 TextoAnotacao = "Troca de HFC BSOD VIA para HFC BSOD em função da migração de acesso. "
+             End If
+           End If
+           objblfOC_SelecionarOTS.Anotacao = TextoAnotacao
+         End If
+       End If
+       
+       Set objDadosPropriedadeTerc = New clsGenPropriedadeTerceiros
+       objDadosAcesso.objPropriedadeTerceiros = objDadosPropriedadeTerc
+       
+       Set objDadosPropriedadeTerc = Nothing
+       
+       '=================================================================
+       'CALLBAT - 13/09/2013 - Radio IP
+       'SO- TVASS-47468LFW
+       '=================================================================
+       Call CarregaAtributosPropriedadesTerceiros(objDadosAcesso.objPropriedadeTerceiros)
+       
+       'Call CarregaAtributosPropriedadesTerceiros(objDadosAcesso)
+    
+    End If
+    
+    'Carrega os atributos de Equipamentos Complementares
+    If Produto_ID <> GbIDProdutoVIP Then   'Se vipline IP
+        
+        Call CarregaAtributosEqtos(objDadosAcesso)
+    
+    End If
+    
+    'Inicia a Transacao
+    bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+        
+    If Not bRetorno Then
+        
+        GoTo ErrorHandler
+    
+    End If
+    
+    FlagIniciouTransacao = True
+    
+    'Atualiza dados de Acesso
+    If objDadosAcesso.FaseExistente(Fase_ID) Then
+       
+       TipoOperacao = "A"
+       
+       Gravar = objDadosAcesso.AtualizarDados(Fase_ID)
+    
+    Else
+       
+       TipoOperacao = "I"
+       
+       Gravar = objDadosAcesso.IncluirDados(Fase_ID)
+       
+       objDadosAcesso.iD = objDadosAcesso.ObtemIDContingencia(Fase_ID, objDadosAcesso.CaracteristicaAcesso)
+    
+    End If
+   
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo ErrorHandler
+    
+    End If
+    'JRCRUZ - 22/02/2007
+    'If Produto_ID = GbIDProdutoVIP Then   'Se vipline IP
+    If Grupo_ID = GbIDGrupoVLI Then   'Se vipline IP
+    
+        Set objOc_TrataEqptoCompl = New clsInterOC_TratarEqptoCompl
+        
+        objOc_TrataEqptoCompl.InformaMensagem objMensagem
+        
+        Call objOc_TrataEqptoCompl.GravarDadosEqptos(objDadosAcesso.iD, objForm, Fase_ID)
+        
+        'Obtem os dados de Equipamento Complementar
+        bRetorno = objDadosAcesso.RecuperarDadosEquipamentos(objDadosAcesso.iD, objMensagem)
+          
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+        
+        Call objForm.UsrVIPEquipComplementares.CarregarGridEqpto(objDadosAcesso.objColecaoEqpto)
+        
+        '===================================================================
+        'CALBAT - 19/02/2009
+        'Ajuste feito para contemplar o processo de cancelamento e desativação para
+        'Vipline IP
+        '===================================================================
+        'If AcessoConstruidoFaseID <> 0 And Me.TipoOperacao = "I" Then
+        If (AcessoConstruidoFaseID <> 0 And Me.TipoOperacao = "I") Or _
+         ((Sigla_Acao = "DES" Or Sigla_Acao = "CAN") And (lGrupo_ID = GbIDGrupoVLI)) Then
+        '===================================================================
+        '===================================================================
+            
+            'Se ja existe acesso construido, os equipamentos cadastrados para o endereco
+            'de instalação deverão ser registrados para o circuito que está sendo aprovisionado
+'alterado vcb 28/05
+
+            bRetorno = objOc_EqptoNGN.GravarEqptoExistente(objForm.UsrVIPDadosSwitch.EquipamentoID, _
+                                                           Fase_ID, _
+                                                           objMensagem)
+'-----
+            If Not bRetorno Then
+            
+                GoTo ErrorHandler
+            
+            End If
+        
+        End If
+        
+        
+    End If
+    
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo ErrorHandler
+    
+    End If
+    
+    'Caso Tenha gravado Acesso OK
+    If (Gravar) Then
+    
+        If Produto_ID <> GbIDProdutoVIP Then  'Tratamento abaixo serve para todos os
+                                              'produtos exceto VIPLINE IP
+
+            'Grava dados de Equipamentos Complementares
+            iQtEquipamento = 0
+            
+            For Each ObjEqpto In objDadosAcesso.objColecaoEqpto
+                
+                iQtEquipamento = iQtEquipamento + 1
+                
+                ObjEqpto.InformaBanco frmgenMDI_SGAPlus.objBanco
+                
+                If Val(ObjEqpto.TipoEquipamento) <> 0 Then
+                    
+                    If TipoOperacao = "I" Then
+                    
+                        ObjEqpto.iD = 0
+                        
+                    End If
+                    
+                    ObjEqpto.Fase_ID = Fase_ID
+                    
+                    If ObjEqpto.iD = 0 Then 'Inclusao
+                       
+                       bRetorno = ObjEqpto.IncluirDados("E", objDadosAcesso.iD, objMensagem)
+                     
+                       If bRetorno Then
+                          
+                          lIDEquip = ObjEqpto.ObtemID(iQtEquipamento, objDadosAcesso.iD, objMensagem)
+                       
+                       End If
+                       
+                       Select Case iQtEquipamento
+                              Case 1
+                                    objForm.TxtIDEquipamento1.Text = lIDEquip
+                              Case 2
+                                    objForm.TxtIDEquipamento2.Text = lIDEquip
+                              Case 3
+                                    objForm.TxtIDEquipamento3.Text = lIDEquip
+                       End Select
+                       
+                    Else
+                                       
+                       bRetorno = ObjEqpto.AtualizarDados("E", objDadosAcesso.iD, ObjEqpto.iD, objMensagem)
+                                       
+                    End If
+                    
+                Else
+                
+                    If TipoOperacao <> "I" And ObjEqpto.iD <> 0 Then  'Atualizacao
+                    
+                       bRetorno = ObjEqpto.ExcluirDados(objDadosAcesso.iD, ObjEqpto.iD, objMensagem)
+                    
+                    End If
+                    
+                End If
+                
+                If objMensagem.TipoMsg <> "" Then
+                 
+                   GoTo ErrorHandler
+                
+                End If
+                
+            Next
+        
+        End If
+        
+        If objDadosAcesso.PropridedadeAcesso = "E" Then    'Propriedade Embratel
+
+            'bRetorno = DataFinalizacao
+
+            'Grava dados Propriedade Embratel
+            bRetorno = GravaDadosPropriedadeEmbratel(objDadosAcesso)
+            
+            If Not bRetorno Then
+            
+                GoTo ErrorHandler
+            
+            End If
+        
+        ElseIf objDadosAcesso.PropridedadeAcesso = "T" Then
+        
+            'Grava dados Propriedade Terceiros
+            bRetorno = GravaDadosPropriedadeTerceiros(objDadosAcesso)
+            
+            If Not bRetorno Then
+            
+                GoTo ErrorHandler
+            
+            End If
+        
+        End If
+        
+         'Se existia Seguranca de acesso e não mais, o acesso Contingente deve ser excluido
+        If SegurancaAcessoAnterior = "S" And objForm.optSegurancaAcesso(1).Value = True Then
+         
+           lIdContingencia = objDadosAcesso.ObtemIDContingencia(Fase_ID, "C")
+        
+            bRetorno = ExcluiAcesso("C", lIdContingencia)
+         
+            If objMensagem.TipoMsg <> "" Then
+                 
+               GoTo ErrorHandler
+              
+            End If
+         
+        End If
+    
+    End If 'FIM If (Gravar) Then
+    
+    'Verifica se Existe pendencia a ser incluida
+'    If Produto_ID = GbIDProdutoBLF Or Produto_ID = GbIDProdutoWID Then
+    If (Familia_Produto = "I") Then
+        
+        If (objDadosPendencia.ColecaoPendencia.Count <> 0) Then
+           
+           bRetorno = objDadosPendencia.AtualizarDados(Fase_ID, Servico_ID, _
+                                                       Produto_ID, FlagTemPendenciaEmAberto, _
+                                                       objdadosServico.DiretorRegional, _
+                                                       objdadosServico.NumOE, _
+                                                       objdadosServico.AnoOE, _
+                                                       objdadosServico.ItemOE)
+           
+           If (Not bRetorno) Then
+              GoTo ErrorHandler
+           End If
+           
+        End If
+    
+    ElseIf (Familia_Produto = "D") Then
+    
+        'Verifica se Existe pendencia a ser incluida
+        If (objPendencia.Tipo_Pendencia_ID <> 0 And _
+                Flag_Atualiza_Pendencia) Then
+            
+           objPendencia.Fase_ID = Fase_ID
+            
+           objPendencia.Servico_ID = Servico_ID
+           
+           objPendencia.Codigo_Tipo_Fase = GbCodigoFaseAcesso
+           '---------------------------------------------------
+           objPendencia.InformaBanco frmgenMDI_SGAPlus.objBanco
+           objPendencia.InformaMensagem objMensagem
+        
+           If (objPendencia.Operacao = "R") Then
+               
+              bRetorno = objPendencia.Retirar(objPendencia.iD)
+              
+              FlagTemPendenciaEmAberto = False
+            
+           Else
+               
+              objPendencia.Servico_ID = Servico_ID
+              
+              bRetorno = objPendencia.IncluirDados
+              
+              bRetorno = objPendencia.RecuperarDados(Fase_ID)
+              
+              FlagTemPendenciaEmAberto = True
+            
+           End If
+            
+           If (Not bRetorno) Then
+              
+              GoTo ErrorHandler
+              
+           End If
+            
+        Else
+            
+            If (objPendencia.Tipo_Pendencia_ID <> 0) Then
+                
+                FlagTemPendenciaEmAberto = True
+                
+            End If
+            
+        End If
+    
+    End If 'If (Familia_Produto = "I") Then
+    
+    'Grava Anotacao da fase
+    If Trim(TextoAnotacao) <> "" Then
+       
+       bRetorno = objblfOC_SelecionarOTS.GravarAnotacaoGen(False)
+         
+       If (objMensagem.TipoMsg <> "") Then
+       
+          GoTo ErrorHandler
+          
+       End If
+    
+    End If
+    
+    '=================================================================
+    'CALLBAT - 21/05/2012 - CH-43184DVM
+    'Inclusão do usuário que efetuou a ação.
+    '=================================================================
+    objDadosFase.Usuario_ID = GbID_Usuario
+    '=================================================================
+    '=================================================================
+     
+    bRetorno = objDadosFase.IniciaFase(Fase_ID, GbID_Usuario)
+    
+    If (objMensagem.TipoMsg <> "") Then
+    
+       GoTo ErrorHandler
+       
+    End If
+        
+        '==================================================================================================
+        'CALLBAT - 05/07/2012 - BSoD Light II
+        'Como não há a fase do SAIP, nesse ponto devemos finalizar a TRATAR ALOCAÇÃO CONFIGURACAO
+        '==================================================================================================
+        If objForm.CboTipoAcessoTerceiro.ListIndex = 5 Then
+
+
+            'Captura Fase AlocaçãoConfiguração
+            lIdFaseConfiguracao = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseConfiguracao)
+
+            If (objMensagem.TipoMsg <> "") Then
+                GoTo ErrorHandler
+            End If
+
+            If Not objDadosFase.VerificaFaseFinalizada(lIdFaseConfiguracao) Then
+
+                If (objMensagem.TipoMsg <> "") Then
+                    GoTo ErrorHandler
+                End If
+
+
+                '=================================================================
+                'CALLBAT - 21/05/2012 - CH-43184DVM
+                'Inclusão do usuário que efetuou a ação.
+                '=================================================================
+                 objDadosFase.Usuario_ID = GbID_Usuario
+                '=================================================================
+                '=================================================================
+                
+                'Inicia a Fase Configuração
+                bRetorno = objDadosFase.IniciaFase(lIdFaseConfiguracao, GbID_Usuario)
+
+                If (objMensagem.TipoMsg <> "") Then
+                   GoTo ErrorHandler
+                End If
+
+                'Finaliza a Fase Configuração
+                bRetorno = objDadosFase.FinalizaFase(lIdFaseConfiguracao)
+
+                If (objMensagem.TipoMsg <> "") Then
+                   GoTo ErrorHandler
+                End If
+
+            End If
+
+        End If
+        '==================================================================================================
+        '==================================================================================================
+    
+       
+    FlagFaseFinalizadaOK = False
+    
+    'Verifica se a fase pode ser finalizada
+    
+    If (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") And Not bFlagEnviaCLA Then
+
+
+       FlagFaseFinalizadaOK = VerificaFinalizacaoOK(objDadosAcesso, False)
+
+       'If objdadosServico.FlagMotivoCorrecao = "A" And FlagStatusAcessoCLA = "" And (Not bFlagIndicaLegado And Not bFlagLegadoEmAndamento) Then
+    
+        
+        '    FlagFaseFinalizadaOK = False
+    
+       'End If
+
+       If (Not bFlagIndicaLegado And Not bFlagLegadoEmAndamento) And FlagStatusAcessoCLA <> "2" Then
+        
+            FlagFaseFinalizadaOK = False
+            
+       End If
+       
+    Else
+
+        FlagFaseFinalizadaOK = True
+
+    End If
+    
+    If ((bRetornoCriticaOk And FlagTemPendenciaEmAberto = False) And _
+       (FlagStatusAcessoCLA = "2" Or _
+       ((bFlagLegadoEmAndamento Or bFlagIndicaLegado))) Or _
+       (objdadosServico.FlagMotivoCorrecao = "A" And FlagStatusAcessoCLA = "")) Then
+    
+    '================================================================
+    'Vagner Brandão - VAGNERR- 23/06/2008
+    'Implementação para contemplar a tela de monitoração
+    '================================================================
+       If Produto_ID = GbIDProdutoVIP Then
+           
+          Call TratarFechamentoporPacote
+        
+       End If
+    '================================================================
+    '================================================================
+       If (DataFinalizacao = "") And FlagFaseFinalizadaOK Then
+      '==================================================================================================
+      '==================================================================================================
+       
+       
+          'Para OTS de Cancelamento e Desativacao, não será necessário calcular o periodo
+          'para a fase seguinte já que todas as fases após a fase de Alocacao, são executadas
+          'em paralelo
+          
+          If (Sigla_Acao <> "CAN" And Sigla_Acao <> "DES") And _
+                (Familia_Produto = "I") Then
+
+                If (Produto_ID <> GbIDProdutoJAH) And (Produto_ID <> GbIDProdutoVIP) Then
+                
+                    'Tratar Centro Local
+                    'Uma OTS de cancelamento pode não gerar Fase Tratar Centro Local Aquino IP VPN
+                    'Está fora do bloco que checa várias fases pois o retorno é verificado
+                    'no Else
+                    lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseCentroLocal)
+            
+                    If (objMensagem.TipoMsg <> "") Then
+                    
+                        GoTo ErrorHandler
+                        
+                    End If
+            
+                    'Checa se o produto pode alocar vários CFs para a fase Tratar Centro Local
+                    If objDadosDuracaoFase.ChecaPermissaoMultiplosCF(Produto_ID, _
+                                GbCodigoFaseCentroLocal) Then
+            
+                        'Verifica se a fase Centro local já foi finalizada,
+                        'Caso o método retorne 0, indica que a fase Centro Local ainda não foi finalizada
+                        If objDadosFase.ObtemSequenciaFaseFinalizada(Servico_ID, _
+                                    GbCodigoFaseCentroLocal) = 0 And _
+                                    (lIdFaseCentroLocal > 0) Then
+                    
+                            'Carrega a tela Alocação de Centro Funcional e atualiza os CFs alocados
+                            bRetorno = CarregarFormCFsDaFase(lIdFaseCentroLocal)
+                              
+                            If (Not bRetorno) Then
+                            
+                                GoTo ErrorHandler
+                                
+                            End If
+            
+                        End If 'ObtemSequenciaFaseFinalizada
+                        
+                    End If  'ChecaPermissaoMultiplosCF
+                
+                End If  '(Produto_ID <> GbIDProdutoJAH)
+        
+                'Caso seja uma Desativacao ou Cancelamento, a fase de Configuração será executada
+                'em paralelo com a fase de Acesso, portanto a atualização da tabela de Integração,
+                'será feita ao final da fase de Alocação de Centro Funcional
+                
+                iSequenciaAcaoAux = Sequencia_Acao
+                'Verifica se fase Tratar Centro Local deve ser executada ou não.
+                
+                'JRCRUZ - 22/02/2007
+                'If (Produto_ID = GbIDProdutoVIP) Then
+                If (Grupo_ID = GbIDGrupoVLI) Then
+                    
+                    'Caso o usuario opte por não executar a fase Tratar Centro Local
+                    If objForm.optExecCentroLocal(1).Value = True And _
+                       bFlagNaoExecutaCentroLocal Then
+                        
+                        lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, _
+                                                                     GbCodigoFaseCentroLocal)
+                        
+                        If lIdFaseCentroLocal <> 0 Then
+                           
+                           bRetorno = objDadosFase.RetirarPeriodoPrevisto(lIdFaseCentroLocal)
+                        
+                        End If
+                        
+                        'Obter a sequencia acao da fase posterior a fase Centro Local
+                        iSequenciaAcaoAux = objDadosFase.ObtemSequenciadaFase(Servico_ID, _
+                                                                   GbCodigoFaseCentroLocal)
+                    
+                    End If
+                    
+                End If
+                                
+                'Calcula o período para a proxima fase
+                
+                lID_Fase_Seguinte = objDadosFase.ObtemIDFaseSeguinte(Servico_ID, iSequenciaAcaoAux)
+            
+                If objMensagem.TipoMsg <> "" Then
+                   
+                    GoTo ErrorHandler
+                 
+                End If
+                
+                If objDadosFase.ObtemDataFimPrevisto(lID_Fase_Seguinte) = "" Then
+                    
+                    bRetorno = objDadosFase.CalculaPeriodoProximaFase(iSequenciaAcaoAux, Servico_ID)
+                    
+                    If (objMensagem.TipoMsg <> "") Then
+                      
+                      GoTo ErrorHandler
+                    
+                    End If
+                
+                End If
+                
+          ElseIf (Familia_Produto = "D") Then
+            
+             'Calcula o período para a proxima fase
+             bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, Servico_ID, "D")
+          
+             If (objMensagem.TipoMsg <> "") Then
+            
+                 GoTo ErrorHandler
+                
+             End If
+              
+              'Obtem a sequencia_acao da última fase existente para a OTS
+             lSeqUltimaFaseOTS = objDadosFase.ObtemSequenciaUltimaFase(Servico_ID, _
+                                                                        Familia_Produto)
+
+             If (objMensagem.TipoMsg <> "") Then
+            
+                 objMensagem.ExibeMensagem
+                 
+                 GoTo Finalizar
+            
+             End If
+              
+             If (Sequencia_Acao = lSeqUltimaFaseOTS) Then
+                 
+                 Set objDadosAnalisarOE = New clsDNI_DadosAnalisarOE
+
+                 objDadosAnalisarOE.InformaMensagem objMensagem
+                 objDadosAnalisarOE.InformaBanco frmgenMDI_SGAPlus.objBanco
+               
+                 sDesignacaoSOE = Trim(objForm.UsrDNICabecalhoAcesso.CNLPontaA) & "/" & _
+                                  Trim(objForm.UsrDNICabecalhoAcesso.CNLPontaB) & "/" & _
+                                  Trim(objForm.UsrDNICabecalhoAcesso.CodigoNP) & "/"
+                                  
+                 If Produto_ID = GbIDProdutoDiginet Then
+               
+                   sDesignacaoSOE = sDesignacaoSOE & _
+                                Format(objForm.UsrDNICabecalhoAcesso.SequencialDesig, "0000")
+               
+                 Else
+                   
+                   sDesignacaoSOE = sDesignacaoSOE & _
+                            Format(objForm.UsrDNICabecalhoAcesso.SequencialDesig, "0000000")
+               
+                 End If
+
+                 bRetorno = objDadosAnalisarOE.EncerraWorkFlow(Servico_ID, _
+                                                     Servico_ID_Anterior, _
+                                                     AnoOE, NumeroOE, NumeroItemOE, _
+                                                     "02", GbUsuario, _
+                                                     sDesignacaoSOE, _
+                                                     Sigla_Acao, _
+                                                     objdadosServico)
+              
+                Set objDadosAnalisarOE = Nothing
+                
+                If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+                
+                   objdadosServico.FinalizaServico (Servico_ID)
+                
+                End If
+                
+             End If
+            
+          End If 'FIM If (Produto_ID <> GbIDProdutoJAH) And (Produto_ID <> GbIDProdutoVIP) Then
+          
+          If FlagFaseFinalizadaOK Then
+          
+          
+            '=================================================================
+            'CALLBAT - 21/05/2012 - CH-43184DVM
+            'Inclusão do usuário que efetuou a ação.
+            '=================================================================
+            '-- VAGNERR 29/10/2012 --descomentado a linha abaixo para que o usuário que finalizou a fase seja gravado na tabela corretamente
+             objDadosFase.Usuario_ID = GbID_Usuario
+            '=================================================================
+            '=================================================================
+              
+                '=================================================================
+                'AGRC - 15/01/2015 - CH-58474KFY
+                'Chamado CH-35920CGP implantado em 15/01/2015 de forma incorreta. Retornado o codigo anterior.Necessario refazer chamado CH-35920CGP.
+                '=================================================================
+                'bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+            
+                'If (objMensagem.TipoMsg <> "") Then
+                '    GoTo ErrorHandler
+                'End If
+                '=================================================================
+                '=================================================================
+                
+                ''=================================================================
+                ''CALLBAT - 21/05/2012 - CH-35920CGP
+                ''Causa raiz implementada para impedir que seja finalizada a OTS, em
+                ''caso de rejeição do CLA
+                ''=================================================================
+                 bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+
+                 If (objMensagem.TipoMsg <> "") Then
+                    GoTo ErrorHandler
+                 End If
+                 
+                 If FlagStatusAcessoCLA <> "6" Then
+                 
+                     bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+                     
+                      If (objMensagem.TipoMsg <> "") Then
+                         GoTo ErrorHandler
+                      End If
+
+                 End If
+                '=================================================================
+                '=================================================================
+          
+         End If
+           
+       End If   'If (DataFinalizacao = "") Then
+
+    Else
+       
+       'Caso a fase já tenha sido finalizada e uma pendencia tenha sido incluida,
+       'A fase deverá ser considerada como Em Andamento
+       If (DataFinalizacao <> "") Then
+
+          objDadosFase.ID_Servico = Servico_ID
+          objDadosFase.Id_Fase = Fase_ID
+                 
+          'Quando for OTS de Desativacao ou Cancelamento, o periodo previsto para a fase seguinte
+          'deverá ser mantido já que as fases para estas ações serão executadas em paralelo.
+         
+          If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+         
+             FlagManterPeriodo = True
+             
+          Else
+         
+             FlagManterPeriodo = False
+         
+         End If
+        
+         bRetorno = objDadosFase.RetirarFinalizacaoFase(Servico_ID, Fase_ID, _
+                                       Sequencia_Acao, FlagManterPeriodo, Familia_Produto)
+             
+         If objMensagem.TipoMsg <> "" Then
+               
+            Set objDadosFase = Nothing
+            
+            GoTo ErrorHandler
+             
+         End If
+       
+       End If
+    
+       DataFinalizacao = ""
+       
+    End If 'fim If (bRetornoCriticaOk And FlagTemPendenciaEmAberto = False) And _
+       (FlagStatusAcessoCLA = "2" Or _
+       ((bFlagLegadoEmAndamento Or bFlagIndicaLegado) And FlagStatusAcessoCLA = "")) Or _
+       (objdadosServico.FlagMotivoCorrecao = "A" And FlagStatusAcessoCLA = "") Then
+        
+    'Comentado por CALBAT em 27/01/2008 ==================================
+    'If DataFinalizacao <> "" Then
+    '=====================================================================
+    
+       'Quando for uma OTS de Cancelamento ou Desativacao, verifica se
+       'as fases que estão sendo executadas em paralelo já foram finalizadas
+       'caso Todas as outras fases já estejam finalizadas, o sistema deverá finalizar
+       'o Servico.
+        
+    'Comentado por CALBAT em 27/01/2008 ==================================
+       'If (Sigla_Acao = "CAN" Or Sigla_Acao = "DES") And Familia_Produto = "I"  Then
+    
+       '' ----========================================================================================================
+       '' --- FABIMENDONCA- 10/2019- CH-95954OTQ -solicitação para finalizar a fase de CentroLocal quando for produto BSOD LIGHT.
+       '' --- BSodLight/ Banda Larga = sim, nao tera configuracao SAIP e portanto fase Centro Local Podera ser concluida ao final da Fase Acesso finalizada
+       '' --- Caso Fase Acesso finalizada, em caso afirmativo, finaliza a Fase Centro Local e calcula o periodo previsto da fase seguinte
+        If Trim(objForm.UsrBLFCabecalho_Acesso.BandaLarga) = "S" And (objDadosFase.VerificaFaseFinalizada(Fase_ID)) Then
+        'BSOD LIGHT - n'ao tem fase SAIP entao finaliza Centro Local se a fase acesso ja finalizada
+        
+            'Resgata Id fase centro Local
+            lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseCentroLocal)
+            '
+            If (objMensagem.TipoMsg <> "") Then
+          
+                GoTo ErrorHandler
+                    
+            End If
+            'Atualiza datas Previsao inicio e fim da fase Centro Local
+            'Calcula o período para a proxima fase
+            If objDadosFase.ObtemDataFimPrevisto(lIdFaseCentroLocal) = "" Then
+                ' 'preeche campos data prevista da fase
+                objDadosFase.Data_Inicio_Previsto = Format(Now, "DD/MM/YYYY")
+                objDadosFase.Data_Fim_Previsto = Format(Now + 2, "DD/MM/YYYY")
+                '
+                bRetorno = objDadosFase.AtualizaPeriodoPrevisto(lIdFaseCentroLocal)
+                '
+                If (objMensagem.TipoMsg <> "") Then
+                  
+                  GoTo ErrorHandler
+                
+                End If
+            
+            End If
+                
+            '' Iniciar FASE Centro Local
+            bRetorno = objDadosFase.IniciaFase(lIdFaseCentroLocal, GbID_Usuario)
+            
+            If bRetorno Then
+                'Seta o objeto mensagem da classe de dados
+                objDadosTratarCentroLocal.InformaMensagem objMensagem
+                objDadosTratarCentroLocal.InformaBanco frmgenMDI_SGAPlus.objBanco
+                
+                'Preencher data de Conclusao e Centro funcional associado á Fase
+                objDadosTratarCentroLocal.DtHoraConclusao = ""
+                
+                'Marca data de Conclusao como a data corrente
+                objDadosTratarCentroLocal.DtHoraConclusao = Format(Now, "DD/MM/YYYY")
+                
+                
+                If objDadosTratarCentroLocal.FaseExistente(lIdFaseCentroLocal) Then
+           
+                   Gravar = objDadosTratarCentroLocal.AtualizarDados(lIdFaseCentroLocal)
+                   
+                Else
+                   
+                   Gravar = objDadosTratarCentroLocal.IncluirDados(lIdFaseCentroLocal)
+                
+                End If
+                '
+                If (objMensagem.TipoMsg <> "") Then
+                    
+                   GoTo ErrorHandler
+                
+                End If
+                
+                ''Recuperar ID da FASE_CENTROS_FUNCIONAIS para atualizar a DATA_CONCLUSAO da fase Centro Local
+                ''
+                '''Preencher tabela Fase_centro_Funcional com registro da fase e seu centro funcional correspondente
+                bRetorno = objDadosFase.AtualizarDados_VariosCFS(lIdFaseCentroLocal, _
+                        objDadosFase.ObtemFaseCentrosFunc(lIdFaseCentroLocal), _
+                        IIf(IsDate(objDadosTratarCentroLocal.DtHoraConclusao), objDadosTratarCentroLocal.DtHoraConclusao, ""))
+                '
+                If Not (bRetorno) Then
+                '
+                   GoTo ErrorHandler
+                '
+                End If
+                
+                'Preenche o periodo realizado indicando que a fase foi finalizada
+                bRetorno = objDadosFase.FinalizaFase(lIdFaseCentroLocal)
+           
+                If Not (bRetorno) Then
+                '
+                    GoTo ErrorHandler
+                '
+                Else
+                    '''''Finalizada a fase Centro Local --> Iniciar a Fase de PRE-ativacao
+                    '''''Verifica fase seguinte para preencher data inicio e fim previstos
+                    laux = objDadosFase.ObtemSequenciadaFase(Servico_ID, GbCodigoFaseCentroLocal)
+                    '
+                    bRetorno = objDadosFase.CalculaPeriodoProximaFase(laux, Servico_ID)
+                
+                    If (objMensagem.TipoMsg <> "") Then
+          
+                        GoTo ErrorHandler
+                    
+                    End If
+                End If
+            End If
+                      
+            ' Calcular Periodo
+            ' Finalizar Fase Centro Local
+            If objDadosFase.ObtemDataFimPrevisto(lIdFaseCentroLocal) = "" Then
+                 
+                    bRetorno = objDadosFase.CalculaPeriodoProximaFase(laux, Servico_ID)
+                
+                     If objMensagem.TipoMsg <> "" Then
+                    
+                         GoTo Finalizar
+                    
+                    End If
+                 
+                 End If
+            
+            
+        
+       End If
+       '' ----FIM FABIMENDONCA -- CH-95954OTQ========================================================================================================
+    
+    
+    
+    If (Sigla_Acao = "CAN" Or Sigla_Acao = "DES") And Familia_Produto = "I" And sReplicaInformações = False And _
+       (FlagStatusAcessoCLA = "2" Or (bFlagIndicaLegado Or bFlagLegadoEmAndamento)) Then
+'=====================================================================
+        bRetorno = objdadosServico.RecuperarDados(Servico_ID)
+      
+        If (Not bRetorno) Then
+          
+           GoTo ErrorHandler
+       
+        End If
+         
+        bRetorno = VerificaFinalizacaoDesativacao(objDadosFase, _
+                                                 objdadosServico, _
+                                                 Servico_ID, Fase_ID, _
+                                                 Sigla_Acao, _
+                                                 objMensagem)
+         If (objMensagem.TipoMsg <> "") Then
+         
+           GoTo ErrorHandler
+           
+         End If
+   
+    End If
+    
+    If (Produto_ID <> GbIDProdutoVIP) Then
+    
+        'Obtem ID_fase da Alocacao Configuraçao
+        lIdFaseAlocacaoConfiguracao = objDadosFase.ObtemIDFase(objdadosServico.ID_Servico, _
+                                                               GbCodigoFaseConfiguracao)
+            
+        If objMensagem.TipoMsg <> "" Then
+          
+             GoTo Finalizar
+        
+        End If
+    
+        If lIdFaseAlocacaoConfiguracao <> 0 Then
+            
+            bFlagIniciaFaseConf = False
+                        
+            If Trim(objForm.TxtEstacaoConfiguracao.Text) <> "" And _
+               objForm.CboPadraoInterfaceEBT.ListIndex > 0 And _
+               Trim(objForm.UsrBLFCabecalho_Acesso.Velocidade) <> "" Then
+            '------------------------------------------------------------------------
+               bFlagIniciaFaseConf = True
+        
+            ElseIf (Sigla_Acao = "CAN" Or Sigla_Acao = "DES") Then
+               
+               bFlagIniciaFaseConf = True
+                
+            End If
+        
+            '==================================================================================================
+            'CALLBAT - 05/07/2012 - BSoD Light II / FO EtherNET
+            '==================================================================================================
+            'No caso de BSOD NET ou VIA não o sistema não deve iniciar o paralelismo
+            'If (objForm.CboTipoAcessoTerceiro.ListIndex = 3) And ((Not FlagFaseFinalizadaOK) Or FlagStatusAcessoCLA <> "2") Then
+            '=================================================================
+            'CALLBAT - 18/02/2014 - BSoD Unificado
+            'SO-ENGNQ-55327NEG
+            '=================================================================
+            'If ((objForm.CboTipoAcessoTerceiro.ListIndex = 3) Or (objForm.CboTipoAcessoTerceiro.ListIndex = 6)) And _
+                     ((Not FlagFaseFinalizadaOK) Or FlagStatusAcessoCLA <> "2") Then
+            '=================================================================
+             'TBASTOS 09/12/2016
+            'CH-62822UKO - Adicionar condição de BSOD Light para impedir paralelismo.
+            '========================================================================
+            'If ((objForm.CboTipoAcessoTerceiro.ListIndex = 3) Or (objForm.CboTipoAcessoTerceiro.ListIndex = 6) Or (objForm.CboTipoAcessoTerceiro.ListIndex = 8)) And _
+                     ((Not FlagFaseFinalizadaOK) Or FlagStatusAcessoCLA <> "2") Then
+             If ((objForm.CboTipoAcessoTerceiro.ListIndex = 3) Or (objForm.CboTipoAcessoTerceiro.ListIndex = 5) Or (objForm.CboTipoAcessoTerceiro.ListIndex = 6) Or (objForm.CboTipoAcessoTerceiro.ListIndex = 8)) And _
+                     ((Not FlagFaseFinalizadaOK) Or FlagStatusAcessoCLA <> "2") Then
+            '=================================================================
+            '=================================================================
+            '==================================================================================================
+            '==================================================================================================
+                bFlagIniciaFaseConf = False
+                
+            End If
+        
+            If (objForm.CboTipoAcessoTerceiro.ListIndex = 4) And FlagStatusAcessoCLA = "2" Then
+            
+                bFlagIniciaFaseConf = False
+                
+            End If
+            
+            '=================================================================
+            'CALLBAT - 13/09/2013 - Radio IP
+            'SO- TVASS-47468LFW
+            '--------------------------------------------------------------------
+            '   Caso seja acesso Radio IP, só será iniciada a fase do SAIP, após o
+            'retorno do CLA, pois será encaminhado para o SAIP as informações de
+            'VLAN, SVLAN, Porta, Porta PE que são retornadas do CLA.
+            '====================================================================
+            If (objForm.CboTipoAcessoTerceiro.ListIndex = 7) And FlagStatusAcessoCLA <> "2" Then
+            
+                bFlagIniciaFaseConf = False
+                
+            End If
+            
+           'AGRC - SO-TVASS-32377EYC - 25/08/2017
+            '--------------------------------------------------------------------
+            '   Caso seja acesso Terceiro ETH, só será iniciada a fase do SAIP, após o
+            'retorno do CLA, pois será encaminhado para o SAIP as informações de
+            'VLAN, SVLAN, Porta, Porta PE que são retornadas do CLA.
+            '====================================================================
+            If (objForm.CboTipoAcessoTerceiro.ListIndex = 9) And FlagStatusAcessoCLA <> "2" Then
+            
+                bFlagIniciaFaseConf = False
+                
+            End If
+            '====================================================================
+            '====================================================================
+            
+            '====================================================================
+            '   Caso seja acesso GPON, só será iniciada a fase do SAIP, após o
+            'retorno do CLA, pois será encaminhado para o SAIP as informações que
+            'são retornadas do CLA.
+            '====================================================================
+            If (objForm.CboTipoAcessoEmbratel.ListIndex = 4) And FlagStatusAcessoCLA <> "2" Then
+            
+                bFlagIniciaFaseConf = False
+                
+            End If
+            '====================================================================
+            '====================================================================
+            
+            '====================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '--------------------------------------------------------------------
+            '   Caso seja acesso FO_EDD, só será iniciada a fase do SAIP, após o
+            'retorno do CLA, pois será encaminhado para o SAIP as informações de
+            'VLAN, SVLAN, Porta, Porta PE que são retornadas do CLA.
+            '====================================================================
+            If (objForm.CboTipoAcessoEmbratel.ListIndex = 5) And FlagStatusAcessoCLA <> "2" Then
+            
+                bFlagIniciaFaseConf = False
+                
+            End If
+            '====================================================================
+            '====================================================================
+            
+            '==================================================================================================
+            'CALLBAT - 05/07/2012 - BSoD Light II / FO EtherNET
+            '==================================================================================================
+            
+            '=====================================================================================================
+            'Callbat - 06/12/2015 - Atendimento ao Chamado CH-35843NKH
+            'EM caso de cancelamento, em FO Ethenernet, não estava encaminhando a OTS de cacnelamento para o SAIP
+            '------------------------------------------------------------------------
+            
+'                If ((Grupo_ID = GbIDGrupoBLD Or Grupo_ID = GbIDGrupoBLF) And bFlagIniciaFaseConf = True) And objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+'
+'                    Set objDadosIntegracaoWebip = New clsBlf_IntegracaoWebIP
+'
+'                    objDadosIntegracaoWebip.InformaBanco frmgenMDI_SGAPlus.objBanco
+'                    objDadosIntegracaoWebip.InformaMensagem objMensagem
+'
+'                    bRetorno = objDadosIntegracaoWebip.ObtemOTSIntegracao(Servico_ID, sOTSAux)
+'
+'                    If sOTSAux = "" Then
+'
+'                        bFlagIniciaFaseConf = True
+'
+'                    Else
+'
+'                        bFlagIniciaFaseConf = False
+'
+'                    End If
+'
+'                End If
+
+
+            
+            If Acao_ID <> 9 Then
+                If ((Grupo_ID = GbIDGrupoBLD Or Grupo_ID = GbIDGrupoBLF) And bFlagIniciaFaseConf = True) And objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+                    
+                    Set objDadosIntegracaoWebip = New clsBlf_IntegracaoWebIP
+                    
+                    objDadosIntegracaoWebip.InformaBanco frmgenMDI_SGAPlus.objBanco
+                    objDadosIntegracaoWebip.InformaMensagem objMensagem
+                    
+                    bRetorno = objDadosIntegracaoWebip.ObtemOTSIntegracao(Servico_ID, sOTSAux)
+                    
+                    If sOTSAux = "" Then
+                
+                        bFlagIniciaFaseConf = True
+                    
+                    Else
+                        
+                        bFlagIniciaFaseConf = False
+                    
+                    End If
+                
+                End If
+                
+            Else
+            
+            
+                If ((Grupo_ID = GbIDGrupoBLD Or Grupo_ID = GbIDGrupoBLF)) And objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+                    
+                    Set objDadosIntegracaoWebip = New clsBlf_IntegracaoWebIP
+                    
+                    objDadosIntegracaoWebip.InformaBanco frmgenMDI_SGAPlus.objBanco
+                    objDadosIntegracaoWebip.InformaMensagem objMensagem
+                    
+                    bRetorno = objDadosIntegracaoWebip.ObtemOTSIntegracao(Servico_ID, sOTSAux)
+                    
+                    If sOTSAux = "" Then
+                
+                        bFlagIniciaFaseConf = True
+                    
+                    Else
+                        
+                        bFlagIniciaFaseConf = False
+                    
+                    End If
+                    
+                End If
+            
+            
+            End If
+            
+            '------------------------------------------------------------------------
+            '=====================================================================================================
+            '=====================================================================================================
+            
+            '==================================================================================================
+            '==================================================================================================
+            
+            If bFlagIniciaFaseConf Then
+                
+                'Caso não tenha calculado o periodo previsto da fase de configuracao, o mesmo deve ser calculado
+                If objDadosFase.ObtemDataFimPrevisto(lIdFaseAlocacaoConfiguracao) = "" Then
+                   
+                   bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, Servico_ID)
+                   
+                Else
+                
+                
+                    '=================================================================
+                    'CALLBAT - 21/05/2012 - CH-43184DVM
+                    'Inclusão do usuário que efetuou a ação.
+                    '=================================================================
+                    '-- VAGNERR 29/10/2012 -- Descomentado para gravar o usuário corretamente
+                     objDadosFase.Usuario_ID = GbID_Usuario
+                    '=================================================================
+                    '=================================================================
+                    'Finaliza a Fase Configuração
+                    bRetorno = objDadosFase.FinalizaFase(lIdFaseConfiguracao)
+        
+                    If (objMensagem.TipoMsg <> "") Then
+                       
+                       GoTo ErrorHandler
+                       
+                    End If
+                
+                End If
+                
+                '==================================================================================================
+                'CALLBAT - 05/07/2012 - BSoD Light II
+                '==================================================================================================
+                
+                If objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+                
+                    If (objWEBIP Is Nothing) Then
+                        Set objWEBIP = New clsInterOC_TrataWebIP
+                    End If
+                              
+                     objWEBIP.Grupo_ID = lGrupo_ID
+                         
+                    '=================================================================
+                    'CALLBAT - 21/05/2012 - BSoD Net Light
+                    'Incluso o parametro de indicação de Banda Larga para a gravação na tabela
+                    'de interface junto ao SAIP
+                    '=================================================================
+                        'bRetorno = objWEBIP.GravaWEBIPIntegracao(Servico_ID, _
+                                        Fase_ID, _
+                                        "C", _
+                                        Produto_ID, _
+                                        objMensagem, _
+                                        Sigla_Acao, _
+                                        , , IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 5, "S", ""))
+                                        
+                        bRetorno = objWEBIP.GravaWEBIPIntegracao(Servico_ID, _
+                                        Fase_ID, _
+                                        "C", _
+                                        Produto_ID, _
+                                        objMensagem, _
+                                        Sigla_Acao)
+                    '=================================================================
+                    '=================================================================
+                
+                    '--VAGNERR 19/09/2012
+                        If objWEBIP.FlagExibeCritica Then
+                                        
+                            FlagFaseFinalizadaOK = False
+                              
+                            If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+                         
+                               FlagManterPeriodo = True
+                             
+                            Else
+                         
+                               FlagManterPeriodo = False
+                         
+                            End If
+                        
+                            bRetorno = objDadosFase.RetirarFinalizacaoFase(Servico_ID, Fase_ID, _
+                                                       Sequencia_Acao, FlagManterPeriodo, Familia_Produto)
+                              
+                            If objMensagem.TipoMsg <> "" Then
+                               
+                              GoTo ErrorHandler
+                             
+                            End If
+                        
+                        End If
+                        '----------
+                        '==================================================================================================
+                        '==================================================================================================
+                
+                        If (objMensagem.TipoMsg <> "") Then
+                            GoTo ErrorHandler
+                        End If
+
+                End If
+                
+            End If
+      
+        End If
+       '' ----========================================================================================================
+       
+       '' --- Caso a fase de acesso esteja sendo finalizada, verifica se fase de configuracao (SAIP) já se encontra
+       '' --- finalizada, em caso afirmativo, calcula o periodo previsto da fase Centro Local
+        
+        If FlagFaseFinalizadaOK And (FlagStatusAcessoCLA = "2" Or (bFlagLegadoEmAndamento Or bFlagIndicaLegado)) Then
+        
+            If objDadosFase.ObtemDataFimReal(lIdFaseAlocacaoConfiguracao) <> "" Then
+                 
+                 iSeqAux = objDadosFase.ObtemSequenciadaFase(Servico_ID, GbCodigoFaseConfiguracao)
+                  
+                 lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseCentroLocal)
+    
+                 If objDadosFase.ObtemDataFimPrevisto(lIdFaseCentroLocal) = "" Then
+                 
+                    bRetorno = objDadosFase.CalculaPeriodoProximaFase(iSeqAux, Servico_ID)
+                
+                    If objMensagem.TipoMsg <> "" Then
+                    
+                         GoTo Finalizar
+                    
+                    End If
+                 
+                 End If
+                 
+                 'CALLBAT - 05/07/2012 - FO EtheNET
+                 
+'                  If objForm.CboTipoAcessoTerceiro.ListIndex = 5 Then
+'
+'                        bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+'
+'                        If (objMensagem.TipoMsg <> "") Then
+'                           GoTo ErrorHandler
+'                        End If
+'
+'                  End If
+                  
+            End If
+            
+            '=================================================================
+            'CALLBAT - 21/05/2012 - CH-43184DVM
+            'Inclusão do usuário que efetuou a ação.
+            '=================================================================
+            '-- VAGNERR 29/10/2012 -- Descomentado a linha abaixo para gravar o usuário corretamente
+             objDadosFase.Usuario_ID = GbID_Usuario
+            '=================================================================
+            '=================================================================
+            
+            '=================================================================
+            'AGRC - 15/01/2015 - CH-58474KFY
+            'Chamado CH-35920CGP implantado em 15/01/2015 de forma incorreta. Retornado o codigo anterior.Necessario refazer chamado CH-35920CGP.
+            '=================================================================
+            bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+            
+            If (objMensagem.TipoMsg <> "") Then
+               GoTo ErrorHandler
+            End If
+            '=================================================================
+            '=================================================================
+            
+            ''=================================================================
+            ''CALLBAT - 21/05/2012 - CH-35920CGP
+            ''Causa raiz implementada para impedir que seja finalizada a OTS, em
+            ''caso de rejeição do CLA
+            ''=================================================================
+''            bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+''
+''            If (objMensagem.TipoMsg <> "") Then
+''               GoTo ErrorHandler
+''            End If
+
+'            If FlagStatusAcessoCLA = "6" Then
+'                bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+'
+'                If (objMensagem.TipoMsg <> "") Then
+'                    GoTo ErrorHandler
+'                End If
+'
+'            End If
+            ''=================================================================
+            ''=================================================================
+            
+        
+        End If
+    
+    End If 'fim If (Produto_ID <> GbIDProdutoVIP) Then
+    
+    '=========================================================
+    '=========================================================
+    
+     'CALBAT - 05/10/2007 =======================================
+     'Tratar Acesso Paralelismo.                                =
+     'Verifica se a fase seguinte está preenchida, de Configuração está  =
+     'OK, caso esteja, inicia a fase de Tratar Centro Local              =
+     '===========================================================
+'     bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, Servico_ID)
+
+'        'Obtem ID_fase da Alocacao Configuraçao
+'        lIdFaseAlocacaoConfiguracao = objDadosFase.ObtemIDFase(objdadosServico.ID_SERVICO, GbCodigoFaseConfiguracao)
+
+
+'        If objMensagem.TipoMsg <> "" Then
+
+'             GoTo Finalizar
+
+'        End If
+
+'         bRetorno = objDadosFase.VerificaFaseFinalizada(lIdFaseAlocacaoConfiguracao)
+
+'         If bRetorno Then
+
+'            lIdFaseCentroLocal = objDadosFase.ObtemIDFase(objdadosServico.ID_SERVICO, GbCodigoFaseCentroLocal)
+
+'            'bRetorno = objDadosFase.CalculaPeriodoProximaFase(lIdFaseCentroLocal, objdadosServico.ID_SERVICO)
+             'iSeqAux = objDadosFase.ObtemSequenciadaFase(objdadosServico.ID_SERVICO, GbCodigoFaseConfigE1)
+
+'             'bRetorno = objDadosFase.CalculaPeriodoProximaFase(5, Servico_ID)
+'             bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao + 2, Servico_ID)
+
+'            If objMensagem.TipoMsg <> "" Then
+
+'                 GoTo Finalizar
+
+'            End If
+
+'         End If
+     
+     '===========================================================
+     '===========================================================
+     
+     'CALBAT - 18/08/2008 ========================================
+     'Projeto Portabilidade                                                                       =
+     'Verifica se o produto é VIPLINE IP e for um cancelamento e a         =
+     'proxima fase for a fase 35 ( Configuração NGN Acesso ), o sistema =
+     'deve gerar na tabela confserv_auto o código 35                               =
+     '============================================================
+     
+     
+     'CALBAT - 15/01/2009 ========================================
+     'Ajuste feito para acertar erro na gravação do confserv
+     '============================================================
+     'If (Produto_ID = GbIDProdutoVIP) And Sigla_Acao = "CAN" Then
+    If (Produto_ID = GbIDProdutoVIP) And Sigla_Acao = "CAN" And sReplicaInformações = False And FlagFaseFinalizadaOK Then
+     
+            'Finaliza confserv
+            bRetorno = ReplicaDadosAcesso(Servico_ID)
+     
+            If Not bRetorno Then
+            
+                GoTo ErrorHandler
+                
+            End If
+     
+'             lID_Fase_Seguinte = objDadosFase.ObtemIDFaseSeguinte(Servico_ID, Sequencia_Acao)
+'
+'             lCodigoFase = objDadosFase.ObtemCodigoFase(lID_Fase_Seguinte)
+'
+'             If lCodigoFase = 35 Then
+'
+'                     Dim objConfServAuto As VIP_NGN_AutoExec
+'
+'                     Set objConfServAuto = New VIP_NGN_AutoExec
+'
+'                     objConfServAuto.InformaBanco frmgenMDI_SGAPlus.objBanco
+'
+'                    bRetorno = objConfServAuto.VerificarRegistroFase(Servico_ID, 35, objMensagem)
+'
+'                    If bRetorno <> True Then
+'
+'                         objConfServAuto.CodigoTIpoFase = 35
+'                         objConfServAuto.ServicoID = Servico_ID
+'
+'                         bRetorno = objConfServAuto.IncluirDados(objMensagem)
+'
+'                         If (objMensagem.TipoMsg <> "") Then
+'                              GoTo ErrorHandler
+'                        End If
+'
+'                    End If
+'
+'                    bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, Servico_ID)
+'
+'                    If bRetorno = False Then
+'                        GoTo ErrorHandler
+'                    End If
+'
+'                    Set objConfServAuto = Nothing
+'
+'             End If
+     '============================================================
+     '============================================================
+     
+    End If
+     '===========================================================
+     '===========================================================
+     
+    bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao
+    
+    If Not bRetorno Then
+    
+        GoTo ErrorHandler
+        
+    End If
+    
+    GravarDados = True
+    
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+    If Not objWEBIP Is Nothing Then
+    
+        If objWEBIP.FlagExibeCritica Then
+        
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = objWEBIP.MsgCriticaSaip
+            objMensagem.ExibeMensagem
+            
+        End If
+        
+    End If
+        '========================================
+        '========================================
+
+    bFlagControlaAlteracao = False
+    objForm.FlControlaAlteracao = False
+    objForm.UsrVIPEquipComplementares.bFlagAlteracao = False
+    
+    If Not bFlagEnviaCLA Then
+
+        If objDadosAcesso.SegurancaAcesso = "S" Then 'Seguranca de Acesso
+              
+              If objDadosAcesso.CaracteristicaAcesso = "P" Then 'Acesso Principal
+                              
+                 
+                 If FlagFaseFinalizadaOK = True Then
+    
+                     objMensagem.TipoMsg = "A"
+                       
+                     objMensagem.Descricao = "Os Dados do Acesso Principal foram " & _
+                                            "atualizados com Sucesso!"
+                    
+                     FlagDescarregaForm = True
+                
+    '#########################
+    'adeil RN-SGAD-81746VNS 07/10/2003
+    'inicio
+    
+                ElseIf Not FlagFaseFinalizadaOK And Not FlagTemPendenciaEmAberto Then
+    
+                    objMensagem.TipoMsg = "A"
+                    
+                    objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                                   " Porém a fase continua em Andamento," & vbCrLf & _
+                                   " pois campos obrigatórios não foram preenchidos."
+        
+        
+                     FlagDescarregaForm = True
+                     
+                     If Not objForm.CmdAcessoPrincipal.Visible And (Produto_ID <> GbIDProdutoVIP) Then
+                     
+                        objForm.CmdAcessoContingente.Visible = True
+                        objForm.CmdAcessoPrincipal.Visible = True
+                     
+                     End If
+        
+        
+                ElseIf Not FlagFaseFinalizadaOK And FlagTemPendenciaEmAberto Then
+    
+                    objMensagem.TipoMsg = "A"
+    
+                    objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                                   " Porém a fase continua em andamento, devido a existência de pendência!"
+    'fim
+    '########### ##############
+                    
+                     FlagDescarregaForm = True
+                     
+                     If (Not objForm.CmdAcessoPrincipal.Visible) And (Produto_ID <> GbIDProdutoVIP) Then
+                     
+                        objForm.CmdAcessoContingente.Visible = True
+                        objForm.CmdAcessoPrincipal.Visible = True
+                     
+                     End If
+                 
+                 End If
+                 
+    '''             objMensagem.ExibeMensagem
+    '''             objMensagem.TipoMsg = ""
+    '''             objMensagem.Descricao = ""
+                 
+                 objForm.ssTabAcesso.Tab = 0
+              
+              Else
+                 
+                 objMensagem.TipoMsg = "A"
+                 
+                 If (FlagFaseFinalizadaOK = True) Then
+                 
+                    FlagDescarregaForm = True
+                           
+                    objMensagem.Descricao = "Os Dados do Acesso Contingente foram atualizados com Sucesso!"
+                           
+                 Else
+                 
+                    objMensagem.Descricao = _
+                                       vbCrLf & vbCrLf & _
+                                       "Os Dados do Acesso Contingente foram atualizados " & _
+                                      "com Sucesso! " & vbCrLf & _
+                                      "Porém a fase continua em Andamento."
+                 
+                    FlagDescarregaForm = False
+                    
+                 End If
+                 
+                 'objMensagem.ExibeMensagem
+              
+              End If
+              
+        Else
+                
+            'objMensagem.TipoMsg = "A"
+            
+            
+            'CALBAT - 05/10/2007 =====================================
+            'Tratar Acesso Paralelismo.                                                          =
+            '=========================================================
+            'If FlagFaseFinalizadaOK = True Then
+            If FlagFaseFinalizadaOK = True Then
+            '=========================================================
+            '=========================================================
+            
+                '=================================================================
+                'CALLBAT - 26/06/2013 - Interface junto ao CFM
+                'SO-ENGNQ-83669III
+                '=================================================================
+                'objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+                
+                If Acao_ID <> 8 And Acao_ID <> 9 Then
+                     objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+                    
+                ElseIf Acao_ID = 8 And objForm.UsrGenDadosAcessoTroncoTX.UsaTX = "S" Then
+                    objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!" & _
+                                    Chr(13) & " Favor desativar o Tronco TX no CFM!"
+                                    
+                ElseIf Acao_ID = 9 And objForm.UsrGenDadosAcessoTroncoTX.UsaTX = "S" Then
+                 objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!" & _
+                                    Chr(13) & " Favor cancelar o Tronco TX no CFM!"
+                Else
+                  objMensagem.TipoMsg = "A"
+                  objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+                End If
+                
+                '=================================================================
+                '=================================================================
+                
+                FlagDescarregaForm = True
+               
+    '#########################
+    'adeil RN-SGAD-81746VNS 07/10/2003
+    'inicio
+            'CALBAT - 05/10/2007 =====================================
+            'Tratar Acesso Paralelismo.                                                          =
+            '=========================================================
+            'ElseIf Not FlagFaseFinalizadaOK And Not FlagTemPendenciaEmAberto Then
+            ElseIf Not FlagTemPendenciaEmAberto Then
+            '=========================================================
+            '=========================================================
+                objMensagem.TipoMsg = "A"
+                
+                objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                               " Porém a fase continua em Andamento," & vbCrLf & _
+                               " pois campos obrigatórios não foram preenchidos."
+                               
+    
+                If DataFinalizacao <> "" Then
+                    FlagDescarregaForm = False
+                Else
+                    FlagDescarregaForm = True
+                End If
+    
+            ElseIf Not FlagFaseFinalizadaOK And FlagTemPendenciaEmAberto Then
+    
+                objMensagem.TipoMsg = "A"
+    
+                objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                               " Porém a fase continua em andamento, devido a existência de pendência!"
+                               
+                'CALBAT - 07/11/2007 =============================================
+                'Comentado por solicitação da AR Aline Silva , para que após salvar as
+                'informações gravadas sair da tela.
+                '=================================================================
+                FlagDescarregaForm = True
+                '=================================================================
+                '=================================================================
+                
+    'fim
+    '#########################
+            End If
+            'objMensagem.ExibeMensagem
+            
+            'FlagDescarregaForm = False
+            
+        End If
+        
+            'Trata ativação da OTS de Topologia pelo SAIP. IP VPN
+            'IP VPN
+            'Inicia a próxima Fase apenas se a OTS de Topologia estiver Ativada no SAIP.
+    '''        If (FlagFaseFinalizadaOK = True And _
+    '''                Produto_ID = GbIDProdutoBIV And _
+    '''                FlagFaseAguardaSAIPAtivarTopologia) Then
+    '''
+    '''                objMensagem.Descricao = objMensagem.Descricao & _
+    '''                    vbCrLf & vbCrLf & "Esta OTS estará disponível na fase Alocação/Configuração " & _
+    '''                                        "apenas após Ativação pelo SAIP da OTS de Topologia!"
+    '''        End If
+        If Trim(objMensagem.TipoMsg) <> "" Then
+                objMensagem.ExibeMensagem
+                objMensagem.TipoMsg = ""
+                objMensagem.Descricao = ""
+        End If
+    
+    End If
+    
+Finalizar:
+    Set objWEBIP = Nothing
+    Set objDadosDuracaoFase = Nothing
+    
+    Set objDadosFase = Nothing
+    Set ObjEqpto = Nothing
+    Set objDadosPropriedadeTerc = Nothing
+    Set objDadosAtivacaoFinal = Nothing
+    Set objDadosAnalisarOE = Nothing
+    
+    Exit Function
+    
+ErrorHandler:
+       
+    ' Cancelar Transação
+
+    If FlagIniciouTransacao Then
+       
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+    
+    End If
+    
+    If objMensagem.TipoMsg = "" And Err.Number <> 0 Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "GravarDados " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+       
+    objMensagem.ExibeMensagem
+
+    GoTo Finalizar
+       
+End Function
+
+Public Function GravarDadosPorId(plId As Long, bFlagEnviaCLA As Boolean) As Boolean
+
+    Dim objDadosFase                As New clsgenFase
+    Dim ObjEqpto                    As clsGenEqptoComplementar
+    Dim objDadosPropriedadeTerc     As clsGenPropriedadeTerceiros
+    Dim objWEBIP                    As clsInterOC_TrataWebIP
+    Dim objDadosAtivacaoFinal       As clsblf_AtivacaoFinalizacao
+    Dim objDadosAnalisarOE          As clsDNI_DadosAnalisarOE
+    Dim objOc_TrataEqptoCompl       As clsInterOC_TratarEqptoCompl
+   
+    Dim sSituacaoOTS                As String
+    Dim bRetorno                    As Boolean
+    Dim FlagIniciouTransacao        As Boolean
+    Dim numUltimaFaseRealizada      As Long
+    Dim bTemAcessoRedundante        As Boolean
+    Dim lIdContingencia             As Long
+    Dim lID_Fase_Seguinte           As Long
+    Dim lSeqUltimaFaseOTS           As Long
+    Dim iQtEquipamento              As Integer
+    Dim lIDEquip                    As Long
+    Dim lIDNGN                      As Long
+    Dim iSequenciaAcaoAux           As Integer
+    Dim FlagTemPendenciaEmAberto    As Boolean
+    Dim FlagFaseFinalizadaOK        As Boolean
+    Dim FlagTemPendenciaCliente     As Boolean
+    Dim FlagManterPeriodo           As Boolean
+    Dim bFlagIniciaFaseConf         As Boolean
+    
+    Dim lIdFaseCentroLocal          As Long
+    Dim lIDCentroFuncional          As Long
+    Dim iSeqAux                     As Integer
+    
+    Dim lIdFaseAlocacaoConfiguracao As Long
+    
+    Dim sCodigoCFCentroLocal        As String
+    Dim sDesignacaoSOE              As String
+    Dim bRetornoCriticaOk           As Boolean
+    Dim bFlagNaoExecutaCentroLocal  As Boolean
+    Dim objDadosDuracaoFase         As clsgenDuracaoFase
+    Dim oobjAcesso                  As clsGenAcesso
+    
+    Dim objDadosIntegracaoWebip As clsBlf_IntegracaoWebIP
+    Dim sOTSAux As String
+    
+    
+    '=================================================================
+    'CALLBAT - 05/07/2012 - BSoD Light II
+    '=================================================================
+    Dim lIdFaseConfiguracao          As Long
+    '=================================================================
+     
+    '' ----===========================================================
+    '' --- FABIMENDONCA- 10/2019- CH-95954OTQ
+    Dim lIDFase_PreAtivacao         As Long
+    Dim lIDFase_CentroFunc          As Long
+    Dim lIDFase_CentroLocal         As Long
+    Dim objDadosTratarCentroLocal   As New clsblf_CentroLocal
+    Dim sDescricao_CF               As String
+    Dim laux                        As Long
+    '' ----===========================================================
+   
+    
+    '===========================================
+    Dim lCodigoFase                 As Long
+    Dim bFlagAcessosOk              As Boolean
+    Dim iAux                        As Integer
+    Dim sVar                        As Variant
+    Dim lAcessoID                   As Long
+   
+      
+    sReplicaInformações = False
+
+    On Error GoTo ErrorHandler
+    
+    ReDim vMensagemListaMsg(1)
+    
+    FlagIniciouTransacao = False
+    
+    GravarDadosPorId = False
+    
+    bRetornoCriticaOk = True
+    
+    '-- Lê todos os itens da Coleção de acessos e para cada item, critica o preenchimento dos campos. Caso todos estejam preenchidos OK,
+    '-- procede com a gravação dos dados de cada item, caso não estejam preenchidos, grava a fase parcialmente
+    
+    Call ArmazenaDadosPorAcesso(plId, objForm.SpdListaAcessos.ActiveRow)
+    
+    bFlagAcessosOk = True
+    iAux = 0
+    
+    If Sigla_Acao <> "CAN" And Sigla_Acao <> "DES" Then
+        
+        For iAux = 1 To objForm.SpdListaAcessos.DataRowCnt
+            
+            objForm.SpdListaAcessos.Row = iAux
+            objForm.SpdListaAcessos.Col = 5
+            
+            
+            'If Trim(objForm.UsrBLFCabecalho_Acesso.BandaLarga) <> "S" Then
+            
+                If CBool(objForm.SpdListaAcessos.Value) = False Then
+                    
+                    bFlagAcessosOk = False
+                
+                End If
+            'End If
+            
+        Next iAux
+    
+    End If
+    
+    If Acao_ID <> 9 Then
+        
+        If Not bFlagAcessosOk And FlagStatusAcessoCLA = "2" Then
+        
+            objMensagem.Descricao = "Existe(m) dados de acesso ainda pendentes de preenchimento correto!"
+            objMensagem.TipoMsg = "A"
+            objMensagem.ExibeMensagem
+            
+            objForm.ssTabAcesso.TabIndex = 0
+            
+'            GoTo Finalizar
+        
+        End If
+    
+    End If
+    
+    'Inicia a Transacao
+    bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+        
+    If Not bRetorno Then
+        
+        GoTo ErrorHandler
+    
+    End If
+    
+    FlagIniciouTransacao = True
+    
+    iAux = 0
+    
+    bRetornoCriticaOk = True
+    
+    For Each oobjAcesso In cColecaoAcessos
+     
+        iAux = iAux + 1
+'        Set oobjAcesso = cColecaoAcessos.Item(iAux)
+
+        If (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+        '=========================================================
+        '=========================================================
+'           Call CarregaDadosAcessoCLA(CLng(oobjAcesso.iD))
+           
+           
+           If VerPreenchimentoInstancia(oobjAcesso) = "N" Then
+                       
+              bRetornoCriticaOk = False
+           
+           End If
+           
+           If bRetornoCriticaOk = False Then
+                
+                FlagDescarregaForm = False
+           
+           End If
+           
+        End If
+
+        'Atualiza dados de Acesso
+        
+        oobjAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+        oobjAcesso.InformaMensagem objMensagem
+        
+        '=================================================================
+        'CALLBAT - 26/06/2013 - Interface junto ao CFM
+        'SO-ENGNQ-83669III
+        '=================================================================
+        oobjAcesso.UtilizaTroncoTX = objForm.UsrGenDadosAcessoTroncoTX.UsaTX
+        
+        objMensagem.TipoMsg = ""
+        objMensagem.Descricao = ""
+        
+        '=================================================================
+        '=================================================================
+         
+        If oobjAcesso.IdFisico <> "" Then
+            
+            If oobjAcesso.FaseExistentePorIdFisico(Fase_ID, oobjAcesso.IdFisico) Then
+             
+                Gravar = oobjAcesso.AtualizarDadosPorId(oobjAcesso.iD)
+            Else
+                Gravar = oobjAcesso.IncluirDados(Fase_ID)
+                 
+                 oobjAcesso.iD = oobjAcesso.ObtemIDPorAcessoFisico(Fase_ID, oobjAcesso.IdFisico, oobjAcesso.CaracteristicaAcesso)
+            
+            End If
+        Else
+            Gravar = oobjAcesso.AtualizarDadosPorId(oobjAcesso.iD)
+        
+        End If
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+
+        'Caso Tenha gravado Acesso OK
+        If (Gravar) Then
+            
+            If oobjAcesso.PropridedadeAcesso = "E" Then    'Propriedade Embratel
+    
+                'bRetorno = DataFinalizacao
+    
+                'Grava dados Propriedade Embratel
+                bRetorno = GravaDadosPropriedadeEmbratel(oobjAcesso)
+                
+                If Not bRetorno Then
+                
+                    GoTo ErrorHandler
+                
+                End If
+            
+            Else
+                'AGRC - BSOD UNIFICADO - 21/07/014 - INCLUIR MIGRAÇÃO DE ACESSO NO BOOK
+                If (Sigla_Acao <> "ATV" And Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+                    If (objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "N" Or objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "V") And objForm.CboTipoAcessoTerceiro.ListIndex = 8 Then
+                         
+                          If objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "N" Then
+                            If Trim(TextoAnotacao) <> "" Then
+                                TextoAnotacao = TextoAnotacao & " -" & " Troca de HFC BSOD NET para HFC BSOD em função da migração de acesso. "
+                            Else
+                                TextoAnotacao = "Troca de HFC BSOD NET para HFC BSOD em função da migração de acesso. "
+                            End If
+                          Else
+                             If Trim(TextoAnotacao) <> "" Then
+                                TextoAnotacao = TextoAnotacao & " -" & " Troca de HFC BSOD VIA para HFC BSOD em função da migração de acesso. "
+                            Else
+                                TextoAnotacao = "Troca de HFC BSOD VIA para HFC BSOD em função da migração de acesso. "
+                            End If
+                          End If
+                          objblfOC_SelecionarOTS.Anotacao = TextoAnotacao
+                    End If
+                End If
+       
+                'Grava dados Propriedade Terceiros
+                bRetorno = GravaDadosPropriedadeTerceiros(oobjAcesso)
+                
+                If Not bRetorno Then
+                
+                    GoTo ErrorHandler
+                
+                End If
+            
+            End If
+            
+        
+            'Se existia Seguranca de acesso e não mais, o acesso Contingente deve ser excluido
+'            If SegurancaAcessoAnterior = "S" And objForm.optSegurancaAcesso(1).Value = True Then
+            
+'              lIdContingencia = objDadosAcesso.ObtemIDContingencia(Fase_ID, "C")
+           
+'               bRetorno = ExcluiAcesso("C", lIdContingencia)
+            
+'               If objmensagem.TipoMsg <> "" Then
+                    
+'                  GoTo ErrorHandler
+                 
+'               End If
+            
+'            End If
+        End If
+        
+        If Produto_ID <> GbIDProdutoVIP Then  'Tratamento abaixo serve para todos os
+                                                      'produtos exceto VIPLINE IP
+        
+            'Grava dados de Equipamentos Complementares
+            iQtEquipamento = 0
+            
+            Set oobjAcesso = cColecaoAcessos.Item(1)
+            
+            For Each ObjEqpto In oobjAcesso.objColecaoEqpto
+                
+                iQtEquipamento = iQtEquipamento + 1
+                
+                ObjEqpto.InformaBanco frmgenMDI_SGAPlus.objBanco
+                
+                If Val(ObjEqpto.TipoEquipamento) <> 0 Then
+                    
+                    If TipoOperacao = "I" Then
+                    
+                        ObjEqpto.iD = 0
+                        
+                    End If
+                    
+                    
+                    ObjEqpto.Equipamento_ID = ObjEqpto.TipoEquipamento
+                    
+                    If ObjEqpto.iD = 0 Then 'Inclusao
+                       
+                       ObjEqpto.Fase_ID = Fase_ID
+                       
+                       bRetorno = ObjEqpto.IncluirDados("E", oobjAcesso.iD, objMensagem)
+                     
+                       If bRetorno Then
+                          
+                          lIDEquip = ObjEqpto.ObtemID(iQtEquipamento, oobjAcesso.iD, objMensagem)
+                       
+                       End If
+                       
+                       Select Case iQtEquipamento
+                              Case 1
+                                    objForm.TxtIDEquipamento1.Text = lIDEquip
+                              Case 2
+                                    objForm.TxtIDEquipamento2.Text = lIDEquip
+                              Case 3
+                                    objForm.TxtIDEquipamento3.Text = lIDEquip
+                       End Select
+                       
+                    Else
+                                       
+    '                           bRetorno = ObjEqpto.AtualizarDados("E", objDadosAcesso.iD, ObjEqpto.iD, objmensagem)
+                       
+                       bRetorno = ObjEqpto.AtualizarDadosPorFase(Fase_ID, objMensagem)
+                                       
+                    End If
+                    
+                Else
+                
+                    If TipoOperacao <> "I" And ObjEqpto.iD <> 0 Then  'Atualizacao
+                    
+    '                           bRetorno = ObjEqpto.ExcluirDados(objDadosAcesso.iD, ObjEqpto.iD, objmensagem)
+                       bRetorno = ObjEqpto.ExcluirDadosPorFase(Fase_ID, objMensagem)
+                    
+                    End If
+                    
+                End If
+                
+                If objMensagem.TipoMsg <> "" Then
+                 
+                   GoTo ErrorHandler
+                
+                End If
+                
+            Next
+        Else
+            If Grupo_ID = GbIDGrupoVLI Then   'Se vipline IP
+            
+                Set objOc_TrataEqptoCompl = New clsInterOC_TratarEqptoCompl
+                
+                objOc_TrataEqptoCompl.InformaMensagem objMensagem
+                
+                Call objOc_TrataEqptoCompl.GravarDadosEqptos(oobjAcesso.iD, objForm, Fase_ID)
+                
+                'Obtem os dados de Equipamento Complementar
+                bRetorno = oobjAcesso.RecuperarDadosEquipamentos(oobjAcesso.iD, objMensagem)
+                  
+                If objMensagem.TipoMsg <> "" Then
+                    
+                   GoTo ErrorHandler
+                 
+                End If
+                
+                Call objForm.UsrVIPEquipComplementares.CarregarGridEqpto(oobjAcesso.objColecaoEqpto)
+                
+                If (AcessoConstruidoFaseID <> 0 And Me.TipoOperacao = "I") Or _
+                 ((Sigla_Acao = "DES" Or Sigla_Acao = "CAN") And (lGrupo_ID = GbIDGrupoVLI)) Then
+        
+                    bRetorno = objOc_EqptoNGN.GravarEqptoExistente(objForm.UsrVIPDadosSwitch.EquipamentoID, _
+                                                                   Fase_ID, _
+                                                                   objMensagem)
+                    If Not bRetorno Then
+                    
+                        GoTo ErrorHandler
+                    
+                    End If
+                
+                End If
+                
+            End If
+            
+            If objMensagem.TipoMsg <> "" Then
+               
+               GoTo ErrorHandler
+            
+            End If
+        
+        End If
+    
+    Next
+            
+    bFlagNaoExecutaCentroLocal = False
+    
+    'JRCRUZ - 22/02/2007
+    'If Produto_ID = GbIDProdutoVIP Then
+    If Grupo_ID = GbIDGrupoVLI Then
+    
+        If bRetornoCriticaOk And objForm.optExecCentroLocal(1).Value = True Then
+            
+            objMensagem.TipoMsg = "Q"
+            objMensagem.Descricao = "A fase Tratar Centro Local não será executada! Confirma S/N? "
+            
+            If objMensagem.ExibeMensagem = "S" Then
+            
+               bFlagNaoExecutaCentroLocal = True
+               
+            Else
+            
+               bRetornoCriticaOk = False
+               
+            End If
+        
+        End If
+        
+    End If
+    
+    bRetorno = objdadosServico.RecuperarDados(Servico_ID)
+    
+    If (objMensagem.TipoMsg <> "") Then
+       
+       GoTo ErrorHandler
+       
+    End If
+    
+    sSituacaoOTS = objdadosServico.StatusServico
+    
+    If (sSituacaoOTS = "CAN" Or sSituacaoOTS = "CR") Then
+       
+       objMensagem.TipoMsg = "A"
+       objMensagem.Descricao = "Esta OTS foi paralisada pelo SOE!"
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+    
+    End If
+
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+
+    If (Not objDadosFase.RecuperarSituacaoFase(Fase_ID)) And _
+       DataFinalizacao = "" Then
+
+       Set objDadosFase = Nothing
+       objMensagem.ExibeMensagem
+
+       GravarDadosPorId = True
+
+       GoTo Finalizar
+    
+    Else
+       
+       objMensagem.TipoMsg = ""
+    
+    End If
+
+    'Checa se o produto pode alocar vários CFs para a fase Tratar Centro Local
+    Set objDadosDuracaoFase = New clsgenDuracaoFase
+    objDadosDuracaoFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosDuracaoFase.InformaMensagem objMensagem
+
+    'Obtem o número da última fase realizada
+    numUltimaFaseRealizada = objDadosFase.ObtemSequenciaUltimaFaseRealizada(Servico_ID, _
+                                         GbCodigoFaseProgramarCPE, Familia_Produto)
+
+    If (objMensagem.TipoMsg <> "") Then
+       
+       objMensagem.ExibeMensagem
+       GoTo Finalizar
+    
+    End If
+
+    If Familia_Produto = "D" And objdadosServico.DataRealizacao = "" Then
+            
+        bRetorno = VerificaUltimaVersaoContratoDNI(Servico_ID, objdadosServico.VersaoContrato, objMensagem)
+        
+        If Not bRetorno Then
+        
+            GoTo Finalizar
+            
+        End If
+        
+    End If
+   
+    'Verifica se Existe pendencia a ser incluida
+'    If Produto_ID = GbIDProdutoBLF Or Produto_ID = GbIDProdutoWID Then
+    If (Familia_Produto = "I") Then
+        
+        If (objDadosPendencia.ColecaoPendencia.Count <> 0) Then
+           
+           bRetorno = objDadosPendencia.AtualizarDados(Fase_ID, Servico_ID, _
+                                                       Produto_ID, FlagTemPendenciaEmAberto, _
+                                                       objdadosServico.DiretorRegional, _
+                                                       objdadosServico.NumOE, _
+                                                       objdadosServico.AnoOE, _
+                                                       objdadosServico.ItemOE)
+           
+           If (Not bRetorno) Then
+              GoTo ErrorHandler
+           End If
+           
+        End If
+    
+    ElseIf (Familia_Produto = "D") Then
+    
+        'Verifica se Existe pendencia a ser incluida
+        If (objPendencia.Tipo_Pendencia_ID <> 0 And Flag_Atualiza_Pendencia) Then
+            
+           objPendencia.Fase_ID = Fase_ID
+            
+           objPendencia.Servico_ID = Servico_ID
+           
+           objPendencia.Codigo_Tipo_Fase = GbCodigoFaseAcesso
+           '---------------------------------------------------
+           objPendencia.InformaBanco frmgenMDI_SGAPlus.objBanco
+           objPendencia.InformaMensagem objMensagem
+        
+           If (objPendencia.Operacao = "R") Then
+               
+              bRetorno = objPendencia.Retirar(objPendencia.iD)
+              
+              FlagTemPendenciaEmAberto = False
+            
+           Else
+               
+              objPendencia.Servico_ID = Servico_ID
+              
+              bRetorno = objPendencia.IncluirDados
+              
+              bRetorno = objPendencia.RecuperarDados(Fase_ID)
+              
+              FlagTemPendenciaEmAberto = True
+            
+           End If
+            
+           If (Not bRetorno) Then
+              
+              GoTo ErrorHandler
+              
+           End If
+            
+        Else
+            
+            If (objPendencia.Tipo_Pendencia_ID <> 0) Then
+                
+                FlagTemPendenciaEmAberto = True
+                
+            End If
+            
+        End If
+    
+    End If
+    
+    'Grava Anotacao da fase
+    If Trim(TextoAnotacao) <> "" Then
+       
+       bRetorno = objblfOC_SelecionarOTS.GravarAnotacaoGen(False)
+         
+       If (objMensagem.TipoMsg <> "") Then
+       
+          GoTo ErrorHandler
+          
+       End If
+    
+    End If
+     
+    'If TipoOperacao = "I" Then  'Indica que a fase está sendo gravada pela 1a vez
+    
+        '=================================================================
+        'CALLBAT - 21/05/2012 - BSoD Net Light
+        'Inclusão do usuário que efetuou a ação.
+        '=================================================================
+        objDadosFase.Usuario_ID = GbID_Usuario
+        '=================================================================
+        '=================================================================
+       bRetorno = objDadosFase.IniciaFase(Fase_ID, GbID_Usuario)
+       
+       If (objMensagem.TipoMsg <> "") Then
+       
+          GoTo ErrorHandler
+          
+       End If
+       
+        '==================================================================================================
+        'CALLBAT - 05/07/2012 - BSoD Light II
+        'Como não há a fase do SAIP, nesse ponto devemos finalizar a TRATAR ALOCAÇÃO CONFIGURACAO
+        '==================================================================================================
+        If objForm.CboTipoAcessoTerceiro.ListIndex = 5 Then
+
+
+            'Captura Fase AlocaçãoConfiguração
+            lIdFaseConfiguracao = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseConfiguracao)
+
+            If (objMensagem.TipoMsg <> "") Then
+                GoTo ErrorHandler
+            End If
+
+            If Not objDadosFase.VerificaFaseFinalizada(lIdFaseConfiguracao) Then
+
+                If (objMensagem.TipoMsg <> "") Then
+                    GoTo ErrorHandler
+                End If
+                objDadosFase.Usuario_ID = GbID_Usuario
+                'Inicia a Fase Configuração
+                bRetorno = objDadosFase.IniciaFase(lIdFaseConfiguracao, GbID_Usuario)
+
+                If (objMensagem.TipoMsg <> "") Then
+                   GoTo ErrorHandler
+                End If
+
+
+                '=================================================================
+                'CALLBAT - 21/05/2012 - CH-43184DVM
+                'Inclusão do usuário que efetuou a ação.
+                '=================================================================
+                 objDadosFase.Usuario_ID = GbID_Usuario
+                '=================================================================
+                '=================================================================
+
+                'Finaliza a Fase Configuração
+                bRetorno = objDadosFase.FinalizaFase(lIdFaseConfiguracao)
+
+                If (objMensagem.TipoMsg <> "") Then
+                   GoTo ErrorHandler
+                End If
+
+            End If
+
+        End If
+        '==================================================================================================
+        '==================================================================================================
+       
+    'End If
+    
+    FlagFaseFinalizadaOK = False
+    
+    If (bRetornoCriticaOk And FlagTemPendenciaEmAberto = False) And FlagStatusAcessoCLA = "2" And bFlagAcessosOk Then
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+        If Trim(objForm.TxtEstacaoConfiguracao.Text) = "" Or objForm.CboPadraoInterfaceEBT.ListIndex <= 0 Then
+        
+            '==============================================================
+            ' TBASTOS - 20/11/2016
+            ' CH-25385REE
+            ' Verifica o tipo de acesso e não critica se for BSoD Light
+            '==============================================================
+            'bRetornoCriticaOk = False
+            If objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+                    bRetornoCriticaOk = False
+            End If
+        End If
+        
+    End If
+        '========================================
+        '========================================
+    If (bRetornoCriticaOk And FlagTemPendenciaEmAberto = False) And FlagStatusAcessoCLA = "2" And bFlagAcessosOk Then
+        If Produto_ID = GbIDProdutoVIP Then
+           
+           Call TratarFechamentoporPacote
+        
+        End If
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+            GoTo ErrorHandler
+        
+        End If
+
+       If (DataFinalizacao = "") Then
+       
+          'Para OTS de Cancelamento e Desativacao, não será necessário calcular o periodo
+          'para a fase seguinte já que todas as fases após a fase de Alocacao, são executadas
+          'em paralelo
+          
+          If (Sigla_Acao <> "CAN" And Sigla_Acao <> "DES") And _
+                (Familia_Produto = "I") Then
+
+                If (Produto_ID <> GbIDProdutoJAH) And (Produto_ID <> GbIDProdutoVIP) Then
+                
+                    'Tratar Centro Local
+                    'Uma OTS de cancelamento pode não gerar Fase Tratar Centro Local Aquino IP VPN
+                    'Está fora do bloco que checa várias fases pois o retorno é verificado
+                    'no Else
+                    lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseCentroLocal)
+                    
+                    If (objMensagem.TipoMsg <> "") Then
+                        GoTo ErrorHandler
+                    End If
+                    
+                    'Checa se o produto pode alocar vários CFs para a fase Tratar Centro Local
+                    If objDadosDuracaoFase.ChecaPermissaoMultiplosCF(Produto_ID, GbCodigoFaseCentroLocal) Then
+            
+                        'Verifica se a fase Centro local já foi finalizada,
+                        'Caso o método retorne 0, indica que a fase Centro Local ainda não foi finalizada
+                        If objDadosFase.ObtemSequenciaFaseFinalizada(Servico_ID, GbCodigoFaseCentroLocal) = 0 And (lIdFaseCentroLocal > 0) Then
+                    
+                            'Carrega a tela Alocação de Centro Funcional e atualiza os CFs alocados
+                            bRetorno = CarregarFormCFsDaFase(lIdFaseCentroLocal)
+                              
+                            If (Not bRetorno) Then
+                                GoTo ErrorHandler
+                            End If
+                            
+                    
+                             '=================================================================
+                             'CALLBAT - 05/07/2012 - BSoD Net Light II
+                             '=================================================================
+                             lIdFaseConfiguracao = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseConfiguracao)
+                             
+                             If objDadosFase.VerificaFaseFinalizada(lIdFaseConfiguracao) Then
+                                    bRetorno = objDadosFase.CalculaPeriodoProximaFase((Sequencia_Acao + 1), Servico_ID)
+                                    If (objMensagem.TipoMsg <> "") Then
+                                       GoTo ErrorHandler
+                                    End If
+                             End If
+                             '=================================================================
+                             '=================================================================
+            
+                            End If 'ObtemSequenciaFaseFinalizada
+                        
+                    End If  'ChecaPermissaoMultiplosCF
+                
+                End If  '(Produto_ID <> GbIDProdutoJAH)
+        
+                'Caso seja uma Desativacao ou Cancelamento, a fase de Configuração será executada
+                'em paralelo com a fase de Acesso, portanto a atualização da tabela de Integração,
+                'será feita ao final da fase de Alocação de Centro Funcional
+                
+                iSequenciaAcaoAux = Sequencia_Acao
+                'Verifica se fase Tratar Centro Local deve ser executada ou não.
+                
+                'JRCRUZ - 22/02/2007
+                'If (Produto_ID = GbIDProdutoVIP) Then
+                If (Grupo_ID = GbIDGrupoVLI) Then
+                    
+                    'Caso o usuario opte por não executar a fase Tratar Centro Local
+                    If objForm.optExecCentroLocal(1).Value = True And _
+                       bFlagNaoExecutaCentroLocal Then
+                        
+                        lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, _
+                                                                     GbCodigoFaseCentroLocal)
+                        
+                        If lIdFaseCentroLocal <> 0 Then
+                           
+                           bRetorno = objDadosFase.RetirarPeriodoPrevisto(lIdFaseCentroLocal)
+                        
+                        End If
+                        
+                        'Obter a sequencia acao da fase posterior a fase Centro Local
+                        iSequenciaAcaoAux = objDadosFase.ObtemSequenciadaFase(Servico_ID, _
+                                                                   GbCodigoFaseCentroLocal)
+                    
+                    End If
+                    
+                End If
+                                
+                'Calcula o período para a proxima fase
+                
+                lID_Fase_Seguinte = objDadosFase.ObtemIDFaseSeguinte(Servico_ID, iSequenciaAcaoAux)
+            
+                If objMensagem.TipoMsg <> "" Then
+                   
+                    GoTo ErrorHandler
+                 
+                End If
+                
+                If objDadosFase.ObtemDataFimPrevisto(lID_Fase_Seguinte) = "" Then
+                    
+                    bRetorno = objDadosFase.CalculaPeriodoProximaFase(iSequenciaAcaoAux, Servico_ID)
+                    
+                    If (objMensagem.TipoMsg <> "") Then
+                      
+                      GoTo ErrorHandler
+                    
+                    End If
+'                Else
+'                    'Caso a fase de configuracao ja esteja finalizada, calcular o periodo previsto para a fase centro local
+'                    If objDadosFase.ObtemCodigoFase(lID_Fase_Seguinte) = "7" Then
+'
+'                        If objDadosFase.ObtemDataFimReal(lID_Fase_Seguinte) <> "" Then
+'
+'                            bRetorno = objDadosFase.CalculaPeriodoProximaFase(iSequenciaAcaoAux + 1, Servico_ID)
+'
+'                            If (objMensagem.TipoMsg <> "") Then
+'
+'                              GoTo ErrorHandler
+'
+'                            End If
+'
+'
+'                        End If
+'
+'                    End If
+                    
+                End If
+                
+          ElseIf (Familia_Produto = "D") Then
+            
+             'Calcula o período para a proxima fase
+             bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, Servico_ID, "D")
+          
+             If (objMensagem.TipoMsg <> "") Then
+            
+                 GoTo ErrorHandler
+                
+             End If
+            
+          End If
+          
+          If (Familia_Produto = "D") Then
+              
+              'Obtem a sequencia_acao da última fase existente para a OTS
+              lSeqUltimaFaseOTS = objDadosFase.ObtemSequenciaUltimaFase(Servico_ID, _
+                                                                        Familia_Produto)
+
+              If (objMensagem.TipoMsg <> "") Then
+            
+                 objMensagem.ExibeMensagem
+                 
+                 GoTo Finalizar
+            
+              End If
+              
+              If (Sequencia_Acao = lSeqUltimaFaseOTS) Then
+                 
+                 Set objDadosAnalisarOE = New clsDNI_DadosAnalisarOE
+
+                 objDadosAnalisarOE.InformaMensagem objMensagem
+                 objDadosAnalisarOE.InformaBanco frmgenMDI_SGAPlus.objBanco
+               
+                 sDesignacaoSOE = Trim(objForm.UsrDNICabecalhoAcesso.CNLPontaA) & "/" & _
+                                  Trim(objForm.UsrDNICabecalhoAcesso.CNLPontaB) & "/" & _
+                                  Trim(objForm.UsrDNICabecalhoAcesso.CodigoNP) & "/"
+                                  
+                 If Produto_ID = GbIDProdutoDiginet Then
+               
+                   sDesignacaoSOE = sDesignacaoSOE & _
+                                Format(objForm.UsrDNICabecalhoAcesso.SequencialDesig, "0000")
+               
+                 Else
+                   
+                   sDesignacaoSOE = sDesignacaoSOE & _
+                            Format(objForm.UsrDNICabecalhoAcesso.SequencialDesig, "0000000")
+               
+                 End If
+
+                 bRetorno = objDadosAnalisarOE.EncerraWorkFlow(Servico_ID, _
+                                                     Servico_ID_Anterior, _
+                                                     AnoOE, NumeroOE, NumeroItemOE, _
+                                                     "02", GbUsuario, _
+                                                     sDesignacaoSOE, _
+                                                     Sigla_Acao, _
+                                                     objdadosServico)
+              
+                Set objDadosAnalisarOE = Nothing
+                
+                If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+                
+                   objdadosServico.FinalizaServico (Servico_ID)
+                
+                End If
+                
+              End If
+          
+          End If
+          
+          
+        '=================================================================
+        'CALLBAT - 21/05/2012 - BSoD Net Light
+        'Inclusão do usuário que efetuou a ação.
+        '=================================================================
+            objDadosFase.Usuario_ID = GbID_Usuario
+        '=================================================================
+        '=================================================================
+        
+        '=================================================================
+        'AGRC - 15/01/2015 - CH-58474KFY
+        'Chamado CH-35920CGP implantado em 15/01/2015 de forma incorreta. Retornado o codigo anterior.Necessario refazer chamado CH-35920CGP.
+        '=================================================================
+         bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+
+          If (objMensagem.TipoMsg <> "") Then
+
+             GoTo ErrorHandler
+
+          End If
+        '=================================================================
+        '=================================================================
+        
+        ''=================================================================
+        ''CALLBAT - 21/05/2012 - CH-35920CGP
+        ''Causa raiz implementada para impedir que seja finalizada a OTS, em
+        ''caso de rejeição do CLA
+        ''=================================================================
+''          bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+
+''          If (objMensagem.TipoMsg <> "") Then
+''             GoTo ErrorHandler
+''          End If
+          
+          'If FlagStatusAcessoCLA = "6" Then
+            
+            'bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+        
+            'If (objMensagem.TipoMsg <> "") Then
+              'GoTo ErrorHandler
+            'End If
+        
+          'End If
+          
+        ''=================================================================
+        ''=================================================================
+          
+       End If
+       
+       FlagFaseFinalizadaOK = True
+       
+    Else
+       
+       'Caso a fase já tenha sido finalizada e uma pendencia tenha sido incluida,
+       'A fase deverá ser considerada como Em Andamento
+       If (DataFinalizacao <> "") Then
+
+          objDadosFase.ID_Servico = Servico_ID
+          objDadosFase.Id_Fase = Fase_ID
+                 
+          'Quando for OTS de Desativacao ou Cancelamento, o periodo previsto para a fase seguinte
+          'deverá ser mantido já que as fases para estas ações serão executadas em paralelo.
+         
+          If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+         
+             FlagManterPeriodo = True
+             
+          Else
+         
+             FlagManterPeriodo = False
+         
+         End If
+        
+         bRetorno = objDadosFase.RetirarFinalizacaoFase(Servico_ID, Fase_ID, _
+                                       Sequencia_Acao, FlagManterPeriodo, Familia_Produto)
+             
+         If objMensagem.TipoMsg <> "" Then
+               
+            Set objDadosFase = Nothing
+            
+            GoTo ErrorHandler
+             
+         End If
+       
+       End If
+    
+       DataFinalizacao = ""
+       
+    End If
+        
+    'Comentado por CALBAT em 27/01/2008 ==================================
+    
+    'Quando for uma OTS de Cancelamento ou Desativacao, verifica se
+    'as fases que estão sendo executadas em paralelo já foram finalizadas
+    'caso Todas as outras fases já estejam finalizadas, o sistema deverá finalizar
+    'o Servico.
+    
+    'If FlagStatusAcessoCLA = "0" Or (FlagStatusAcessoCLA = "2") And DataFinalizacao = "" And bFlagAcessosOk Then
+     
+        'Obtem ID_fase da Alocacao Configuraçao
+    lIdFaseAlocacaoConfiguracao = objDadosFase.ObtemIDFase(objdadosServico.ID_Servico, _
+                                                           GbCodigoFaseConfiguracao)
+
+    If objMensagem.TipoMsg <> "" Then
+
+         GoTo Finalizar
+
+    End If
+
+    If lIdFaseAlocacaoConfiguracao <> 0 Then
+
+        bFlagIniciaFaseConf = False
+        
+                '-- DIF 15/10/2012 -- VCBDIF -- FALTOU ALTERAR A CONDIÇÃO <>-1 PARA > 0
+        'If Trim(objForm.TxtEstacaoConfiguracao.Text) <> "" And _
+        '   objForm.CboPadraoInterfaceEBT.ListIndex <> -1 And _
+        '   Trim(objForm.UsrBLFCabecalho_Acesso.Velocidade) <> "" Then
+
+        If Trim(objForm.TxtEstacaoConfiguracao.Text) <> "" And _
+           objForm.CboPadraoInterfaceEBT.ListIndex > 0 And _
+           Trim(objForm.UsrBLFCabecalho_Acesso.Velocidade) <> "" Then
+                '----------------------------------------------------------------------
+
+           bFlagIniciaFaseConf = True
+      '==================================================================================================
+      'CALLBAT - 05/07/2012 - BSoD Light II
+      '==================================================================================================
+        'ElseIf Trim(objForm.UsrBLFCabecalho_Acesso.BandaLarga) = "S" Then
+            'bFlagIniciaFaseConf = True
+      '==================================================================================================
+      '==================================================================================================
+        ElseIf (Sigla_Acao = "CAN" Or Sigla_Acao = "DES") Then
+           
+           bFlagIniciaFaseConf = True
+        
+        End If
+        
+        If objForm.optPropriedadeAcesso(1).Value = True And bFlagIniciaFaseConf = True Then
+            
+            
+            '==================================================================================================
+            'CALLBAT - 05/07/2012 - BSoD Light II
+            '==================================================================================================
+            'No caso de BSOD NET ou VIA não o sistema não deve iniciar o paralelismo
+            '==================================================================================================
+            'TBASTOS 09/12/2016
+            'CH-62822UKO - Adicionar condição de BSOD Light para impedir paralelismo.
+            '==================================================================================================
+            'If (objForm.CboTipoAcessoTerceiro.ListIndex = 3 Or objForm.CboTipoAcessoTerceiro.ListIndex = 6) And FlagStatusAcessoCLA <> "2" Then
+            If (objForm.CboTipoAcessoTerceiro.ListIndex = 3 Or objForm.CboTipoAcessoTerceiro.ListIndex = 6 Or (objForm.CboTipoAcessoTerceiro.ListIndex = 5)) And FlagStatusAcessoCLA <> "2" Then
+                bFlagIniciaFaseConf = False
+                
+            End If
+
+            'No caso de BSOD NET o sistema deve calcular o periodo para a fase Centro Local, uma vez que para este tipo de acesso, a
+            'configuracao é executada antes do envio do acesso para o CLA.
+            
+            '==================================================================================================
+            'Alteração efetuada pelo analista Vagner Brandão em 23/01/2014
+            'para atender ao chamado de produção
+            '==================================================================================================
+            'If objForm.CboTipoAcessoTerceiro.ListIndex = 4 And FlagStatusAcessoCLA = "2"  Then
+            If objForm.CboTipoAcessoTerceiro.ListIndex = 4 And FlagStatusAcessoCLA = "2" And objdadosServico.FlagMotivoCorrecao <> "A" Then
+            '==================================================================================================
+            '==================================================================================================
+                bFlagIniciaFaseConf = False
+                
+            'ElseIf objForm.CboTipoAcessoTerceiro.ListIndex = 3 And FlagStatusAcessoCLA = "2" Then
+            
+            '    bFlagIniciaFaseConf = True
+            
+            End If
+        
+        ElseIf objForm.optPropriedadeAcesso(0).Value = True And bFlagIniciaFaseConf = True Then
+        
+            If objForm.CboTipoAcessoEmbratel.ListIndex = 4 And FlagStatusAcessoCLA <> "2" Then
+            
+                bFlagIniciaFaseConf = False
+                
+            End If
+        
+        End If
+        'vcb1234
+        
+        If (Grupo_ID = GbIDGrupoBLD Or Grupo_ID = GbIDGrupoBLF) And bFlagIniciaFaseConf = True Then
+            
+            Set objDadosIntegracaoWebip = New clsBlf_IntegracaoWebIP
+            
+            objDadosIntegracaoWebip.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objDadosIntegracaoWebip.InformaMensagem objMensagem
+            
+            bRetorno = objDadosIntegracaoWebip.ObtemOTSIntegracao(Servico_ID, sOTSAux)
+            
+            If sOTSAux = "" Then
+        
+                bFlagIniciaFaseConf = True
+            
+            Else
+                
+                bFlagIniciaFaseConf = False
+            
+            End If
+        
+        End If
+        
+        '=====================================================================================================
+        'Callbat - 06/12/2015 - Atendimento ao Chamado CH-35843NKH
+        'EM caso de cancelamento, em FO Ethenernet, não estava encaminhando a OTS de cacnelamento para o SAIP
+        '=====================================================================================================
+        If Acao_ID = 9 Then
+        
+            If ((Grupo_ID = GbIDGrupoBLD Or Grupo_ID = GbIDGrupoBLF)) And objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+                
+                Set objDadosIntegracaoWebip = New clsBlf_IntegracaoWebIP
+                
+                objDadosIntegracaoWebip.InformaBanco frmgenMDI_SGAPlus.objBanco
+                objDadosIntegracaoWebip.InformaMensagem objMensagem
+                
+                bRetorno = objDadosIntegracaoWebip.ObtemOTSIntegracao(Servico_ID, sOTSAux)
+                
+                If sOTSAux = "" Then
+            
+                    bFlagIniciaFaseConf = True
+                
+                Else
+                    
+                    bFlagIniciaFaseConf = False
+                
+                End If
+                
+            End If
+            
+        End If
+        '=====================================================================================================
+        '=====================================================================================================
+        
+        If bFlagIniciaFaseConf Then
+
+            'Caso não tenha calculado o periodo previsto da fase de configuracao, o mesmo deve ser calculado
+            If objDadosFase.ObtemDataFimPrevisto(lIdFaseAlocacaoConfiguracao) = "" Then
+
+               bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, Servico_ID)
+
+            End If
+            
+            '==================================================================================================
+            'CALLBAT - 05/07/2012 - BSoD Light II
+            '==================================================================================================
+            If objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+
+                    If (objWEBIP Is Nothing) Then
+        
+                        Set objWEBIP = New clsInterOC_TrataWebIP
+        
+                    End If
+        
+                     objWEBIP.Grupo_ID = lGrupo_ID
+        
+                    '=================================================================
+                    'CALLBAT - 21/05/2012 - BSoD Net Light
+                    'Incluso o parametro de indicação de Banda Larga para a gravação na tabela
+                    'de interface junto ao SAIP
+                    '=================================================================
+                    'bRetorno = objWEBIP.GravaWEBIPIntegracao(Servico_ID, _
+                                                Fase_ID, _
+                                                "C", _
+                                                Produto_ID, _
+                                                objMensagem, _
+                                                Sigla_Acao, _
+                                                , _
+                                                , IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 5, "S", ""))
+                                                
+                    bRetorno = objWEBIP.GravaWEBIPIntegracao(Servico_ID, _
+                                                Fase_ID, _
+                                                "C", _
+                                                Produto_ID, _
+                                                objMensagem, _
+                                                Sigla_Acao)
+                                                
+                    
+                    If objWEBIP.FlagExibeCritica Then
+                                    
+                        FlagFaseFinalizadaOK = False
+                          
+                        If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+                     
+                           FlagManterPeriodo = True
+                         
+                        Else
+                     
+                           FlagManterPeriodo = False
+                     
+                        End If
+                    
+                        bRetorno = objDadosFase.RetirarFinalizacaoFase(Servico_ID, Fase_ID, _
+                                                   Sequencia_Acao, FlagManterPeriodo, Familia_Produto)
+                          
+                        If objMensagem.TipoMsg <> "" Then
+                           
+                          GoTo ErrorHandler
+                         
+                        End If
+                    
+                    End If
+                    
+                    '=================================================================
+                    '=================================================================
+                    If (objMensagem.TipoMsg <> "") Then
+        
+                        GoTo ErrorHandler
+        
+                    End If
+                    
+            End If
+            
+                    
+        End If
+            '==================================================================================================
+            '==================================================================================================
+    End If
+        
+      
+    'End If
+    
+    
+    
+    
+    If FlagStatusAcessoCLA = "2" And bFlagAcessosOk And FlagFaseFinalizadaOK Then
+        
+           '' ----========================================================================================================
+           '' --- FABIMENDONCA- 10/2019- CH-95954OTQ -solicitação para finalizar a fase de CentroLocal quando a fase que a anteceder for finalizada.
+           '' --- Caso seja BSodLigh/Banda Larga = sim -- nao tem configuracao no SAIP,
+           '' --- Logo, fechando a Fase Acesso --> Finaliar a FASE TRATAR CENTRO LOCAL E Iniciar a FASE seguinte a ela se houver(FASE PRE-ATIVACAO)
+           '' -------------------------------------------------------------------------------------------------------------
+           If objForm.UsrBLFCabecalho_Acesso.BandaLarga = "S" And (objDadosFase.VerificaFaseFinalizada(Fase_ID)) Then  '''verifica se BSodLight
+           
+               'Obter id Fase Tratar Centro Local
+               lIDFase_CentroLocal = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseCentroLocal) ' codigo tipo fase "Tratar Centro Local" = 8
+               '
+               If (objMensagem.TipoMsg <> "") Then
+         
+                   GoTo ErrorHandler
+                   
+               End If
+              
+               'Atualiza datas Previsao inicio e fim da fase Centro Local
+               'Calcula o período para a proxima fase
+               If objDadosFase.ObtemDataFimPrevisto(lIDFase_CentroLocal) = "" Then
+                   'preeche campos data prevista da fase
+                   objDadosFase.Data_Inicio_Previsto = Format(Now, "DD/MM/YYYY")
+                   objDadosFase.Data_Fim_Previsto = Format(Now + 2, "DD/MM/YYYY")
+                   
+                   bRetorno = objDadosFase.AtualizaPeriodoPrevisto(lIDFase_CentroLocal)
+                   '
+                   If (objMensagem.TipoMsg <> "") Then
+                     
+                     GoTo ErrorHandler
+                   
+                   End If
+               
+               End If
+               '
+                'Iniciar Fase Tratar Centro Local
+               bRetorno = objDadosFase.IniciaFase(lIDFase_CentroLocal, GbID_Usuario)
+        
+               If bRetorno Then
+                 'Seta o objeto mensagem da classe de dados
+                 objDadosTratarCentroLocal.InformaMensagem objMensagem
+                 objDadosTratarCentroLocal.InformaBanco frmgenMDI_SGAPlus.objBanco
+                 
+                 'Carrega as propriedades da classe de dados e executa o método de Inclusao ou alteracao
+                 objDadosTratarCentroLocal.DtHoraConclusao = ""
+                 
+                 objDadosTratarCentroLocal.DtHoraConclusao = Format(Now, "DD/MM/YYYY")
+                 
+                 If objDadosTratarCentroLocal.FaseExistente(lIDFase_CentroLocal) Then
+            
+                    Gravar = objDadosTratarCentroLocal.AtualizarDados(lIDFase_CentroLocal)
+                    
+                 Else
+                    
+                    Gravar = objDadosTratarCentroLocal.IncluirDados(lIDFase_CentroLocal)
+                 
+                 End If
+             
+                 If (objMensagem.TipoMsg <> "") Then
+                     
+                    GoTo ErrorHandler
+                 
+                 End If
+                 
+                 ''Recuperar ID da FASE_CENTROS_FUNCIONAIS para atualizar a DATA_CONCLUSAO da fase Centro Local
+                 lIDFase_CentroFunc = objDadosFase.ObtemFaseCentrosFunc(lIDFase_CentroLocal)
+                 
+                 
+                'Preencher tabela Fase_centro_Funcional
+                 bRetorno = objDadosFase.AtualizarDados_VariosCFS(lIDFase_CentroLocal, _
+                         lIDFase_CentroFunc, _
+                         IIf(IsDate(objDadosTratarCentroLocal.DtHoraConclusao), objDadosTratarCentroLocal.DtHoraConclusao, ""))
+                 
+                 If Not (bRetorno) Then
+                     
+                    GoTo ErrorHandler
+                 
+                 End If
+                 
+                 'Preenche o periodo realizado indicando que a fase foi finalizada
+                 bRetorno = objDadosFase.FinalizaFase(lIDFase_CentroLocal)
+            
+                 If Not (bRetorno) Then
+                 
+                     GoTo ErrorHandler
+                 
+                 Else
+                     '''''Finalizada a fase Centro Local --> Iniciar a Fase de PRE-ativacao
+                     '''''Verifica fase seguinte para preencher data inicio e fim previstos
+                     laux = objDadosFase.ObtemSequenciadaFase(Servico_ID, GbCodigoFaseCentroLocal)
+    
+                     'ObtemSequenciadaFase
+                     
+                     bRetorno = objDadosFase.CalculaPeriodoProximaFase(laux, Servico_ID)
+                 
+                     If (objMensagem.TipoMsg <> "") Then
+           
+                         GoTo ErrorHandler
+                     
+                     End If
+                 End If
+             End If
+          
+           '' --- FABIMENDONCA- 10/2019- CH-95954OTQ
+           '' ----========================================================================================================
+           End If
+        
+        If (Sigla_Acao = "CAN" Or Sigla_Acao = "DES") And Familia_Produto = "I" And sReplicaInformações = False Then
+            
+            bRetorno = objdadosServico.RecuperarDados(Servico_ID)
+           
+            If (Not bRetorno) Then
+               
+               GoTo ErrorHandler
+            
+            End If
+              
+            bRetorno = VerificaFinalizacaoDesativacao(objDadosFase, _
+                                                      objdadosServico, _
+                                                      Servico_ID, Fase_ID, _
+                                                      Sigla_Acao, _
+                                                      objMensagem)
+             If (objMensagem.TipoMsg <> "") Then
+              
+                GoTo ErrorHandler
+                
+             End If
+        
+        End If
+    
+        If (Produto_ID <> GbIDProdutoVIP) Then
+            
+            'Caso a fase de acesso esteja sendo finalizada, verifica se fase de configuracao (SAIP) já se encontra
+            'finalizada, em caso afirmativo, calcula o periodo previsto da fase Centro Local
+            If FlagFaseFinalizadaOK Then
+        
+                'Obtem ID_fase da Alocacao Configuraçao
+                lIdFaseAlocacaoConfiguracao = objDadosFase.ObtemIDFase(objdadosServico.ID_Servico, _
+                                                                       GbCodigoFaseConfiguracao)
+        
+                If objMensagem.TipoMsg <> "" Then
+        
+                     GoTo Finalizar
+        
+                End If
+        
+
+                If objDadosFase.ObtemDataFimReal(lIdFaseAlocacaoConfiguracao) <> "" Then
+
+                     iSeqAux = objDadosFase.ObtemSequenciadaFase(Servico_ID, GbCodigoFaseConfiguracao)
+
+                     lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseCentroLocal)
+
+                     If objDadosFase.ObtemDataFimPrevisto(lIdFaseCentroLocal) = "" Then
+
+                        bRetorno = objDadosFase.CalculaPeriodoProximaFase(iSeqAux, Servico_ID)
+
+                        If objMensagem.TipoMsg <> "" Then
+
+                             GoTo Finalizar
+
+                        End If
+
+                     End If
+
+                End If
+            
+            End If
+            
+
+        End If
+'
+'        If FlagStatusAcessoCLA = "2" And FlagFaseFinalizadaOK Then
+'
+'            iSequenciaAcaoAux = objDadosFase.ObtemSequenciadaFase(Servico_ID, 7)
+'
+'            lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseCentroLocal)
+'
+'            'Caso não tenha calculado o periodo previsto da fase de Centro Local, o mesmo deve ser calculado
+'            If objDadosFase.ObtemDataFimPrevisto(lIdFaseCentroLocal) = "" Then
+'
+'               bRetorno = objDadosFase.CalculaPeriodoProximaFase(iSequenciaAcaoAux, Servico_ID)
+'
+'            End If
+'
+'        End If
+    
+    End If
+     
+
+    'If (Produto_ID = GbIDProdutoVIP) And Sigla_Acao = "CAN" Then
+    If (Produto_ID = GbIDProdutoVIP) And Sigla_Acao = "CAN" And sReplicaInformações = False And FlagFaseFinalizadaOK Then
+          
+       'Finaliza confserv
+       bRetorno = ReplicaDadosAcesso(Servico_ID)
+   
+       If Not bRetorno Then
+      
+           GoTo ErrorHandler
+          
+       End If
+   
+    End If
+    
+    bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao
+    
+    If Not bRetorno Then
+    
+        GoTo ErrorHandler
+        
+    End If
+    '-- DIF 15/10/2012 - VCBDIF -- FALTOU INCLUIR
+    If Not objWEBIP Is Nothing Then
+    
+        If objWEBIP.FlagExibeCritica Then
+        
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = objWEBIP.MsgCriticaSaip
+            objMensagem.ExibeMensagem
+            
+        End If
+        
+    End If
+        '-----------------------------------
+    
+    GravarDadosPorId = True
+    
+    bFlagControlaAlteracao = False
+    objForm.FlControlaAlteracao = False
+    objForm.UsrVIPEquipComplementares.bFlagAlteracao = False
+    
+    If Not bFlagEnviaCLA Then
+        If objDadosAcesso.SegurancaAcesso = "S" Then 'Seguranca de Acesso
+              
+              If objDadosAcesso.CaracteristicaAcesso = "P" Then 'Acesso Principal
+                              
+                 
+                 If FlagFaseFinalizadaOK = True Then
+                             objMensagem.TipoMsg = "A"
+                     objMensagem.Descricao = "Os Dados do Acesso Principal foram " & _
+                                            "atualizados com Sucesso!"
+                    
+                     FlagDescarregaForm = True
+                
+                ElseIf Not FlagFaseFinalizadaOK And Not FlagTemPendenciaEmAberto Then
+    
+                    objMensagem.TipoMsg = "A"
+                    
+                    objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                                   " Porém a fase continua em Andamento," & vbCrLf & _
+                                   " pois campos obrigatórios não foram preenchidos."
+        
+        
+                     FlagDescarregaForm = True
+                     
+                     If Not objForm.CmdAcessoPrincipal.Visible And (Produto_ID <> GbIDProdutoVIP) Then
+                     
+                        objForm.CmdAcessoContingente.Visible = True
+                        objForm.CmdAcessoPrincipal.Visible = True
+                     
+                     End If
+        
+        
+                ElseIf Not FlagFaseFinalizadaOK And FlagTemPendenciaEmAberto Then
+    
+                    objMensagem.TipoMsg = "A"
+    
+                    objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                                   " Porém a fase continua em andamento, devido a existência de pendência!"
+                     FlagDescarregaForm = True
+                     
+                     If (Not objForm.CmdAcessoPrincipal.Visible) And (Produto_ID <> GbIDProdutoVIP) Then
+                     
+                        objForm.CmdAcessoContingente.Visible = True
+                        objForm.CmdAcessoPrincipal.Visible = True
+                     
+                     End If
+                 
+                 End If
+                 
+                 objForm.ssTabAcesso.Tab = 0
+              
+              Else
+                 
+                 objMensagem.TipoMsg = "A"
+                 
+                 If (FlagFaseFinalizadaOK = True) Then
+                 
+                    FlagDescarregaForm = True
+                           
+                    objMensagem.Descricao = "Os Dados do Acesso Contingente foram atualizados com Sucesso!"
+                           
+                 Else
+                 
+                    objMensagem.Descricao = _
+                                       vbCrLf & vbCrLf & _
+                                       "Os Dados do Acesso Contingente foram atualizados " & _
+                                      "com Sucesso! " & vbCrLf & _
+                                      "Porém a fase continua em Andamento."
+                 
+                    FlagDescarregaForm = False
+                    
+                 End If
+                 
+              End If
+              
+        Else
+                
+            'objMensagem.TipoMsg = "A"
+            
+            If FlagFaseFinalizadaOK = True Then
+            
+                '=================================================================
+                'CALLBAT - 26/06/2013 - Interface junto ao CFM
+                'SO-ENGNQ-83669III
+                '=================================================================
+                'objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+                
+                If Acao_ID <> 8 And Acao_ID <> 9 Then
+                    objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+                    
+                ElseIf Acao_ID = 8 And objForm.UsrGenDadosAcessoTroncoTX.UsaTX = "S" Then
+                    objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!" & _
+                                    Chr(13) & " Favor desativar o Tronco TX no CFM!"
+                                    
+                ElseIf Acao_ID = 9 And objForm.UsrGenDadosAcessoTroncoTX.UsaTX = "S" Then
+                    objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!" & _
+                                    Chr(13) & " Favor cancelar o Tronco TX no CFM!"
+                Else
+                    objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+                End If
+                
+                '=================================================================
+                '=================================================================
+                
+                FlagDescarregaForm = True
+            
+            ElseIf Not FlagTemPendenciaEmAberto Then
+                
+                objMensagem.TipoMsg = "A"
+                
+                objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                               " Porém a fase continua em Andamento," & vbCrLf & _
+                               " pois campos obrigatórios não foram preenchidos."
+                               
+    
+                If DataFinalizacao <> "" Then
+                    FlagDescarregaForm = False
+                Else
+                    FlagDescarregaForm = True
+                End If
+    
+            ElseIf Not FlagFaseFinalizadaOK And FlagTemPendenciaEmAberto Then
+    
+                objMensagem.TipoMsg = "A"
+    
+                objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                               " Porém a fase continua em andamento, devido a existência de pendência!"
+                               
+                'CALBAT - 07/11/2007 =============================================
+                'Comentado por solicitação da AR Aline Silva , para que após salvar as
+                'informações gravadas sair da tela.
+                '=================================================================
+                FlagDescarregaForm = True
+            
+            End If
+            
+        End If
+    
+    
+        If Trim(objMensagem.TipoMsg) <> "" Then
+                
+                objMensagem.ExibeMensagem
+                objMensagem.TipoMsg = ""
+                objMensagem.Descricao = ""
+        
+        End If
+    
+    End If
+
+Finalizar:
+    
+    Set objWEBIP = Nothing
+    Set objDadosDuracaoFase = Nothing
+    
+    Set objDadosFase = Nothing
+    Set ObjEqpto = Nothing
+    Set objDadosPropriedadeTerc = Nothing
+    Set objDadosAtivacaoFinal = Nothing
+    Set objDadosAnalisarOE = Nothing
+    Exit Function
+    
+ErrorHandler:
+       
+    ' Cancelar Transação
+
+    If FlagIniciouTransacao Then
+       
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+    
+    End If
+    
+    If objMensagem.TipoMsg = "" And Err.Number <> 0 Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "GravarDadosPorID " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+       
+    objMensagem.ExibeMensagem
+
+    GoTo Finalizar
+       
+End Function
+
+'================================================================
+'Vagner Brandão - VAGNERR- 23/06/2008
+'Implementação para contemplar a tela de monitoração
+'================================================================
+Public Function TratarFechamentoporPacote() As Boolean
+
+    'Verifica se a OTS é a primeira do pacote, em caso afirmativo, exibir pergunta:
+    'Deseja replicar as informações registradas para as outras OTS's deste cliente?
+    'obter lista de ID's de serviço do pacote
+    'para cada serviço da lista, inserir ou atualizar os dados do acesso e eqpto ngn, registrar a finalização da fase
+
+    Dim objAtenItemServico As VIP_Aten_Item_Servico
+    Dim lContratoID        As Long
+    Dim aListaServicos()   As Variant
+    Dim iAux               As Integer
+    
+    TratarFechamentoporPacote = False
+                    
+    Set objAtenItemServico = New VIP_Aten_Item_Servico
+
+    objAtenItemServico.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objAtenItemServico.InformaMensagem objMensagem
+    
+    lContratoID = 0
+    
+    If objAtenItemServico.RecuperarDados(Servico_ID) Then
+            
+        lContratoID = objAtenItemServico.ContratoID
+        
+        '==============================================================================
+        'CALBAT - 27/01/2009
+        'Alterado para capturar todos os ID's servicos, pois quando está fazendo esta fase,
+        'a data de inicio real da fase já está preenchida
+        '==============================================================================
+        'If objAtenItemServico.ObtemServicoPorContratoFase(lContratoID, "6", aListaServicos) Then
+        If objAtenItemServico.ObtemServicoPorContratoFase(lContratoID, "6", aListaServicos, lAcao_ID) Then
+        '==============================================================================
+        '==============================================================================
+        
+            'Verificar se o produto é VIPLINE IP  e em caso afirmativo, exibir pergunta
+            objMensagem.TipoMsg = "Q"
+            objMensagem.Descricao = "Deseja replicar as informações dessa OTS para as demais OTS's deste cliente ? "
+            
+            If objMensagem.ExibeMensagem = "S" Then
+                   
+                '============================================================
+                'CALBAT - 15/01/2009
+                'Ajuste feito para não duplicar a finalização na ConfServ_AUTO
+                '============================================================
+                sReplicaInformações = True
+                '============================================================
+                 '============================================================
+                 
+                For iAux = 0 To UBound(aListaServicos, 2)
+                    
+                    If IsEmpty(aListaServicos(0, iAux)) Then Exit For
+                    
+                    bRetorno = ReplicaDadosAcesso(CLng(aListaServicos(0, iAux)))
+                                    
+                    If Not bRetorno Then
+                    
+                        GoTo ErrorHandler
+                        
+                    End If
+                                         
+                    If objMensagem.TipoMsg <> "" Then
+
+                        GoTo Finalizar
+
+                    End If
+                
+                Next
+                           
+            End If
+        
+        End If
+    
+    End If
+
+    TratarFechamentoporPacote = True
+    
+Finalizar:
+
+     On Error GoTo 0
+     
+     Exit Function
+     
+ErrorHandler:
+       
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "TratarFechamentoPorPacote " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+    
+    GoTo Finalizar
+    
+End Function
+'================================================================
+'================================================================
+
+Public Property Get TipoOperacao() As String
+
+TipoOperacao = sTipoOperacao
+
+End Property
+
+Public Property Let TipoOperacao(ByVal vNewValue As String)
+
+sTipoOperacao = vNewValue
+
+End Property
+
+'================================================================
+'Vagner Brandão - VAGNERR- 23/06/2008
+'Implementação para contemplar a tela de monitoração
+'================================================================
+Private Function ReplicaDadosAcesso(plServicoDestinoID As Long) As Boolean
+
+    Dim objDadosContingencia        As clsGenAcesso
+    Dim objOc_TrataEqptoCompl       As clsInterOC_TratarEqptoCompl
+    Dim flGravar                    As Boolean
+    Dim lFaseAcessoIDDest           As Long
+    Dim objDadosFase                As clsgenFase
+    Dim lContingenciaID             As Long
+    Dim ObjEqptoOrigem              As clsGenEqptoComplementar
+    Dim ObjEqptoDestino             As clsGenEqptoComplementar
+    Dim objEqpto_Orig               As VIP_Equipamento_NGN
+    Dim objEqpto_Dest               As VIP_Equipamento_NGN
+    Dim objDetalheAnotacao          As clsGenDetalheAnotacao
+    Dim objDetalheAnotacaoDest      As clsGenDetalheAnotacao
+    Dim lContingenciaIDDestino      As Long
+    Dim bRetorno                    As Boolean
+    Dim aEqptosFase()               As Variant
+    Dim iAux                        As Integer
+    Dim bFlagInsereEqptoNGN         As Boolean
+    Dim lID_Fase_Seguinte   As Long
+    
+    Set objDadosFase = New clsgenFase
+    
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+    
+    ReplicaDadosAcesso = False
+
+'ACERTAR GRAVACAO DE PROPRIEDADE EBT E TIPO DE ACESSO
+'ACERTAR CALCULO PROXIMA FASE
+    
+    'Obtem o ID da fase de acesso do servico que receberá os dados do servico que está sendo finalizado
+    lFaseAcessoIDDest = objDadosFase.ObtemIDFase(plServicoDestinoID, 6)
+        
+    Set objDadosContingencia = New clsGenAcesso
+    
+    objDadosContingencia.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosContingencia.InformaMensagem objMensagem
+    
+    'Obtem o ID da contingencia_acesso do servico original
+    lContingenciaID = objDadosContingencia.ObtemIDPorServico(Servico_ID)
+    
+    Set cColecaoAcessos = New Collection
+    
+    bRetorno = RecuperaDadosAcessoPorID(lContingenciaID, True)
+    
+    If Not bRetorno Then
+    
+        objMensagem.TipoMsg = "E"
+        objMensagem.Descricao = "Dados do serviço original não encontrado!"
+        
+    End If
+    
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo Finalizar
+    
+    End If
+    
+    Set objDadosContingencia = objDadosAcesso
+    
+    objDadosContingencia.Servico_ID = plServicoDestinoID
+    
+    'Verifica se já existe acesso para o servico destino
+    If objDadosContingencia.FaseExistente(lFaseAcessoIDDest) Then
+       
+       flGravar = objDadosContingencia.AtualizarDados(lFaseAcessoIDDest)
+       
+       lContingenciaIDDestino = objDadosContingencia.iD
+       
+    Else
+       
+       flGravar = objDadosContingencia.IncluirDados(lFaseAcessoIDDest)
+       
+       lContingenciaIDDestino = objDadosContingencia.ObtemIDContingencia(lFaseAcessoIDDest, objDadosContingencia.CaracteristicaAcesso)
+       
+       objDadosContingencia.iD = lContingenciaIDDestino
+       
+       
+    End If
+   
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo Finalizar
+    
+    End If
+    
+    'Recupera os equipamentos do servico destino caso já exista
+    If objDadosContingencia.RecuperarDadosEquipamentos(lContingenciaIDDestino, objMensagem) Then
+    
+        For Each ObjEqptoOrigem In objDadosContingencia.objColecaoEqpto
+        
+            bRetorno = ObjEqptoOrigem.ExcluirDados(lContingenciaIDDestino, ObjEqptoOrigem.iD, _
+                                 objMensagem)
+                                 
+            If Not bRetorno Then Exit For
+
+        Next
+        
+    End If
+    
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo Finalizar
+    
+    End If
+
+    'Recupera os equipamentos do servico origem
+    If objDadosContingencia.RecuperarDadosEquipamentos(lContingenciaID, objMensagem) Then
+
+        For Each ObjEqptoOrigem In objDadosContingencia.objColecaoEqpto
+
+            Set ObjEqptoDestino = New clsGenEqptoComplementar
+
+            ObjEqptoDestino = ObjEqptoOrigem
+            
+            ObjEqptoDestino.InformaBanco frmgenMDI_SGAPlus.objBanco
+            
+            'Tratar aqui eqpto tipo Modem
+            bRetorno = ObjEqptoDestino.IncluirDados("", lContingenciaIDDestino, objMensagem)
+            
+            If Not ObjEqpto.objTipoAcesso Is Nothing Then
+                
+                Set objEqptoModem = New clsGenEqptosAcessoModem
+                
+                Set objEqptoModem = ObjEqpto.objTipoAcesso
+                
+                objEqptoModem.InformaBanco frmgenMDI_SGAPlus.objBanco
+                
+                objEqptoModem.EquipamentosAcessoID = lIDEqpto
+                
+                bRetorno = objEqptoModem.IncluirDados(objMensagem)
+                
+                If Not bRetorno Then Exit For
+                
+            End If
+            
+        Next
+
+    End If
+    
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo Finalizar
+    
+    End If
+
+    Set objEqpto_Orig = New VIP_Equipamento_NGN
+    
+    ReDim aEqptosFase(2, 0)
+
+    objEqpto_Orig.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objEqpto_Orig.InformaMensagem objMensagem
+    
+    'Gravar dados de eqpto ngn
+    If objEqpto_Orig.ObterEqptosFase(Fase_ID, aEqptosFase) Then
+    
+        For iAux = 0 To UBound(aEqptosFase, 2) - 1
+
+            If Not IsEmpty(aEqptosFase(0, iAux)) Then
+                
+                bRetorno = objEqpto_Orig.RecuperarDados(lFaseAcessoIDDest)
+                
+                bFlagInsereEqptoNGN = True
+                
+                If bRetorno Then
+                   
+                   
+                   'Se o ID do eqpto obtido atraves do ID da fase for igual ao ID do eqpto a ser replicado,
+                   'não deve inserir eqpto duplicado
+                   
+                   Set objEqpto_Dest = New VIP_Equipamento_NGN
+   
+                   objEqpto_Dest.InformaBanco frmgenMDI_SGAPlus.objBanco
+                   objEqpto_Dest.InformaMensagem objMensagem
+                   
+                   bRetorno = objEqpto_Dest.RecuperarDadosPorID(CLng(aEqptosFase(0, iAux)))
+                   
+                   If objEqpto_Orig.Designacao = objEqpto_Dest.Designacao Then
+                       ' caso a OTS destino já possua o mesmo equipamento cadastrado, não deve incluir novamente
+                       bFlagInsereEqptoNGN = False
+                       
+                   End If
+                
+                End If
+
+                If bFlagInsereEqptoNGN Then
+
+                    Set objEqpto_Dest = New VIP_Equipamento_NGN
+    
+                    bRetorno = objEqpto_Orig.RecuperarDadosPorID(CLng(aEqptosFase(0, iAux)))
+                    
+                    If Not bRetorno Then GoTo Finalizar
+    
+                    Set objEqpto_Dest = objEqpto_Orig
+    
+                    objEqpto_Dest.InformaBanco frmgenMDI_SGAPlus.objBanco
+                    objEqpto_Dest.InformaMensagem objMensagem
+    
+                    objEqpto_Dest.iD = objEqpto_Dest.ObtemNovoID(objMensagem)
+    
+                    objEqpto_Dest.Fase_ID = lFaseAcessoIDDest
+    
+                    bRetorno = objEqpto_Dest.Incluir
+    
+                    If Not bRetorno Then GoTo Finalizar
+                
+                End If
+                
+            End If
+        
+        Next iAux
+    
+    End If
+
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo Finalizar
+    
+    End If
+    
+    If objDadosContingencia.PropridedadeAcesso = "E" Then    'Propriedade Embratel
+
+        'Grava dados Propriedade Embratel
+        bRetorno = GravaDadosPropriedadeEmbratel(objDadosContingencia)
+        
+        If Not bRetorno Then
+        
+           GoTo Finalizar
+        
+        End If
+    
+    Else
+        'Grava dados Propriedade Terceiros
+        bRetorno = GravaDadosPropriedadeTerceiros(objDadosContingencia)
+        
+        If Not bRetorno Then
+        
+           GoTo Finalizar
+        
+        End If
+    
+    End If
+    
+    'Grava Anotacao da fase
+    Set objDetalheAnotacao = New clsGenDetalheAnotacao
+
+    objDetalheAnotacao.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDetalheAnotacao.InformaMensagem objMensagem
+    
+    'verifica se ja existe anotacao para o servico que está sendo fechado
+    If objDetalheAnotacao.RecuperarDados(lFaseAcessoIDDest, "A") Then
+       
+       objDetalheAnotacao.iD = lFaseAcessoIDDest
+       bRetorno = objDetalheAnotacao.AtualizarDados("A")
+    
+    Else
+       '- verifica se existe anotacao a ser replicada
+       If objDetalheAnotacao.RecuperarDados(Fase_ID, "A") Then
+           
+            Set objDetalheAnotacaoDest = New clsGenDetalheAnotacao
+            
+            Set objDetalheAnotacaoDest = objDetalheAnotacao
+            
+            objDetalheAnotacao.iD = lFaseAcessoIDDest
+
+            bRetorno = objDetalheAnotacaoDest.IncluirDados("A")
+       
+       End If
+    
+    End If
+    
+    If objMensagem.TipoMsg <> "" Then
+    
+        GoTo Finalizar
+        
+    End If
+    
+    
+    '=================================================================
+    'CALLBAT - 21/05/2012 - CH-43184DVM
+    'Inclusão do usuário que efetuou a ação.
+    '=================================================================
+     objDadosFase.Usuario_ID = GbID_Usuario
+    '=================================================================
+    '=================================================================
+    
+    'registro data inicio da fase da OTS a ser aplicada
+    bRetorno = objDadosFase.IniciaFase(lFaseAcessoIDDest, GbID_Usuario)
+    
+    If (objMensagem.TipoMsg <> "") Then
+    
+       GoTo Finalizar
+       
+    End If
+    
+    bRetorno = objDadosFase.FinalizaFase(lFaseAcessoIDDest)
+    
+    If (objMensagem.TipoMsg <> "") Then
+    
+       GoTo Finalizar
+       
+    End If
+
+    iSequenciaAcaoAux = Sequencia_Acao
+    'Verifica se fase Tratar Centro Local deve ser executada ou não.
+    
+    If (Grupo_ID = GbIDGrupoVLI) Then
+        
+        'Caso o usuario opte por não executar a fase Tratar Centro Local
+        If objForm.optExecCentroLocal(1).Value = True Then
+            
+            lIdFaseCentroLocal = objDadosFase.ObtemIDFase(plServicoDestinoID, _
+                                                         GbCodigoFaseCentroLocal)
+            
+            If lIdFaseCentroLocal <> 0 Then
+               
+               bRetorno = objDadosFase.RetirarPeriodoPrevisto(lIdFaseCentroLocal)
+               
+               '==================================================================
+               'CALBAT - 22/01/2009 ==============================================
+               'Caso o CCTO não tenha a fase de Tratar Centro Local
+               '==================================================================
+                'Obter a sequencia acao da fase posterior a fase Centro Local
+                iSequenciaAcaoAux = objDadosFase.ObtemSequenciadaFase(plServicoDestinoID, _
+                                                           GbCodigoFaseCentroLocal)
+                                                           
+            Else
+            
+                iSequenciaAcaoAux = objDadosFase.ObtemSequenciadaFase(plServicoDestinoID, _
+                                                           GbCodigoFaseAcesso)
+               '==================================================================
+               '==================================================================
+               '==================================================================
+               
+            
+            End If
+            
+        
+        End If
+        
+    End If
+    
+    'Calcula o período para a proxima fase
+    lID_Fase_Seguinte = objDadosFase.ObtemIDFaseSeguinte(plServicoDestinoID, iSequenciaAcaoAux)
+
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo Finalizar
+     
+    End If
+    
+    
+    'CALBAT - 27/01/2009 ========================================
+    'Se o código for 0, é porque é a última fase para ser finalizada,
+    'e quando isso ocorrer, devemos colocar na Confserv_Auto o código 4, para ser finalizado pelo Aten
+    '============================================================
+    If ((Produto_ID <> GbIDProdutoVIP)) Or _
+           (Produto_ID = GbIDProdutoVIP) And Sigla_Acao <> "CAN" Then
+    
+        If objDadosFase.ObtemDataFimPrevisto(lID_Fase_Seguinte) = "" Then
+            
+            bRetorno = objDadosFase.CalculaPeriodoProximaFase(iSequenciaAcaoAux, plServicoDestinoID)
+            
+            If (objMensagem.TipoMsg <> "") Then
+              
+               GoTo Finalizar
+            
+            End If
+        
+        End If
+        
+    End If
+    '============================================================
+    '============================================================
+    
+     'CALBAT - 18/08/2008 ========================================
+     'Projeto Portabilidade                                                                       =
+     'Verifica se o produto é VIPLINE IP e for um cancelamento e a         =
+     'proxima fase for a fase 35 ( Configuração NGN Acesso ), o sistema =
+     'deve gerar na tabela confserv_auto o código 35                               =
+     '============================================================
+     If (Produto_ID = GbIDProdutoVIP) And (Sigla_Acao = "CAN" Or Sigla_Acao = "DES") Then
+     
+     
+            'CALBAT - 18/08/2008 ========================================
+            ' Ajuste feito para solucionar o problema do cancelamento
+            '============================================================
+             'lID_Fase_Seguinte = objDadosFase.ObtemIDFaseSeguinte(Servico_ID, Sequencia_Acao)
+             lID_Fase_Seguinte = objDadosFase.ObtemIDFaseSeguinte(plServicoDestinoID, Sequencia_Acao)
+             '============================================================
+             '============================================================
+          
+             lCodigoFase = objDadosFase.ObtemCodigoFase(lID_Fase_Seguinte)
+             
+             'CALBAT - 19/01/2009 ========================================
+             'Se o código for 0, é porque é a última fase para ser finalizada,
+             'e quando isso ocorrer, devemos colocar na Confserv_Auto o código 4, para ser finalizado pelo Aten
+             If lCodigoFase = 0 Then
+             
+                    lCodigoFase = 4
+             
+             End If
+             '========================================
+             '========================================
+             'Inicio - Tratamento Causa Raiz - PTS 708 - 22/07/2009 - Joao Carlos
+             If lCodigoFase = 35 Or lCodigoFase = 4 Or lCodigoFase = 38 Or lCodigoFase = 39 Then
+             'Fim - Tratamento Causa Raiz - PTS 708 - 22/07/2009 - Joao Carlos
+                     Dim objConfServAuto As VIP_NGN_AutoExec
+                     
+                     Set objConfServAuto = New VIP_NGN_AutoExec
+            
+                     objConfServAuto.InformaBanco frmgenMDI_SGAPlus.objBanco
+                        
+                     objConfServAuto.CodigoTIpoFase = lCodigoFase
+                     
+                    '================================================================
+                    'Calbat - 03/02/2009
+                    'Alteração feita para atender a nova estrutura do envio do Confserv
+                    '================================================================
+                    objConfServAuto.FlagExecucao = 0
+                    objConfServAuto.EmProcesso = 0
+                    '================================================================
+                    '================================================================
+                     
+                     objConfServAuto.ServicoID = plServicoDestinoID
+                        
+                     bRetorno = objConfServAuto.IncluirDados(objMensagem)
+                        
+                     If (objMensagem.TipoMsg <> "") Then
+                        
+                       GoTo Finalizar
+                            
+                    End If
+                    
+                    'CALBAT - 18/08/2008 ========================================
+                    ' Ajuste feito para solucionar o problema do cancelamento
+                    '============================================================
+                    'bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, Servico_ID)
+                    If lCodigoFase <> 4 Then
+                        bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, plServicoDestinoID)
+                    End If
+                    '============================================================
+                    '============================================================
+                    
+                    If bRetorno = False Then
+                        
+                       GoTo Finalizar
+                        
+                    End If
+                    
+                    Set objConfServAuto = Nothing
+                    
+             End If
+          
+     End If
+     
+     
+        'CALBAT - 18/08/2008 ========================================
+        ' Ajuste feito para solucionar o problema do cancelamento
+        '============================================================
+        If lCodigoFase <> 4 And (Acao_ID = 8 Or Acao_ID = 9) Then
+        
+            bRetorno = VerificaFinalizacaoDesativacao(objDadosFase, _
+                                                      objdadosServico, _
+                                                      plServicoDestinoID, lFaseAcessoIDDest, _
+                                                      Sigla_Acao, _
+                                                      objMensagem)
+             If (objMensagem.TipoMsg <> "") Then
+              
+               GoTo Finalizar
+                
+             End If
+             
+        End If
+
+    ReplicaDadosAcesso = True
+    
+Finalizar:
+
+     On Error GoTo 0
+     
+     Exit Function
+     
+ErrorHandler:
+       
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "ReplicaDadosAcesso " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+    
+    GoTo Finalizar
+
+End Function
+'================================================================
+'================================================================
+Private Function ExcluiAcesso(pCaracteristicaAcesso As String, plIdContingencia As Long) As Boolean
+
+    Dim ObjAcesso               As clsGenAcesso
+    Dim objEquipamentos         As clsGenEqptoComplementar
+    Dim objDadosPropriedadeEBT  As clsGenPropriedadeEmbratel
+    Dim objDadosPropriedadeTerc As clsGenPropriedadeTerceiros
+    
+    On Error GoTo ErrorHandler
+    
+    Set ObjAcesso = New clsGenAcesso
+    
+    ObjAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+    ObjAcesso.InformaMensagem objMensagem
+    
+    bRetorno = ObjAcesso.RecuperarDados(pCaracteristicaAcesso, Servico_ID, Fase_ID, objMensagem)
+    
+    If objMensagem.TipoMsg <> "" Then
+        
+       GoTo ErrorHandler
+     
+    End If
+    
+    'Exclui dados de Acesso
+    If ObjAcesso.PropridedadeAcesso = "E" Then      'Propriedade Embratel
+    
+        'Obtem o tipo de Acesso
+        Set objDadosPropriedadeEBT = New clsGenPropriedadeEmbratel
+        
+        objDadosPropriedadeEBT.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDadosPropriedadeEBT.RecuperarDados(plIdContingencia, objMensagem)
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+        
+        'Exclui o Tipo de Acesso
+        bRetorno = ExcluiTipoAcessoEBT(objDadosPropriedadeEBT.TipoAcesso, plIdContingencia, objMensagem)
+       
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+       
+        'Exclui a Propriedade Embratel
+        Retorno = objDadosPropriedadeEBT.ExcluirDados(plIdContingencia, objMensagem)
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+        
+        Set objDadosPropriedadeEBT = Nothing
+    
+    Else
+    
+        'Obtem o tipo de Acesso
+        Set objDadosPropriedadeTerc = New clsGenPropriedadeTerceiros
+        
+        objDadosPropriedadeTerc.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDadosPropriedadeTerc.RecuperarDados(plIdContingencia, objMensagem)
+        
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+    
+        'Exclui o tipo de Acesso
+         bRetorno = ExcluiTipoAcessoTerceiros(objDadosPropriedadeTerc.TipoAcesso, plIdContingencia, objMensagem)
+         
+         If objMensagem.TipoMsg <> "" Then
+            
+            GoTo ErrorHandler
+          
+         End If
+         
+         'Exclui propriedade Terceiro
+         bRetorno = objDadosPropriedadeTerc.ExcluirDados(plIdContingencia, objMensagem)
+    
+         If objMensagem.TipoMsg <> "" Then
+            
+            GoTo ErrorHandler
+          
+         End If
+    
+    End If
+       
+    'Exclui os registros de Equipamentos
+    
+    Set objEquipamentos = New clsGenEqptoComplementar
+    
+    objEquipamentos.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    bRetorno = objEquipamentos.ExcluirDados(plIdContingencia, 0, objMensagem)
+    
+    Set objEquipamentos = Nothing
+    
+    If objMensagem.TipoMsg <> "" Then
+        
+       GoTo ErrorHandler
+     
+    End If
+    
+    bRetorno = objDadosAcesso.ExcluirDados(plIdContingencia)
+   
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo ErrorHandler
+    
+    End If
+
+Finalizar:
+
+     On Error GoTo 0
+     
+     Exit Function
+     
+ErrorHandler:
+       
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "ExcluiAcesso " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+    
+    GoTo Finalizar
+
+End Function
+
+Public Property Get Sigla_Acao() As String
+
+Sigla_Acao = sSigla_Acao
+
+End Property
+
+Public Property Let Sigla_Acao(ByVal sNewValue As String)
+
+sSigla_Acao = sNewValue
+
+End Property
+
+Public Property Get Status_Fase() As String
+
+Status_Fase = sStatus_Fase
+
+End Property
+
+Public Property Let Status_Fase(ByVal vNewValue As String)
+
+sStatus_Fase = vNewValue
+
+End Property
+Private Sub DesabilitaCamposTela()
+
+    objForm.CmdTrataPendencia.Enabled = False
+    objForm.optProprietarioModem(0).Enabled = False
+    objForm.optProprietarioModem(1).Enabled = False
+    objForm.SpdDataPedidoAcesso.Enabled = False
+    objForm.OptResponsavelInfra(0).Enabled = False
+    objForm.OptResponsavelInfra(1).Enabled = False
+    objForm.CboClassificacaoEndereco.Enabled = False
+    
+    'objForm.OptTipoRede(0).Enabled = False
+    'objForm.OptTipoRede(1).Enabled = False
+    'objForm.OptTipoRede(2).Enabled = False
+    
+    objForm.CboPlataformas.Enabled = False
+
+    objForm.CmdEnviarSolicCLA.Enabled = False
+    
+    objForm.CboTipoAcessoEmbratel.Enabled = False
+    objForm.TxtDesignacaoAcessoEBT.Enabled = False
+    objForm.TxtIdentificadorAcessoEBT.Enabled = False
+    objForm.TxtEstacaoEntregaEbtConf.Enabled = False
+    objForm.TxtEstacaoEntregaEbt.Enabled = False
+    
+    objForm.TxtEstacaoCliente.Enabled = False
+    objForm.CboPadraoInterfaceEBT.Enabled = False
+    objForm.TxtEstacaoConfiguracao.Enabled = False
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objForm.txtTroncoOTS.Enabled = False
+    objForm.UsrGenDadosAcessoTroncoTX.HabilitaOpcaoTX (False)
+    '=================================================================
+    '=================================================================
+    
+    objForm.SpdDataAtivacaoAcessoEBT.Enabled = False
+    objForm.TxtDIDFila_Radio.Enabled = False
+    objForm.TxtDIDArmacao_Radio.Enabled = False
+    objForm.TxtDIDRegua_Radio.Enabled = False
+    objForm.TxtDIDPosicao_Radio.Enabled = False
+    objForm.TxtNumeroRepeticoes.Enabled = False
+    objForm.TxtDIDFila_Fibra.Enabled = False
+    objForm.TxtDIDArmacao_Fibra.Enabled = False
+    objForm.TxtDidRegua_Fibra.Enabled = False
+    objForm.TxtDIDPosicao_Fibra.Enabled = False
+    objForm.TxtNumeroCaboFibra.Enabled = False
+    objForm.TxtNumeroParFibra.Enabled = False
+    objForm.TxtPredioEBT_ADE.Enabled = False
+    objForm.TxtNumeroCabo_ADE.Enabled = False
+    objForm.TxtNumeroPar_ADE.Enabled = False
+    objForm.TxtPredioCabo_Cabo.Enabled = False
+    objForm.TxtNumeroParEBT_Cabo.Enabled = False
+    objForm.TxtNumeroCaboEBT_Cabo.Enabled = False
+    objForm.TxtNumeroParCliente_Cabo.Enabled = False
+    objForm.TxtNumeroCaboCliente_Cabo.Enabled = False
+    
+    'objForm.TxtLinkRedeVIA.Enabled = False
+    'objForm.TxtPE.Enabled = False
+    'objForm.TxtPortaVIA.Enabled = False
+    'objForm.TxtVLANVia.Enabled = False
+    'objForm.TxtVLAN_NET.Enabled = False
+    'objForm.TxtDesigAcessoBSoD.Enabled = False
+    'objForm.TxtSVLAN.Enabled = False
+    
+    objForm.optSegurancaAcesso(0).Enabled = False
+    objForm.optSegurancaAcesso(1).Enabled = False
+    
+    objForm.optPropriedadeAcesso(1).Enabled = False
+    objForm.optPropriedadeAcesso(0).Enabled = False
+    
+    objForm.optCaracAcessoEmbratel(1).Enabled = False
+    objForm.optCaracAcessoTerceiro(1).Enabled = False
+    
+    objForm.CboTipoAcessoEmbratel.Enabled = False
+    objForm.CboTipoAcessoTerceiro.Enabled = False
+   
+    objForm.optCaracAcessoGen(1).Enabled = False
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objForm.TxtNumeroOtsTx_EBT.Enabled = False
+    'objForm.TxtItemOtsTxEBT.Enabled = False
+    'objForm.TxtNumeroOTSTXTerc.Enabled = False
+    'objForm.TxtItemOTSTxTerc.Enabled = False
+    '=================================================================
+    '=================================================================
+
+    objForm.CboTipoAcessoTerceiro.Enabled = False
+    objForm.TxtEstacaoEntregaTercConf.Enabled = False
+    objForm.TxtEstacaoEntregaTerc.Enabled = False
+    objForm.TxtDesignacaoAcessoTerceiro.Enabled = False
+    objForm.SpdNumeroAcessoUrbano.Enabled = False
+    objForm.TxtCNLPontaA_Urbano.Enabled = False
+    objForm.SpdDataEntregaUrbano.Enabled = False
+
+    objForm.TxtIDentificadorAcessoUrbano.Enabled = False
+    objForm.SpdDataAtivacaoAcessoTerc.Enabled = False
+    
+    objForm.optTipoTecnologia(0).Enabled = False
+    objForm.optTipoTecnologia(1).Enabled = False
+    objForm.optTipoTecnologia(2).Enabled = False
+    
+    objForm.CboProvedorUrbano.Enabled = False
+    objForm.optExisteAcessoIU(0).Enabled = False
+    objForm.optExisteAcessoIU(1).Enabled = False
+    objForm.CboProvedorInterurbano.Enabled = False
+    objForm.TxtIdentificadorAcessoEBTInterUrbano.Enabled = False
+    objForm.SpdNumeroAcessoInterurbano.Enabled = False
+    objForm.TxtCNLPontaA.Enabled = False
+    objForm.TxtCNLPontaB.Enabled = False
+    objForm.SpdDataEntregaInterUrbano.Enabled = False
+    objForm.CboInterfaceEBTMenor.Enabled = False
+    objForm.CboInterfaceClienteMenor.Enabled = False
+    objForm.TxtNumeroCaboAcessoMenor.Enabled = False
+    objForm.TxtNumeroParAcessoMenor.Enabled = False
+    objForm.TxtBlocoDGMenor.Enabled = False
+    objForm.TxtParDGMenor.Enabled = False
+    objForm.TxtBlocoTransdataMenor.Enabled = False
+    objForm.TxtParTransdataMenor.Enabled = False
+    objForm.TxtDIDArmacao.Enabled = False
+    objForm.TxtDIDFila.Enabled = False
+    objForm.TxtDIDPosicao.Enabled = False
+    objForm.TxtDIDRegua.Enabled = False
+    objForm.TxtTronco.Enabled = False
+    objForm.TxtPar.Enabled = False
+    objForm.TXTDominio.Enabled = False
+    objForm.TxtNO.Enabled = False
+    
+    objForm.CboPorta_Rede.Enabled = False
+    objForm.CboSlot_Rede.Enabled = False
+    objForm.CboTSI_Rede.Enabled = False
+    objForm.CboTSF_Rede.Enabled = False
+    
+    objForm.TxtDIDArmacao_Rede.Enabled = False
+    objForm.TxtDIDFila_Rede.Enabled = False
+    objForm.TxtDIDPosicao_Rede.Enabled = False
+    objForm.TxtDIDRegua_Rede.Enabled = False
+    
+    objForm.CboTipoEquipamento_1.Enabled = False
+    objForm.TxtFabricanteEquipamento_1.Enabled = False
+    objForm.optLocalInstalacao_1(0).Enabled = False
+    objForm.optLocalInstalacao_1(1).Enabled = False
+    
+    objForm.CboTipoEquipamento_2.Enabled = False
+    objForm.TxtFabricanteEquipamento_2.Enabled = False
+    objForm.optLocalInstalacao_2(0).Enabled = False
+    objForm.optLocalInstalacao_2(1).Enabled = False
+    
+    objForm.CboTipoEquipamento_3.Enabled = False
+    objForm.TxtFabricanteEquipamento_3.Enabled = False
+    objForm.optLocalInstalacao_3(0).Enabled = False
+    objForm.optLocalInstalacao_3(1).Enabled = False
+
+    objForm.TxtEMailGic.Enabled = False
+    objForm.TxtRIT.Enabled = False
+    objForm.CboVelocidadeAcesso.Enabled = False
+    
+'    objForm.CmdPendencia.Enabled = False
+    objForm.CmdSalvar.Enabled = False
+    objForm.CmdLimpar.Enabled = False
+    objForm.CmdRealocar.Enabled = False
+    
+    objForm.UsrVIPEquipComplementares.DesabilitaBotoes
+    
+    objForm.txtTSI.Enabled = False
+    objForm.txtTSF.Enabled = False
+    objForm.TxtDescricaoRedeDeterministica.Enabled = False
+    
+'    If objForm.CmdCadastrarEqptoNGN.Visible Then
+'
+'        objForm.CmdCadastrarEqptoNGN.Enabled = False
+'
+'    End If
+    '''=================================================================
+    '''=================================================================
+    ''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    ''---Se ja enviado ao CLA desabilitar o campo para nao editar mais
+    If FlagStatusAcessoCLA = "0" Or FlagStatusAcessoCLA = "2" Then
+        objForm.txtSEV_Wireless.Enabled = False
+    End If
+    
+
+End Sub
+
+Public Property Get Acao_ID() As Long
+
+Acao_ID = lAcao_ID
+
+End Property
+
+Public Property Let Acao_ID(ByVal lNewValue As Long)
+
+lAcao_ID = lNewValue
+
+End Property
+
+Public Property Get Produto_ID() As Long
+
+Produto_ID = lProduto_ID
+
+End Property
+
+Public Property Let Produto_ID(ByVal lNewValue As Long)
+
+lProduto_ID = lNewValue
+
+End Property
+
+Public Property Get Grupo_ID() As Long
+
+Grupo_ID = lGrupo_ID
+
+End Property
+
+Public Property Let Grupo_ID(ByVal lNewValue As Long)
+
+lGrupo_ID = lNewValue
+
+End Property
+
+'
+Public Function VerificaFinalizacaoOK(Optional objDadosAcesso As clsGenAcesso, Optional pbFlagExibeCritica As Boolean) As Boolean
+    
+    Dim bRetorno        As Boolean
+    Dim iDigitoVeloc    As Integer
+    Dim sLetraVeloc     As String
+    Dim bRetornoDadosOK As Boolean
+    Dim sRetAux         As String
+    Dim iAux            As Integer
+    Dim sVelocAux       As String
+    Dim bFlagCriticaTipoRede    As Boolean
+    iAux = 0
+    
+    bRetornoDadosOK = False
+    
+    VerificaFinalizacaoOK = False
+    'Verifica o preenchimento dos campos da Pasta Dados Gerais
+    
+    bRetorno = True
+    
+'    If objForm.CboTipoEquipamento_1.ListIndex = -1 And _
+'       objForm.CboTipoEquipamento_2.ListIndex = -1 And _
+'       objForm.CboTipoEquipamento_3.ListIndex = -1 Then
+'
+'        objMensagem.Descricao = "Tipo equipamento obrigatório."
+'        bRetorno = False
+'        GoTo Finalizar
+'
+'    End If
+    
+    iAux = iAux + 1
+    ReDim vMensagemListaMsg(iAux)
+    vMensagemListaMsg(0) = "Os campos abaixo foram preenchidos incorretamente ou não foram preenchidos:"
+    iAux = iAux + 1
+    
+    If objForm.CboPadraoInterfaceEBT.ListIndex <= 0 Then
+
+        bRetorno = False
+
+        iAux = iAux + 1
+
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "Padrão de Interface Embratel " & _
+        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                      " é obrigatório."
+
+    End If
+
+
+    If Trim(objForm.CboPadraoInterfaceEBT.Text) = "" Then
+   
+     ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "A Interface EBT é obrigatória!"
+        bRetorno = False
+
+    End If
+
+    If Trim(objForm.TxtEstacaoEntregaEbtConf.Text) = "" And Trim(objForm.TxtEstacaoEntregaTerc.Text) = "" Then
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "A Estação de Entrega Configuração é obrigatória!"
+        bRetorno = False
+    End If
+    
+    If Produto_ID <> GbIDProdutoVIP Then
+        If objForm.OptResponsavelInfra(0).Value = False And _
+           objForm.OptResponsavelInfra(1).Value = False And objForm.optPropriedadeAcesso(0).Value = True Then
+
+            bRetorno = False
+
+            iAux = iAux + 1
+
+            ReDim Preserve vMensagemListaMsg(iAux)
+            vMensagemListaMsg(iAux - 1) = "Responsabilidade da infraEstrutura " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                          " é obrigatório."
+
+        End If
+    End If
+
+'    If objForm.optTipoRede(0).Value = False And _
+'       objForm.optTipoRede(1).Value = False And _
+'       objForm.optTipoRede(2).Value = False Then
+'
+'        bRetorno = False
+'
+'        iAux = iAux + 1
+'
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "Tipo de Rede Determinística " & _
+'        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                       " do Acesso Contingente") & _
+'                                      " é obrigatório."
+'    End If
+
+    If bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+       
+       bFlagCriticaTipoRede = True
+    
+    Else
+       
+       bFlagCriticaTipoRede = False
+       
+       If objForm.optPropriedadeAcesso(1).Value = True Then  'Propriedade Terceiros
+           
+           bFlagCriticaTipoRede = True
+       
+       End If
+       
+    End If
+    
+    If bFlagCriticaTipoRede Then
+    
+        'If objForm.OptTipoRede(0).Value <> False Or objForm.OptTipoRede(1).Value <> False Or objForm.OptTipoRede(2).Value <> False Then
+        If objForm.CboPlataformas.ListIndex > 0 Then
+            
+'            If Trim(objForm.TxtDescricaoRedeDeterministica.Text) = "" Then
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "Descrição de Rede Deterministica " & _
+'                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                               " do Acesso Contingente") & _
+'                                              " é obrigatório."
+'                bRetorno = False
+'            End If
+        
+'            If Trim(objForm.txtTSI.Text) = "" Then
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "A informação de TSI de Rede Determinística " & _
+'                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                               " do Acesso Contingente") & _
+'                                              " é obrigatório."
+'
+'                bRetorno = False
+'
+'            End If
+'
+'            If Trim(objForm.txtTSF.Text) = "" Then
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "A informação de TSF de Determinística " & _
+'                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                               " do Acesso Contingente") & _
+'                                              " é obrigatório."
+'
+'                bRetorno = False
+'            End If
+        
+        End If
+    
+    End If
+     
+'===================================================================
+'===================================================================
+    
+'    If objForm.TxtRamalGic.Text = "" Then
+'
+'        bRetorno = False
+'
+'        iAux = iAux + 1
+'
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "Ramal " & _
+'        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                       " do Acesso Contingente") & _
+'                                      " é obrigatório."
+'    End If
+    
+    If objForm.TxtEMailGic.Text = "" Then
+    
+        bRetorno = False
+        
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "E-mail " & _
+        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+                                                       
+    End If
+     
+    If objForm.TxtRIT.Text = "" Then
+    
+        bRetorno = False
+       
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "RIT " & _
+        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+       
+    End If
+     
+'    If Trim(objForm.CboVelocidadeAcesso.Text) = "" Then
+'
+'        bRetorno = False
+'
+'        iAux = iAux + 1
+'
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "Velocidade do Acesso " & _
+'        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                       " do Acesso Contingente") & _
+'                                                       " é obrigatório."
+'   End If
+    
+    If objForm.optPropriedadeAcesso(0).Value = True Then  'Propriedade Embratel
+    
+       If Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) = "" Then
+          
+            bRetorno = False
+            
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            vMensagemListaMsg(iAux - 1) = "Data de Ativação " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+       End If
+        
+       If Trim(objForm.TxtEstacaoEntregaEbtConf) = "" And _
+          objForm.TxtEstacaoEntregaEbtConf.Visible = True Then
+       
+            bRetorno = False
+            
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            vMensagemListaMsg(iAux - 1) = "Estação de entrega Configuração " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+       
+       End If
+       
+       If Trim(objForm.TxtEstacaoEntregaEbt) = "" Then
+       
+            bRetorno = False
+       
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            vMensagemListaMsg(iAux - 1) = "Estação de entrega Embratel " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+       
+       End If
+       
+'       If Not bFlagIndicaLegado And Not bFlagLegadoEmAndamento Then
+'            If Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "" And Trim(objForm.TxtTroncoOTS.Text) = "" Then
+                 
+'                 bRetorno = False
+            
+'                 iAux = iAux + 1
+                 
+'                 ReDim Preserve vMensagemListaMsg(iAux)
+'                 vMensagemListaMsg(iAux - 1) = "Tronco OTS TX " & _
+'                 IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                                " do Acesso Contingente") & _
+'                                                                " é obrigatório."
+'            End If
+'       End If
+       
+'       If Trim(objForm.TxtEstacaoCliente.Text) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Estação do Cliente " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+       
+       If bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+            
+            sVelocAux = objForm.CboVelocidadeAcesso.Text
+        
+       Else
+            
+            sVelocAux = objForm.LblVelocidadeAcesso.Text
+        
+       End If
+       
+       'If Trim(sVelocAux) <> "" Then
+
+          'Call obtemDigitoVelocidade(sVelocAux, iDigitoVeloc, sLetraVeloc)
+
+          'Se a Velocidade do Circuito for >= 2M e não for cabo interno, numero ots obrigatorio
+
+          'If ((sLetraVeloc = "M" And iDigitoVeloc >= 2) Or sLetraVeloc = "G") And _
+             objForm.CboTipoAcessoEmbratel.ListIndex <> 3 Then
+
+          '   If Trim(objForm.TxtNumeroOtsTx_EBT.Text) = "" Then
+
+          '      bRetorno = False
+
+          '      iAux = iAux + 1
+
+          '      ReDim Preserve vMensagemListaMsg(iAux)
+
+          '      vMensagemListaMsg(iAux - 1) = "Número OTS TX " & _
+          '      IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+
+          ' End If
+
+          '   If Val(objForm.TxtItemOtsTxEBT.Text) = 0 Then
+
+          '      bRetorno = False
+
+          '      iAux = iAux + 1
+
+          '      ReDim Preserve vMensagemListaMsg(iAux)
+
+          '      vMensagemListaMsg(iAux - 1) = "Item OTS TX " & _
+          '      IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                            " do Acesso Contingente") & _
+                                                            " é obrigatório."
+
+          '   End If
+
+       'End If
+
+        'If Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "" And _
+           Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "0" And _
+           (objForm.TxtNumeroOtsTx_EBT.Enabled = True) Then
+        
+        '    If Not MascaraOTSTX_OK(Trim(objForm.TxtNumeroOtsTx_EBT.Text)) Then
+                
+        '        bRetorno = False
+                
+        '        ReDim Preserve vMensagemListaMsg(iAux)
+        '        vMensagemListaMsg(iAux - 1) = "A máscara do número de OTS TX deve ser " & _
+                 "composta de (1 a 5 dígitos) seguido de "
+            
+        '        iAux = iAux + 1
+                 
+        '        ReDim Preserve vMensagemListaMsg(iAux)
+        '        vMensagemListaMsg(iAux - 1) = "'-' mais (1 a 4) caracteres!"
+                        
+        '    End If
+        
+        'End If
+
+       'End If
+       
+       If bFlagIndicaLegado Then
+           
+           If Trim(objForm.TxtDesignacaoAcessoEBT.Text) = "" And objForm.CboTipoAcessoEmbratel.ListIndex <> 1 And _
+                                                                 objForm.CboTipoAcessoEmbratel.ListIndex <> 3 Then
+                
+                bRetorno = False
+    
+                iAux = iAux + 1
+    
+                ReDim Preserve vMensagemListaMsg(iAux)
+    
+                vMensagemListaMsg(iAux - 1) = "Designação do Acesso Embratel " & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+    
+           End If
+       
+       End If
+       
+        'Se tipo de acesso for Radio
+       If objForm.CboTipoAcessoEmbratel.ListIndex = 0 Then
+
+'          If Trim(objForm.TxtDIDFila_Radio.Text) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "DID Fila " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtDIDArmacao_Radio.Text) = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID armação " & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'          'Leonardo Ferreira - Trocando de numero para string - Inicio
+'          'If Val(objForm.TxtDIDRegua_Radio.Text) = 0 Then
+'          If Trim(objForm.TxtDIDRegua_Radio.Text) = "" Then
+'          'Leonardo Ferreira - Fim
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "DID régua " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtDIDPosicao_Radio.Text) = 0 Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "DID posição " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtNumeroRepeticoes.Text) = 0 Then
+'
+'            objMensagem.Descricao = "Nº repetições obrigatório."
+'            bRetorno = False
+'            GoTo Finalizar
+'
+'          End If
+
+
+       End If
+    
+       'Se tipo de acesso for Fibra
+       If objForm.CboTipoAcessoEmbratel.ListIndex = 1 Then
+
+          If Trim(objForm.TxtDIDFila_Fibra.Text) = "" Then
+
+                bRetorno = False
+
+                iAux = iAux + 1
+
+                ReDim Preserve vMensagemListaMsg(iAux)
+
+                vMensagemListaMsg(iAux - 1) = "DID Fila " & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+
+          End If
+
+          If Val(objForm.TxtDIDArmacao_Fibra.Text) = 0 Then
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "DID armação " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+
+          End If
+          'Leonardo Ferreira - Trocando de numero para string - Inicio
+          'If Val(objForm.TxtDidRegua_Fibra.Text) = 0 Then
+          If Trim(objForm.TxtDidRegua_Fibra.Text) = "" Then
+          'Leonardo Ferreira - Fim
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "DID régua " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+
+          End If
+
+          If Val(objForm.TxtDIDPosicao_Fibra.Text) = 0 Then
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "DID posição " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+
+          End If
+
+          If Trim(objForm.TxtNumeroCaboFibra.Text) = "" Then
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "Número Cabo " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          End If
+
+          If Trim(objForm.TxtNumeroParFibra.Text) = "" Then
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "Número PAR " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+
+          End If
+
+       End If
+    
+       'Se tipo de acesso for ADE
+       If objForm.CboTipoAcessoEmbratel.ListIndex = 2 Then
+       
+          If objForm.optProprietarioModem(0).Value = False And _
+             objForm.optProprietarioModem(1).Value = False Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+          
+'          If Trim(objForm.TxtPredioEBT_ADE.Text) = "" Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Prédio " & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+       
+     'CALBAT - 05/10/2007 =====================================
+    'Tratar Acesso Paralelismo.                                                          =
+    '=========================================================
+        '          If Trim(objForm.TxtNumeroCabo_ADE.Text) = "" Then
+        '
+        '             bRetorno = False
+        '
+        '             iAux = iAux + 1
+        '
+        '             ReDim Preserve vMensagemListaMsg(iAux)
+        '
+        '             vMensagemListaMsg(iAux - 1) = "Número do Cabo " & _
+        '             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+        '                                                           " do Acesso Contingente") & _
+        '                                                           " é obrigatório."
+        '
+        '          End If
+        '
+        '          If Trim(objForm.TxtNumeroPar_ADE.Text) = "" Then
+        '
+        '             bRetorno = False
+        '
+        '             iAux = iAux + 1
+        '
+        '             ReDim Preserve vMensagemListaMsg(iAux)
+        '
+        '             vMensagemListaMsg(iAux - 1) = "Número do PAR " & _
+        '             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+        '                                                           " do Acesso Contingente") & _
+        '                                                           " é obrigatório."
+        '
+        '          End If
+    '=========================================================
+    '=========================================================
+       End If
+    
+       'Se tipo de acesso for Cabo Interno
+       If objForm.CboTipoAcessoEmbratel.ListIndex = 3 Then
+    
+          If objForm.optProprietarioModem(0).Value = False And _
+             objForm.optProprietarioModem(1).Value = False Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+          
+     'CALBAT - 05/10/2007 =====================================
+    'Tratar Acesso Paralelismo.                                                          =
+    '=========================================================
+            '          If Trim(objForm.TxtPredioCabo_Cabo.Text) = "" Then
+            '
+            '             bRetorno = False
+            '
+            '             iAux = iAux + 1
+            '
+            '             ReDim Preserve vMensagemListaMsg(iAux)
+            '
+            '             vMensagemListaMsg(iAux - 1) = "Prédio " & _
+            '             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+            '                                                           " do Acesso Contingente") & _
+            '                                                           " é obrigatório."
+            '
+            '          End If
+            
+            '          If Trim(objForm.TxtNumeroParEBT_Cabo.Text) = "" Then
+            '
+            '             bRetorno = False
+            '
+            '             iAux = iAux + 1
+            '
+            '             ReDim Preserve vMensagemListaMsg(iAux)
+            '
+            '             vMensagemListaMsg(iAux - 1) = "Número do PAR " & _
+            '             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+            '                                                           " do Acesso Contingente") & _
+            '                                                           " é obrigatório."
+            '
+            '          End If
+            '
+            '          If Trim(objForm.TxtNumeroCaboEBT_Cabo.Text) = "" Then
+            '
+            '             bRetorno = False
+            '
+            '             iAux = iAux + 1
+            '
+            '             ReDim Preserve vMensagemListaMsg(iAux)
+            '
+            '             vMensagemListaMsg(iAux - 1) = "Número do Cabo " & _
+            '             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+            '                                                           " do Acesso Contingente") & _
+            '                                                           " é obrigatório."
+            '
+            '          End If
+            
+    '=========================================================
+    '=========================================================
+    
+       End If
+       
+       'Se tipo de acesso for GPON
+       If objForm.CboTipoAcessoEmbratel.ListIndex = 4 Then
+          
+          If objForm.UsrGenDadosAcessoGPON.DesignacaoAcesso = "" Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "Designação do acesso GPON " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+       
+          If objForm.UsrGenDadosAcessoGPON.FabricanteONT = "" Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "Fabricante ONT GPON " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+       
+          If objForm.UsrGenDadosAcessoGPON.ModeloONT = "" Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "Modelo ONT GPON " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+            
+          If objForm.UsrGenDadosAcessoGPON.Vlan = 0 Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "VLAN de dados " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+            
+          If objForm.UsrGenDadosAcessoGPON.Porta = "" Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "Porta do acesso GPON " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+            
+          If objForm.UsrGenDadosAcessoGPON.PEOLT = "" Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "PE OLT do acesso GPON " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+            
+          If objForm.UsrGenDadosAcessoGPON.PortaOLT = "" Then
+          
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "Porta OLT do acesso GPON " & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          
+          End If
+       
+       End If
+       
+    Else
+    
+'       If objForm.optTipoTecnologia(0).Value = 0 And _
+'          objForm.optTipoTecnologia(1).Value = 0 And _
+'          objForm.optTipoTecnologia(2).Value = 0 Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Tecnologia do acesso " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'       End If
+        
+       'Propriedade Acesso Terceiro
+        If objForm.optProprietarioModem(0).Value = False And _
+           objForm.optProprietarioModem(1).Value = False And _
+           objForm.CboTipoAcessoTerceiro.ListIndex <> 2 Then  'É obrigatório quando o
+                                                              'tipo de acesso for <>
+                                                              'de Rede Determinística
+           bRetorno = False
+          
+           iAux = iAux + 1
+          
+           ReDim Preserve vMensagemListaMsg(iAux)
+          
+           vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+           IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+        
+        End If
+        
+       'If Trim(objForm.TxtNumeroOTSTXTerc.Text) <> "" And Trim(objForm.TxtTroncoOTS.Text) = "" Then
+            
+       '     bRetorno = False
+       
+       '     iAux = iAux + 1
+            
+       '     ReDim Preserve vMensagemListaMsg(iAux)
+       '     vMensagemListaMsg(iAux - 1) = "Tronco OTS TX " & _
+       '     IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+       'End If
+        
+       
+       If objForm.SpdDataAtivacaoAcessoTerc.Text = "" Then
+          
+            bRetorno = False
+            
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            
+            vMensagemListaMsg(iAux - 1) = "Data de Ativação " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+
+       End If
+
+       If Trim(objForm.TxtDesignacaoAcessoTerceiro.Text) = "" Then
+
+            bRetorno = False
+
+            iAux = iAux + 1
+
+            ReDim Preserve vMensagemListaMsg(iAux)
+
+            vMensagemListaMsg(iAux - 1) = "Designação de acesso " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+
+       End If
+        
+'       If Trim(objForm.TxtEstacaoEntregaTercConf.Text) = "" Then
+'
+'            bRetorno = False
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Estação de Entrega Configuração" & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+       
+       If Trim(objForm.TxtEstacaoEntregaTerc.Text) = "" Then
+       
+            bRetorno = False
+       
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            
+            vMensagemListaMsg(iAux - 1) = "Estação de Entrega Embratel " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+       
+       End If
+       
+       If objForm.optExisteAcessoIU(1).Value = True Then
+            
+            If objForm.CboProvedorUrbano.ListIndex <= 0 Then
+            
+                 bRetorno = False
+            
+                 iAux = iAux + 1
+                 
+                 ReDim Preserve vMensagemListaMsg(iAux)
+                 
+                 vMensagemListaMsg(iAux - 1) = "Provedor urbano " & _
+                 IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                                " do Acesso Contingente") & _
+                                                                " é obrigatório."
+            
+            End If
+                
+            'Designacao de Provedor Urbano
+            If bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+                
+                If Trim(objForm.SpdNumeroAcessoUrbano.Text) = "" Then
+        
+                    bRetorno = False
+        
+                    iAux = iAux + 1
+        
+                    ReDim Preserve vMensagemListaMsg(iAux)
+        
+                    vMensagemListaMsg(iAux - 1) = "Número do Acesso Urbano " & _
+                    IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                                   " do Acesso Contingente") & _
+                                                                   " é obrigatório."
+        
+                End If
+            
+            End If
+            
+            If Trim(objForm.TxtCNLPontaA_Urbano.Text) = "" Then
+            
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+                 
+                 ReDim Preserve vMensagemListaMsg(iAux)
+                 
+                 vMensagemListaMsg(iAux - 1) = "CNL Ponta A do Provedor Urbano " & _
+                 IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                                " do Acesso Contingente") & _
+                                                                " é obrigatório."
+            
+            End If
+    
+       
+            If Trim(objForm.SpdDataEntregaUrbano.Text) = "" Then
+    
+                bRetorno = False
+    
+                iAux = iAux + 1
+    
+                ReDim Preserve vMensagemListaMsg(iAux)
+    
+                vMensagemListaMsg(iAux - 1) = "Data de entrega do Provedor urbano " & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+    
+            End If
+       
+       ElseIf objForm.optExisteAcessoIU(0).Value = True Then
+       
+          If objForm.CboProvedorInterurbano.ListIndex <= 0 Then
+           
+             bRetorno = False
+            
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            
+            vMensagemListaMsg(iAux - 1) = "Provedor interurbano " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+          End If
+          
+          If bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+              'Numero do acesso provedor interurbano
+              If Trim(objForm.SpdNumeroAcessoInterurbano.Text) = "" Then
+            
+                objMensagem.Descricao = "Nº acesso interurbano obrigatório."
+                bRetorno = False
+                
+                iAux = iAux + 1
+                
+                ReDim Preserve vMensagemListaMsg(iAux)
+                
+                vMensagemListaMsg(iAux - 1) = "Número do acesso interurbano " & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+            
+              End If
+          End If
+          
+          If bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+              
+              If Trim(objForm.TxtCNLPontaA.Text) = "" Then
+            
+                objMensagem.Descricao = "CNL ponta A interurbano obrigatório."
+                bRetorno = False
+            
+                iAux = iAux + 1
+                
+                ReDim Preserve vMensagemListaMsg(iAux)
+                
+                vMensagemListaMsg(iAux - 1) = "CNL Ponta A interurbano " & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+            
+              End If
+              
+              If Trim(objForm.TxtCNLPontaB.Text) = "" Then
+            
+                objMensagem.Descricao = "CNL ponta B interurbano obrigatório."
+                bRetorno = False
+                
+                iAux = iAux + 1
+                
+                ReDim Preserve vMensagemListaMsg(iAux)
+                
+                vMensagemListaMsg(iAux - 1) = "CNL Ponta B interurbano " & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+            
+              End If
+          
+          End If
+          
+          If Trim(objForm.SpdDataEntregaInterUrbano.Text) = "" Then
+           
+            objMensagem.Descricao = "Data entrega interurbano obrigatório."
+            bRetorno = False
+        
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            
+            vMensagemListaMsg(iAux - 1) = "Data de entrega do Provedor interurbano " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+        
+          End If
+         
+       End If
+       
+'       If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+'
+'          If Val(objForm.TxtNumeroOTSTXTerc.Text) = 0 Then
+'
+'            objMensagem.Descricao = "Nº OTS TX obrigatório."
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Nº OTS TX obrigatório " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtItemOTSTxTerc.Text) = 0 Then
+'
+'            objMensagem.Descricao = "Item OTS TX obrigatório."
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Item OTS TX obrigatório " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'       End If
+        
+       'Tipo de acesso < 2M
+       If objForm.CboTipoAcessoTerceiro.ListIndex = 0 Then
+
+          If Trim(objForm.TxtNumeroCaboAcessoMenor.Text) = "" Then
+
+                objMensagem.Descricao = "Nº cabo obrigatório."
+                
+                iAux = iAux + 1
+            
+                ReDim Preserve vMensagemListaMsg(iAux)
+                
+                vMensagemListaMsg(iAux - 1) = "Nº cabo obrigatório. "
+
+                bRetorno = False
+                GoTo Finalizar
+
+          End If
+
+          If Trim(objForm.TxtNumeroParAcessoMenor.Text) = "" Then
+
+                '======================================================
+                'CALBAT - 27/05/2008 -
+                'BO Nº - 526534
+                '======================================================
+                objMensagem.Descricao = "Nº par obrigatório."
+                
+                iAux = iAux + 1
+            
+                ReDim Preserve vMensagemListaMsg(iAux)
+                
+                vMensagemListaMsg(iAux - 1) = "Nº par obrigatório. "
+                
+                '======================================================
+                
+                bRetorno = False
+                GoTo Finalizar
+
+          End If
+       
+          If objForm.CboInterfaceClienteMenor.ListIndex <= 0 Then
+             
+            objMensagem.Descricao = "Interface Cliente obrigatório."
+            bRetorno = False
+            
+            '======================================================
+            'CALBAT - 27/05/2008 -
+            'BO Nº - 526534
+            '======================================================
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            '======================================================
+            
+            
+            vMensagemListaMsg(iAux - 1) = "Interface cliente " & _
+            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+            
+          End If
+
+'          If objForm.CboInterfaceEBTMenor.ListIndex <= 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Interface Embratel " & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+
+'          If Trim(objForm.TxtBlocoDGMenor.Text) = "" Then
+'
+'                objmensagem.Descricao = "Bloco DG obrigatório."
+'                bRetorno = False
+'                GoTo Finalizar
+'
+'          End If
+
+'          If Trim(objForm.TxtParDGMenor.Text) = "" Then
+'
+'                objmensagem.Descricao = "Par DG obrigatório."
+'                bRetorno = False
+'                GoTo Finalizar
+'
+'          End If
+'
+'          If Trim(objForm.TxtBlocoTransdataMenor.Text) = "" Then
+'
+'                objmensagem.Descricao = "Bloco transdata obrigatório."
+'                bRetorno = False
+'                GoTo Finalizar
+'
+'          End If
+'
+'          If Trim(objForm.TxtParTransdataMenor.Text) = "" Then
+'
+'                objmensagem.Descricao = "Par transdata obrigatório."
+'                bRetorno = False
+'                GoTo Finalizar
+'
+'          End If
+       
+       End If
+    
+       'Tipo de acesso > 2M
+       If objForm.CboTipoAcessoTerceiro.ListIndex = 1 Then
+'
+'          If Trim(objForm.TxtDIDFila.Text) = "" Then
+'
+'            bRetorno = False
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtDIDArmacao.Text) = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID armação " & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                            " do Acesso Contingente") & _
+'                                                            " é obrigatório."
+'
+'          End If
+'          'Leonardo Ferreira - Trocando de numero para string - Inicio
+'          'If Val(objForm.TxtDIDRegua.Text) = 0 Then
+'          If Trim(objForm.TxtDIDRegua.Text) = "" Then
+'          'Leonardo Ferreira - Fim
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID régua" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                            " do Acesso Contingente") & _
+'                                                            " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtDIDPosicao.Text) = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID posição" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                            " do Acesso Contingente") & _
+'                                                            " é obrigatório."
+'
+'          End If
+'
+          If Trim(objForm.TxtTronco.Text) = "" Then
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "Tronco" & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                            " do Acesso Contingente") & _
+                                                            " é obrigatório."
+
+          End If
+       
+          If Trim(objForm.TxtPar.Text) = "" Then
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "PAR" & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                            " do Acesso Contingente") & _
+                                                            " é obrigatório."
+
+          End If
+       
+       End If
+    
+       'Tipo de acesso Rede Deterministica
+       If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+    
+          'If Val(objForm.TxtNumeroOTSTXTerc.Text) = 0 Then
+
+          '  objMensagem.Descricao = "Nº OTS TX obrigatório."
+          '  bRetorno = False
+        
+          '  iAux = iAux + 1
+            
+          '  ReDim Preserve vMensagemListaMsg(iAux)
+            
+          '  vMensagemListaMsg(iAux - 1) = "Nº OTS TX obrigatório " & _
+          '  IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+
+          'End If
+
+          'If Val(objForm.TxtItemOTSTxTerc.Text) = 0 Then
+
+          '  objMensagem.Descricao = "Item OTS TX obrigatório."
+          '  bRetorno = False
+            
+          '  iAux = iAux + 1
+            
+          '  ReDim Preserve vMensagemListaMsg(iAux)
+            
+          '  vMensagemListaMsg(iAux - 1) = "Item OTS TX obrigatório " & _
+          '  IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+
+          'End If
+    
+          'If Trim(objForm.TxtNumeroOTSTXTerc) <> "" And _
+             Trim(objForm.TxtNumeroOTSTXTerc) <> "0" Then
+            
+          '   If Not MascaraOTSTX_OK(Trim(objForm.TxtNumeroOTSTXTerc.Text)) Then
+              
+          '      bRetorno = False
+                 
+          '      iAux = iAux + 1
+                 
+          '      ReDim Preserve vMensagemListaMsg(iAux)
+          '      vMensagemListaMsg(iAux - 1) = "A máscara do número de OTS TX deve ser " & _
+                 "composta de (1 a 5 dígitos) seguido de "
+            
+          '      iAux = iAux + 1
+                 
+          '      ReDim Preserve vMensagemListaMsg(iAux)
+          '      vMensagemListaMsg(iAux - 1) = "'-' mais (1 a 4) caracteres!"
+
+          '   End If
+            
+          'End If
+
+    
+'          If Val(objForm.TXTDominio.Text) = 0 Then
+'
+'             objMensagem.Descricao = "Domínio obrigatório."
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Domínio" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+       
+'          If Val(objForm.TxtNO.Text) = 0 Then
+'
+'             objMensagem.Descricao = "Nó obrigatório."
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Número do Nó" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+       
+'          If Trim(objForm.CboSlot_Rede.Text) = "" Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "SLOT " & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+       
+'          If Trim(objForm.CboPorta_Rede.Text) = "" Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Porta" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'          End If
+          
+'          If Val(objForm.CboTSI_Rede.Text) = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Time slot inicial" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.CboTSF_Rede.Text) = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Time slot final" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'          End If
+       
+          If Trim(objForm.TxtDIDFila_Rede.Text) = "" Then
+            
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+            
+          End If
+    
+        
+          If Val(objForm.TxtDIDArmacao_Rede.Text) = 0 And (bFlagIndicaLegado Or bFlagLegadoEmAndamento) Then
+            
+             bRetorno = False
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "DID armação" & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+            
+          End If
+          'Leonardo Ferreira - Trocando de numero para string - Inicio
+          'If Val(objForm.TxtDIDRegua_Rede.Text) = 0 Then
+          If Trim(objForm.TxtDIDRegua_Rede.Text) = "" Then
+          'Leonardo Ferreira - Fim
+             bRetorno = False
+            
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+            
+          End If
+    
+          If objForm.TxtDIDPosicao_Rede.Text = "" Then
+             
+             bRetorno = False
+             iAux = iAux + 1
+            
+             ReDim Preserve vMensagemListaMsg(iAux)
+            
+             vMensagemListaMsg(iAux - 1) = "DID Posição" & _
+             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                           " do Acesso Contingente") & _
+                                                           " é obrigatório."
+            
+          End If
+       
+       End If
+    
+       'Se tipo de acesso for BSoD VIA
+       If objForm.CboTipoAcessoTerceiro.ListIndex = 3 Then
+        
+            '=================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '=================================================================
+            'If Trim(objForm.TxtDesigAcessoBSoD.Text) = "" Then
+            If Trim(objfrom.UsrGenDadosAcessoBSoD.DesignacaoAcesso) = "" Then
+            '=================================================================
+            '=================================================================
+                bRetorno = False
+                 
+                iAux = iAux + 1
+                
+                ReDim Preserve vMensagemListaMsg(iAux)
+                 
+                vMensagemListaMsg(iAux - 1) = "Designação do acesso HFC BSoD VIA" & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+    
+            End If
+            
+            
+            '=================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '=================================================================
+            'If Trim(objForm.TxtVLANVia.Text) = "" Then
+            If Trim(objfrom.UsrGenDadosAcessoBSoD.Vlan) = "" Then
+            '=================================================================
+            '=================================================================
+                
+                bRetorno = False
+                 
+                iAux = iAux + 1
+                 
+                ReDim Preserve vMensagemListaMsg(iAux)
+                
+                vMensagemListaMsg(iAux - 1) = "VLAN" & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+    
+            End If
+            
+'            If Trim(objForm.TxtLinkRedeVIA.Text) = "" Then
+'
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "Link Rede VIA / PE Embratel " & _
+'                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                               " do Acesso Contingente") & _
+'                                                               " é obrigatório."
+'
+'            End If
+            
+            '=================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '=================================================================
+            'If Trim(objForm.TxtPE.Text) = "" Then
+            If Trim(objForm.UsrGenDadosAcessoBSoD.PE) = "" Then
+            '=================================================================
+            '=================================================================
+                bRetorno = False
+                 
+                iAux = iAux + 1
+                 
+                ReDim Preserve vMensagemListaMsg(iAux)
+                
+                vMensagemListaMsg(iAux - 1) = "PE" & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+            
+            End If
+    
+            '=================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '=================================================================
+            'If Trim(objForm.TxtPortaVIA.Text) = "" Then
+            If Trim(objForm.UsrGenDadosAcessoBSoD.Porta) = "" Then
+            '=================================================================
+            '=================================================================
+                bRetorno = False
+                 
+                iAux = iAux + 1
+                
+                ReDim Preserve vMensagemListaMsg(iAux)
+                
+                vMensagemListaMsg(iAux - 1) = "Porta" & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+            End If
+    
+       End If
+
+       'Se tipo de acesso for BSoD NET
+       If objForm.CboTipoAcessoTerceiro.ListIndex = 4 Then
+        
+            '=================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '=================================================================
+            'If Trim(objForm.TxtDesigAcessoBSoD.Text) = "" Then
+            If Trim(objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso) = "" Then
+            '=================================================================
+            '=================================================================
+                bRetorno = False
+                 
+                iAux = iAux + 1
+                ReDim Preserve vMensagemListaMsg(iAux)
+              
+                vMensagemListaMsg(iAux - 1) = "Designação do acesso HFC BSoD NET" & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+    
+            End If
+            
+            '=================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '=================================================================
+            'If Trim(objForm.TxtVLAN_NET.Text) = "" Then
+            If Trim(objForm.UsrGenDadosAcessoBSoD.Vlan) = "" Then
+            '=================================================================
+            '=================================================================
+                bRetorno = False
+                 
+                iAux = iAux + 1
+                
+                ReDim Preserve vMensagemListaMsg(iAux)
+                 
+                vMensagemListaMsg(iAux - 1) = "VLAN" & _
+                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                                               " é obrigatório."
+    
+            End If
+        
+       End If
+        
+    End If
+    
+    If objForm.ssTabAcesso.TabVisible(5) = True Then
+        
+        '=======================================================================
+        'calbat - 24/01/2008
+        '=======================================================================
+        'If objForm.CmdObterEnderecoIP.Caption <> "Dados de Switch - OK" Then
+        If objForm.UsrVIPDadosSwitch.VerificaComboObterEnderecoIP <> "Dados de Switch - OK" Then
+        '=======================================================================
+        '=======================================================================
+            bRetorno = False
+            
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            
+            vMensagemListaMsg(iAux - 1) = "Os dados de Switch são obrigatórios para a finalização da fase!"
+            
+        End If
+        
+'        If objForm.UsrVIPDadosSwitch.NomeEqpto = "" Then
+'        End If
+    End If
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    If objForm.UsrGenDadosAcessoTroncoTX.UsaTX = "" Then
+    
+      bRetorno = False
+      iAux = iAux + 1
+ 
+      ReDim Preserve vMensagemListaMsg(iAux)
+
+      vMensagemListaMsg(iAux - 1) = "Informações de Tronco TX" & _
+      IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                  " do Acesso Contingente") & _
+                                                  " são obrigatórias."
+    
+    End If
+    '=================================================================
+    '=================================================================
+    
+    If objForm.optSegurancaAcesso(0).Value = True Then   'Seguranca de Acesso igual a Sim
+           
+           If objForm.optCaracAcessoEmbratel(1).Value = True Then  'Acesso Contingente
+              
+              'Caso os dados do Acesso Contingente estejam OK, verifica se os dados do
+              'Acesso Principal foi gravado 100%
+              
+'              If bRetorno Then
+              
+                 sRetAux = VerificaDadosOK("P")
+                 
+                 If sRetAux = "O" Then
+                 
+                    bRetornoDadosOK = True
+                 
+                 ElseIf sRetAux = "N" Then
+                    
+                    bRetornoDadosOK = False
+                 
+                 End If
+                 
+'              End If
+              
+           Else
+           
+              'Caso os dados do Acesso Principal estejam OK, verifica se os dados do
+              'Acesso Contingente foi gravado 100%
+              
+'              If bRetorno Then
+              
+                  sRetAux = VerificaDadosOK("C")
+
+                 If sRetAux = "O" Then
+                 
+                    bRetornoDadosOK = True
+                 
+                 ElseIf sRetAux = "N" Then
+                    
+                    bRetornoDadosOK = False
+                 
+                 ElseIf sRetAux = "I" Then
+                    
+                    bRetornoDadosOK = False
+                 
+                 End If
+
+           End If
+    Else
+        
+        bRetornoDadosOK = True
+    
+    End If
+    
+                    
+    If bRetorno Then
+    
+       bRetorno = bRetornoDadosOK
+       
+    End If
+    
+Finalizar:
+    
+'    If objForm.SpdDataAtivacaoAcessoEBT.Text = "" And objForm.SpdDataAtivacaoAcessoTerc.Text = "" Then
+'
+'       VerificaFinalizacaoOK = bRetorno
+'
+'       Exit Function
+'
+'    End If
+    
+    If objMensagem.TipoMsg <> "" Then
+    
+        objMensagem.ExibeMensagem
+            
+    Else
+    
+    If Not bRetorno Then
+        
+        If sRetAux <> "I" Then
+           
+           If objForm.optSegurancaAcesso(0).Value = True Then   'Seguranca de Acesso igual a Sim
+              
+              If objForm.optCaracAcessoEmbratel(1).Value = True Then  'Acesso Contingente
+                 
+                 'Call ExibeListaMensagem
+                 
+              End If
+              
+           Else
+            
+                If pbFlagExibeCritica And UBound(vMensagemListaMsg, 1) > 0 Then
+                   
+                   Call ExibeListaMensagem
+                
+                End If
+            
+           End If
+        
+        End If
+        
+    End If
+    
+    End If
+    
+    VerificaFinalizacaoOK = bRetorno
+    
+    Exit Function
+       
+End Function
+
+Public Function VerificaDadosOK(pCaracteristicaAcesso As String) As String
+
+    Dim bRetorno                As Boolean
+    Dim iDigitoVeloc            As Integer
+    Dim sLetraVeloc             As String
+    
+    Dim ObjAcesso               As clsGenAcesso
+    Dim objDadosPropriedadeEBT  As clsGenPropriedadeEmbratel
+    Dim objDadosPropriedadeTerc As clsGenPropriedadeTerceiros
+    Dim lContingenciaAcesso_ID  As Long
+    Dim sCaracteristicaAcesso   As String
+    
+    Dim objDadosTipoRadio       As clsGenTipoAcessoRadio
+    Dim objDadosTipoFibra       As clsGenTipoAcessoFibra
+    Dim objdadosTipoADE         As clsGenTipoAcessoADE
+    Dim objDadosTipoCabo        As clsGenTipoAcessoCabo
+    Dim objDadosVelocidade      As clsGenVelocidade
+              
+    Dim objdadosTipoAcessoMaior As clsGenTipoAcessoMaior2M
+    Dim objdadosTipoAcessoMenor As clsGenTipoAcessoMenor2M
+    Dim objdadosTipoAcessoRede  As clsGenTipoAcessoRedeDeterm
+    '#BLD
+    Dim sTabela                 As String
+    
+    Dim bRetornoOK              As Boolean
+    Dim iAux                    As Integer
+    
+    On Error GoTo ErrorHandler
+
+    bRetorno = True
+    
+    iAux = UBound(vMensagemListaMsg, 1)
+    iAux = iAux + 1
+    
+    VerificaDadosOK = "N"       'N - Não está OK. Existem dados não preenchidos ou
+                                'preenchidos incorretamente
+
+    Set ObjAcesso = New clsGenAcesso
+    
+    ObjAcesso.InformaMensagem objMensagem
+    ObjAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    sCaracteristicaAcesso = pCaracteristicaAcesso
+    
+    If Not ObjAcesso.RecuperarDados(sCaracteristicaAcesso, Servico_ID, Fase_ID, objMensagem) Then
+    
+       bRetorno = False
+       
+       If objMensagem.TipoMsg <> "" Then
+           
+          objMensagem.ExibeMensagem
+          
+          GoTo Finalizar
+        
+       End If
+        
+'       objMensagem.Descricao = "Os dados do Acesso Contingente são de preenchimento " & _
+                               "obrigatório para a finalização da fase! "
+       
+'       iAux = iAux + 1
+    
+'       ReDim Preserve vMensagemListaMsg(iAux)
+    
+'       vMensagemListaMsg(iAux - 1) = "Os dados do Acesso Contingente são de " & _
+                                     "preenchimento obrigatório para "
+       
+'       iAux = iAux + 1
+    
+'       ReDim Preserve vMensagemListaMsg(iAux)
+    
+'       vMensagemListaMsg(iAux - 1) = "a finalização da fase!"
+       
+       VerificaDadosOK = "I"  'Dados inexistentes
+       
+       GoTo Finalizar
+        
+    Else
+    
+        If ObjAcesso.PadraoInterfaceEBT_ID = 0 Then
+        
+           bRetorno = False
+           
+           iAux = iAux + 1
+        
+           ReDim Preserve vMensagemListaMsg(iAux)
+        
+           vMensagemListaMsg(iAux - 1) = "Padrão de Interface Embratel" & _
+           IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+           
+        End If
+    
+        If ObjAcesso.ResponsavelInfra = "" And ObjAcesso.PropridedadeAcesso = "E" Then
+        
+           bRetorno = False
+           
+           iAux = iAux + 1
+        
+           ReDim Preserve vMensagemListaMsg(iAux)
+        
+           vMensagemListaMsg(iAux - 1) = "Responsabilidade Infra-estrutura" & _
+           IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+           
+        End If
+        
+        lContingenciaAcesso_ID = ObjAcesso.iD
+        
+        'Obtem os dados de Equipamento Complementar
+        bRetornoOK = ObjAcesso.RecuperarDadosEquipamentos(lContingenciaAcesso_ID, objMensagem)
+          
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+          
+        'Caso o Acesso já esteja Cadastrado, Recuperar os dados Conforme a Propriedade do
+        'Acesso
+        If ObjAcesso.PropridedadeAcesso = "E" Then   'Propriedade Acesso = Embratel
+        
+           Set objDadosPropriedadeEBT = New clsGenPropriedadeEmbratel
+           
+           objDadosPropriedadeEBT.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+           bRetornoOK = objDadosPropriedadeEBT.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+            
+           If objMensagem.TipoMsg <> "" Then
+              
+              GoTo ErrorHandler
+           
+           End If
+           
+           If objDadosPropriedadeEBT.EstacaoEntregaAcesso = "" Then
+           
+              bRetorno = False
+              
+              iAux = iAux + 1
+        
+              ReDim Preserve vMensagemListaMsg(iAux)
+        
+              vMensagemListaMsg(iAux - 1) = "Estação de entrega Embratel" & _
+              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                          " do Acesso Contingente") & _
+                                                          " é obrigatório."
+              
+           End If
+           
+           If objDadosPropriedadeEBT.EstacaoEntregaAcessoConfiguracao = "" Then
+              
+              bRetorno = False
+              
+              iAux = iAux + 1
+        
+              ReDim Preserve vMensagemListaMsg(iAux)
+        
+              vMensagemListaMsg(iAux - 1) = "Estação de Entrega Configuração" & _
+              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                          " do Acesso Contingente") & _
+                                                          " é obrigatório."
+              
+           End If
+           
+           If objDadosPropriedadeEBT.estacaoCliente = "" Then
+              
+              bRetorno = False
+              
+              iAux = iAux + 1
+        
+              ReDim Preserve vMensagemListaMsg(iAux)
+        
+              vMensagemListaMsg(iAux - 1) = "Estação do Cliente" & _
+              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                          " do Acesso Contingente") & _
+                                                          " é obrigatório."
+              
+           End If
+           
+           If objDadosPropriedadeEBT.DataAtivacaoAcesso = "" Then
+           
+              bRetorno = False
+              iAux = iAux + 1
+        
+              ReDim Preserve vMensagemListaMsg(iAux)
+        
+              vMensagemListaMsg(iAux - 1) = "Data de Ativação " & _
+              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                          " do Acesso Contingente") & _
+                                                          " é obrigatório."
+              
+           End If
+           
+ '          Set objDadosVelocidade = New clsGenVelocidade
+           
+'           objDadosVelocidade.InformaMensagem objMensagem
+'           objDadosVelocidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+                       
+           '#BLD
+'           sTabela = ""
+           
+           'If (Produto_ID = GbIDProdutoBLD Or Produto_ID = GbIDProdutoVBL Or _
+                    Produto_ID = GbIDProdutoVOIP) Then
+            
+'            If (lGrupo_ID = GbIDGrupoBLD Or _
+                    Produto_ID = GbIDProdutoVOIP) Then
+
+'               sTabela = "TAB_VELOCIDADE"
+           
+'           End If
+           
+'           bRetorno = objDadosVelocidade.RecuperarDados(objDadosAcesso.Cd_Veloc, _
+                                        sTabela)
+           
+'           If bRetorno Then
+           
+'              Call obtemDigitoVelocidade(objDadosVelocidade.Nm_Veloc, iDigitoVeloc, sLetraVeloc)
+           
+'           Else
+              
+'              objMensagem.TipoMsg = "A"
+'              objMensagem.Descricao = "Foi encontrado um erro de inconsistência " & _
+                                      "de dados referente a Velocidade do Acesso"
+'              GoTo Finalizar
+           
+'           End If
+           
+           Call obtemDigitoVelocidade(objDadosAcesso.Ds_Veloc_CLA, iDigitoVeloc, sLetraVeloc)
+           
+           'Se a Velocidade do Circuito for >= 2M e não for cabo interno, numero ots obrigatorio
+           
+           'If sLetraVeloc = "M" And iDigitoVeloc >= 2 And _
+              objDadosPropriedadeEBT.TipoAcesso <> "C" Then
+                
+           '     If Trim(objDadosPropriedadeEBT.NumeroOTSTX) = "" Then
+                   
+           '        bRetorno = False
+                     
+           '        iAux = iAux + 1
+            
+           '        ReDim Preserve vMensagemListaMsg(iAux)
+            
+           '        vMensagemListaMsg(iAux - 1) = "Número OTS TX" & _
+           '        IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+                     
+           '     End If
+           
+           
+           '     If Val(objDadosPropriedadeEBT.ItemOTSTX) = 0 Then
+                  
+           '        bRetorno = False
+                     
+           '        iAux = iAux + 1
+            
+           '        ReDim Preserve vMensagemListaMsg(iAux)
+            
+           '        vMensagemListaMsg(iAux - 1) = "Item OTS TX" & _
+           '        IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+                     
+           '    End If
+           
+           'End If
+           
+           'Carrega a propriedade Objeto Propriedade Embratel
+           If objDadosPropriedadeEBT.TipoAcesso = "R" Then
+               
+              Set objDadosTipoRadio = New clsGenTipoAcessoRadio
+              
+              objDadosTipoRadio.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetornoOK = objDadosTipoRadio.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+
+              If objDadosTipoRadio.DIDFila = "" Then
+                 
+                  bRetorno = False
+                  
+                  iAux = iAux + 1
+            
+                  ReDim Preserve vMensagemListaMsg(iAux)
+            
+                  vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+                  IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+    
+               End If
+    
+               If objDadosTipoRadio.DIDArmacao = 0 Then
+                 
+                  bRetorno = False
+    
+                  iAux = iAux + 1
+            
+                  ReDim Preserve vMensagemListaMsg(iAux)
+            
+                  vMensagemListaMsg(iAux - 1) = "DID armação" & _
+                  IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+    
+               End If
+               'Leonardo Ferreira - Trocando de numero para string - Inicio
+               'If objDadosTipoRadio.DIDRegua = 0 Then
+               If objDadosTipoRadio.DIDRegua = "" Then
+               'Leonardo Ferreira - Fim
+                  bRetorno = False
+                  
+                  iAux = iAux + 1
+            
+                  ReDim Preserve vMensagemListaMsg(iAux)
+            
+                  vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+                  IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+    
+               End If
+    
+               If objDadosTipoRadio.DIDPosicao = 0 Then
+                 
+                  bRetorno = False
+                  
+                  iAux = iAux + 1
+            
+                  ReDim Preserve vMensagemListaMsg(iAux)
+            
+                  vMensagemListaMsg(iAux - 1) = "DID posição" & _
+                  IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+    
+               End If
+     
+'               If objDadosTipoRadio.NumeroRepeticoes = 0 Then
+'
+'                  objMensagem.Descricao = "Nº repetições obrigatório."
+'                  bRetorno = False
+'                  GoTo Finalizar
+'
+'               End If
+    
+               Set objDadosTipoRadio = Nothing
+               
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "F" Then  'Fibra Otica
+              
+              Set objDadosTipoFibra = New clsGenTipoAcessoFibra
+              
+              objDadosTipoFibra.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetornoOK = objDadosTipoFibra.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              If objDadosTipoFibra.DIDFila = "" Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objDadosTipoFibra.DIDArmacao = 0 Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID armação" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objDadosTipoFibra.DIDPosicao = 0 Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID posição" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              'Leonardo Ferreira - Trocando de numero para string - Inicio
+              'If objDadosTipoFibra.DIDRegua = 0 Then
+              If objDadosTipoFibra.DIDRegua = "" Then
+              'Leonardo Ferreira - Fim
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objDadosTipoFibra.NumeroCabo = "" Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Número do Cabo" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objDadosTipoFibra.NumeroPar = "" Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Número PAR" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              Set objDadosTipoFibra = Nothing
+           
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "A" Then  'ADE
+              
+              If ObjAcesso.ProprietarioModem = "" Then
+                
+                 bRetorno = False
+                  
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Proprietário Modem" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                  
+              End If
+                
+              Set objdadosTipoADE = New clsGenTipoAcessoADE
+              
+              objdadosTipoADE.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetornoOK = objdadosTipoADE.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              If objdadosTipoADE.PredioEBT = "" Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Prédio Embratel" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objdadosTipoADE.NumeroParEBT = "" Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Número PAR Embratel" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objdadosTipoADE.NumeroCaboEBT = 0 Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Número Cabo Embratel" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              Set objdadosTipoADE = Nothing
+           
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "C" Then  'Cabo Interno
+              
+              If ObjAcesso.ProprietarioModem = "" Then
+                
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Proprietário Modem" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                  
+              End If
+              
+              Set objDadosTipoCabo = New clsGenTipoAcessoCabo
+              
+              objDadosTipoCabo.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetornoOK = objDadosTipoCabo.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoCabo
+           
+'              If Trim(objDadosTipoCabo.NumeroCaboCliente) = "" Then
+'
+'                 objMensagem.Descricao = "Nº cabo cliente obrigatório."
+'                 bRetorno = False
+'                 GoTo Finalizar
+'
+'              End If
+'
+'              If Trim(objDadosTipoCabo.NumeroParCliente) = "" Then
+'
+'                 objMensagem.Descricao = "Nº par cliente obrigatório."
+'                 bRetorno = False
+'                 GoTo Finalizar
+'
+'              End If
+            
+              If Trim(objDadosTipoCabo.NumeroCaboEBT) = "" Then
+                 bRetorno = False
+               
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Número Cabo Embratel" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+               
+              End If
+                       
+              If Trim(objDadosTipoCabo.NumeroParEBT) = "" Then
+            
+                 bRetorno = False
+               
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Número PAR Embratel" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+               
+              End If
+            
+              If Trim(objDadosTipoCabo.Predio) = "" Then
+            
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Prédio" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+               
+              End If
+            
+              Set objDadosTipoCabo = Nothing
+           End If
+        
+           Set objDadosPropriedadeEBT = Nothing
+        
+        Else
+           
+           'Propriedade Acesso = Terceiros
+           Set objDadosPropriedadeTerc = New clsGenPropriedadeTerceiros
+           
+           objDadosPropriedadeTerc.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+           bRetornoOK = objDadosPropriedadeTerc.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+            
+           If objMensagem.TipoMsg <> "" Then
+              
+              GoTo ErrorHandler
+           
+           End If
+           
+           If objDadosPropriedadeTerc.EstacaoEntregaAcessoConfiguracao = "" Then
+             
+              bRetorno = False
+              
+              iAux = iAux + 1
+         
+              ReDim Preserve vMensagemListaMsg(iAux)
+        
+              vMensagemListaMsg(iAux - 1) = "Estação de entrega Configuração " & _
+              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                          " do Acesso Contingente") & _
+                                                          " é obrigatório."
+           End If
+           
+           If objDadosPropriedadeTerc.EstacaoEntregaAcesso = "" Then
+             
+              bRetorno = False
+              
+              iAux = iAux + 1
+         
+              ReDim Preserve vMensagemListaMsg(iAux)
+        
+              vMensagemListaMsg(iAux - 1) = "Estação de entrega Embratel " & _
+              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                          " do Acesso Contingente") & _
+                                                          " é obrigatório."
+           End If
+           
+           If objDadosPropriedadeTerc.DataAtivacaoAcesso = "" Then
+             
+              bRetorno = False
+              
+              iAux = iAux + 1
+         
+              ReDim Preserve vMensagemListaMsg(iAux)
+        
+              vMensagemListaMsg(iAux - 1) = "Data de Ativação do acesso " & _
+              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                          " do Acesso Contingente") & _
+                                                          " é obrigatório."
+           End If
+           
+'           If objDadosPropriedadeTerc.TipoAcesso = "R" Then
+'
+'               If Val(objDadosPropriedadeTerc.NumeroOTSTx) = 0 Then
+'
+'                  objMensagem.Descricao = "Nº OTS TX obrigatório."
+'
+'                  bRetorno = False
+'
+'                  GoTo Finalizar
+'
+'               End If
+'
+'
+'               If Val(objDadosPropriedadeTerc.ItemOTSTx) = 0 Then
+'
+'                  objMensagem.Descricao = "Item OTS TX obrigatório."
+'
+'                  bRetorno = False
+'
+'                  GoTo Finalizar
+'
+'               End If
+'
+'           End If
+'
+          'Carrega a propriedade Objeto Propriedade Terceiros
+           If objDadosPropriedadeTerc.TipoAcesso = "<" Then   'Tipo de Acesso Menor 2M
+              
+              If ObjAcesso.ProprietarioModem = "" Then
+                
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Proprietário Modem" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+              End If
+               
+              Set objdadosTipoAcessoMenor = New clsGenTipoAcessoMenor2M
+              
+              objdadosTipoAcessoMenor.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetornoOK = objdadosTipoAcessoMenor.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+                
+'              If objdadosTipoAcessoMenor.NumeroCabo = "" Then
+'
+'                 objMensagem.Descricao = "Nº cabo obrigatório."
+'                 bRetorno = False
+'                 GoTo Finalizar
+'
+'              End If
+'
+'              If objdadosTipoAcessoMenor.NumeroPar = "" Then
+'
+'                 objMensagem.Descricao = "Nº par obrigatório."
+'                 bRetorno = False
+'                 GoTo Finalizar
+'
+'              End If
+              
+              If objdadosTipoAcessoMenor.InterfaceClienteID = 0 Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Interface cliente" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objdadosTipoAcessoMenor.InterfaceEbtId = 0 Then
+              
+                 bRetorno = False
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Interface Embratel" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+'              If objdadosTipoAcessoMenor.BlocoDG = "" Then
+'
+'                 objMensagem.Descricao = "Bloco DG obrigatório."
+'                 bRetorno = False
+'                 GoTo Finalizar
+'
+'              End If
+'
+'              If objdadosTipoAcessoMenor.ParDG = "" Then
+'
+'                 objMensagem.Descricao = "Par DG obrigatório."
+'                 bRetorno = False
+'                 GoTo Finalizar
+'
+'              End If
+              
+'              If objdadosTipoAcessoMenor.BlocoTransData = "" Then
+'
+'                 objMensagem.Descricao = "Bloco transdata obrigatório."
+'                 bRetorno = False
+'                 GoTo Finalizar
+'
+'              End If
+'
+'              If objdadosTipoAcessoMenor.ParTransData = "" Then
+'
+'                 objMensagem.Descricao = "Par transdata obrigatório."
+'                 bRetorno = False
+'                 GoTo Finalizar
+'
+'              End If
+              
+              Set objdadosTipoAcessoMenor = Nothing
+
+           ElseIf objDadosPropriedadeTerc.TipoAcesso = ">" Then  'Tipo de Acesso Maior 2M
+              
+              If ObjAcesso.ProprietarioModem = "" Then
+                
+                 bRetorno = False
+                  
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Proprietário Modem" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                  
+              End If
+              
+              Set objdadosTipoAcessoMaior = New clsGenTipoAcessoMaior2M
+              
+              objdadosTipoAcessoMaior.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetornoOK = objdadosTipoAcessoMaior.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              If objdadosTipoAcessoMaior.DIDFila = "" Then
+              
+                 bRetorno = False
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objdadosTipoAcessoMaior.DIDArmacao = 0 Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID armação" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              'Leonardo Ferreira - Trocando de numero para string - Inicio
+              'If objdadosTipoAcessoMaior.DIDRegua = 0 Then
+              If objdadosTipoAcessoMaior.DIDRegua = "" Then
+              'Leonardo Ferreira - Fim
+                          
+                 bRetorno = False
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objdadosTipoAcessoMaior.DIDPosicao = 0 Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID Posição" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+                            
+              Set objdadosTipoAcessoMaior = Nothing
+           
+           ElseIf objDadosPropriedadeTerc.TipoAcesso = "R" Then  'Tipo de Acesso Rede Determ
+              
+              Set objdadosTipoAcessoRede = New clsGenTipoAcessoRedeDeterm
+           
+              objdadosTipoAcessoRede.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetornoOK = objdadosTipoAcessoRede.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              If objdadosTipoAcessoRede.Dominio = "" Then
+              
+                 bRetorno = False
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Domínio" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objdadosTipoAcessoRede.NO = 0 Then
+              
+                 bRetorno = False
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "Número NÓ" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+'              If objdadosTipoAcessoRede.Slot = "" Then
+'
+'                 bRetorno = False
+'                 iAux = iAux + 1
+'
+'                 ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                 vMensagemListaMsg(iAux - 1) = "SLOT" & _
+'                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                             " do Acesso Contingente") & _
+'                                                             " é obrigatório."
+'
+'              End If
+'
+'              If objdadosTipoAcessoRede.Porta = "" Then
+'
+'                 bRetorno = False
+'                 iAux = iAux + 1
+'
+'                 ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                 vMensagemListaMsg(iAux - 1) = "Porta" & _
+'                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                             " do Acesso Contingente") & _
+'                                                             " é obrigatório."
+'
+'              End If
+              
+'              If objdadosTipoAcessoRede.TSI = 0 Then
+'
+'                 bRetorno = False
+'                 iAux = iAux + 1
+'
+'                 ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                 vMensagemListaMsg(iAux - 1) = "Time Slot inicial" & _
+'                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                             " do Acesso Contingente") & _
+'                                                             " é obrigatório."
+'
+'              End If
+'
+'              If objdadosTipoAcessoRede.TSF = 0 Then
+'
+'                 bRetorno = False
+'
+'                 iAux = iAux + 1
+'
+'                 ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                 vMensagemListaMsg(iAux - 1) = "Time Slot final" & _
+'                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                             " do Acesso Contingente") & _
+'                                                             " é obrigatório."
+'
+'              End If
+              
+              If objdadosTipoAcessoRede.DIDFila = "" Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objdadosTipoAcessoRede.DIDArmacao = 0 Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID armação" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+              If objdadosTipoAcessoRede.DIDPosicao = "" Then
+              
+                 bRetorno = False
+                 
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID posição" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+
+              'Leonardo Ferreira - Trocando de numero para string - Inicio
+              'If objdadosTipoAcessoRede.DIDRegua = 0 Then
+              If objdadosTipoAcessoRede.DIDRegua = "" Then
+              'Leonardo Ferreira - Fim
+                 bRetorno = False
+                 iAux = iAux + 1
+            
+                 ReDim Preserve vMensagemListaMsg(iAux)
+           
+                 vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+                 IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                             " do Acesso Contingente") & _
+                                                             " é obrigatório."
+                 
+              End If
+              
+           End If
+        
+        End If
+        
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    If ObjAcesso.UtilizaTroncoTX = "" Then
+    
+      bRetorno = False
+      iAux = iAux + 1
+ 
+      ReDim Preserve vMensagemListaMsg(iAux)
+
+      vMensagemListaMsg(iAux - 1) = "Informações de Tronco TX" & _
+      IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                  " do Acesso Contingente") & _
+                                                  " são obrigatórias."
+    
+    End If
+    '=================================================================
+    '=================================================================
+    
+    End If
+    
+    
+    
+    
+
+   Set ObjAcesso = Nothing
+   Set objdadosTipoAcessoRede = Nothing
+   Set objDadosPropriedadeTerc = Nothing
+   
+   If bRetorno Then
+      
+      VerificaDadosOK = "O"  'O - Dados OK
+      
+   End If
+   
+Finalizar:
+    
+    Exit Function
+    
+ErrorHandler:
+
+       If objMensagem.TipoMsg = "" Then
+          
+          objMensagem.TipoMsg = "E"
+          objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                             vbCrLf & "Houve um erro de execução no método: " & vbCrLf & vbCrLf & "VerificaDadosOK do Objeto Controle " & _
+                             "clsGenOC_TratarAcessoEmbratel"
+       
+       End If
+       
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+
+End Function
+
+Public Function VerPreenchimentoInstancia(pobjAcesso As clsGenAcesso) As String
+
+    Dim bRetorno                As Boolean
+    Dim iDigitoVeloc            As Integer
+    Dim sLetraVeloc             As String
+    
+    Dim ObjAcesso               As clsGenAcesso
+    Dim objDadosPropriedadeEBT  As clsGenPropriedadeEmbratel
+    Dim objDadosPropriedadeTerc As clsGenPropriedadeTerceiros
+    Dim lContingenciaAcesso_ID  As Long
+    Dim sCaracteristicaAcesso   As String
+    
+    Dim objDadosTipoRadio       As clsGenTipoAcessoRadio
+    Dim objDadosTipoFibra       As clsGenTipoAcessoFibra
+    Dim objdadosTipoADE         As clsGenTipoAcessoADE
+    Dim objDadosTipoCabo        As clsGenTipoAcessoCabo
+    Dim objDadosVelocidade      As clsGenVelocidade
+              
+    Dim objdadosTipoAcessoMaior As clsGenTipoAcessoMaior2M
+    Dim objdadosTipoAcessoMenor As clsGenTipoAcessoMenor2M
+    Dim objdadosTipoAcessoRede  As clsGenTipoAcessoRedeDeterm
+    Dim sMaiorData              As String
+    '#BLD
+    Dim sTabela                 As String
+    
+    Dim bRetornoOK              As Boolean
+    Dim iAux                    As Integer
+    Dim lPosColecao             As Long
+    Dim bFlagCriticaTipoRede    As Boolean
+    
+    Dim bDataValida             As Boolean
+    
+    
+    On Error GoTo ErrorHandler
+
+    bRetorno = True
+    
+    ReDim vMensagemListaMsg(1)
+'    iAux = UBound(vMensagemListaMsg, 1)
+    iAux = 0
+    
+    VerPreenchimentoInstancia = "N"       'N - Não está OK. Existem dados não preenchidos ou
+                                'preenchidos incorretamente
+        
+    Set ObjAcesso = pobjAcesso
+    
+'    If objAcesso.PadraoInterfaceEBT_ID = 0 Then
+'
+'       bRetorno = False
+'
+'       iAux = iAux + 1
+'
+'       ReDim Preserve vMensagemListaMsg(iAux)
+'
+'       vMensagemListaMsg(iAux - 1) = "Padrão de Interface Embratel" & _
+'       IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                   " do Acesso Contingente") & _
+'                                                   " é obrigatório."
+'
+'    End If
+
+    If objForm.optPropriedadeAcesso(1).Value = True Then
+        
+        bFlagCriticaTipoRede = True
+        
+    Else
+        
+        bFlagCriticaTipoRede = False
+    
+    End If
+    
+    If bFlagCriticaTipoRede Then
+        
+        If ObjAcesso.TipoRede <> "" Then
+    
+'            If Trim(ObjAcesso.DescricaoRedeDeterministica) = "" Then
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "Descrição de Rede Deterministica " & _
+'                IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                               " do Acesso Contingente") & _
+'                                              " é obrigatório."
+'                bRetorno = False
+'
+'            End If
+        
+            If Trim(ObjAcesso.TSI) = "" Then
+                
+                iAux = iAux + 1
+        
+                ReDim Preserve vMensagemListaMsg(iAux)
+                vMensagemListaMsg(iAux - 1) = "A informação de TSI de Rede Determinística " & _
+                IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                              " é obrigatório."
+                
+                bRetorno = False
+            
+            End If
+    
+            If Trim(ObjAcesso.TSF) = "" Then
+                
+                iAux = iAux + 1
+        
+                ReDim Preserve vMensagemListaMsg(iAux)
+                vMensagemListaMsg(iAux - 1) = "A informação de TSF de Rede Determinística " & _
+                IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                               " do Acesso Contingente") & _
+                                              " é obrigatório."
+                
+                bRetorno = False
+            
+            End If
+        
+        End If
+        
+    End If
+    
+    If ObjAcesso.eMailUsuario = "" Then
+    
+        bRetorno = False
+        
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "E-mail " & _
+        IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+                                                       
+    End If
+     
+    If ObjAcesso.RIT = "" Then
+    
+        bRetorno = False
+       
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "RIT " & _
+        IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+       
+    End If
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+        ' TBASTOS - 20/11/2016
+        ' CH-25385REE
+        ' Adicionada a condição de Tipo de Acesso  diferente de BSoD Light, pois não deve ser criticada
+        '========================================
+        'If Trim(objAcesso.EstacaoConfiguracao) = "" Then
+        If Trim(ObjAcesso.EstacaoConfiguracao) = "" And objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+        
+        bRetorno = False
+       
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "Estação de Configuração " & _
+        IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+       
+    End If
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    If ObjAcesso.UtilizaTroncoTX = "" Then
+    
+      bRetorno = False
+      iAux = iAux + 1
+ 
+      ReDim Preserve vMensagemListaMsg(iAux)
+
+      vMensagemListaMsg(iAux - 1) = "Informações de Tronco TX" & _
+      IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                  " do Acesso Contingente") & _
+                                                  " são obrigatórias."
+    
+    End If
+    '=================================================================
+    '=================================================================
+    
+    If ObjAcesso.PadraoInterfaceEBT_ID = 0 Then
+    
+        bRetorno = False
+       
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "Interface Lado EBT " & _
+        IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+       
+    End If
+        '========================================
+        '========================================
+
+    If Produto_ID <> GbIDProdutoVIP Then
+        
+        If ObjAcesso.ResponsavelInfra = "" And ObjAcesso.PropridedadeAcesso = "E" Then
+        
+           bRetorno = False
+           
+           iAux = iAux + 1
+        
+           ReDim Preserve vMensagemListaMsg(iAux)
+        
+           vMensagemListaMsg(iAux - 1) = "Responsabilidade Infra-estrutura" & _
+           IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                                       " é obrigatório."
+           
+        End If
+    
+    End If
+    'Caso o Acesso já esteja Cadastrado, Recuperar os dados Conforme a Propriedade do
+    'Acesso
+    
+    If ObjAcesso.PropridedadeAcesso = "E" Then   'Propriedade Acesso = Embratel
+    
+       'If Trim(ObjAcesso.Ds_Veloc_CLA) <> "" Then
+       
+          'Call obtemDigitoVelocidade(ObjAcesso.Ds_Veloc_CLA, iDigitoVeloc, sLetraVeloc)
+         
+          'Se a Velocidade do Circuito for >= 2M e não for cabo interno, numero ots obrigatorio
+          'If sLetraVeloc = "M" And iDigitoVeloc >= 2 And ObjAcesso.objPropriedadeEBT.TipoAcesso <> "C" Then
+        
+          '   If Trim(ObjAcesso.objPropriedadeEBT.NumeroOTSTX) = "" Then
+           
+          '      bRetorno = False
+             
+          '      iAux = iAux + 1
+              
+          '      ReDim Preserve vMensagemListaMsg(iAux)
+              
+          '      vMensagemListaMsg(iAux - 1) = "Número OTS TX " & _
+          '      IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+              
+          '   End If
+           
+          '   If Val(ObjAcesso.objPropriedadeEBT.ItemOTSTX) = 0 Then
+           
+          '      bRetorno = False
+              
+          '      iAux = iAux + 1
+              
+          '      ReDim Preserve vMensagemListaMsg(iAux)
+             
+          '      vMensagemListaMsg(iAux - 1) = "Item OTS TX " & _
+          '      IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                            " do Acesso Contingente") & _
+                                                            " é obrigatório."
+              
+          '   End If
+          
+          'End If
+          
+          'If Trim(ObjAcesso.objPropriedadeEBT.NumeroOTSTX) <> "" And Trim(ObjAcesso.TroncoOTSTx) = "" Then
+                 
+          '    bRetorno = False
+            
+          '    iAux = iAux + 1
+                 
+          '    ReDim Preserve vMensagemListaMsg(iAux)
+          '    vMensagemListaMsg(iAux - 1) = "Tronco OTS TX " & _
+          '    IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                                " do Acesso Contingente") & _
+                                                                " é obrigatório."
+          'End If
+          
+       'End If
+               
+       If Trim(ObjAcesso.objPropriedadeEBT.DesignacaoAcesso) = "" And ObjAcesso.objPropriedadeEBT.TipoAcesso <> "F" _
+                                                                  And ObjAcesso.objPropriedadeEBT.TipoAcesso <> "C" Then
+
+           Exit Function
+
+       End If
+       
+       If ObjAcesso.objPropriedadeEBT.EstacaoEntregaAcesso = "" Then
+       
+          bRetorno = False
+          
+          iAux = iAux + 1
+    
+          ReDim Preserve vMensagemListaMsg(iAux)
+    
+          vMensagemListaMsg(iAux - 1) = "Estação de entrega Embratel" & _
+          IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                      " do Acesso Contingente") & _
+                                                      " é obrigatório."
+          
+       End If
+       
+       If ObjAcesso.objPropriedadeEBT.EstacaoEntregaAcessoConfiguracao = "" Then
+          
+          bRetorno = False
+          
+          iAux = iAux + 1
+    
+          ReDim Preserve vMensagemListaMsg(iAux)
+    
+          vMensagemListaMsg(iAux - 1) = "Estação de Entrega Configuração" & _
+          IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                      " do Acesso Contingente") & _
+                                                      " é obrigatório."
+          
+       End If
+       
+'       If objAcesso.objPropriedadeEBT.estacaoCliente = "" Then
+'
+'          bRetorno = False
+'
+'          iAux = iAux + 1
+'
+'          ReDim Preserve vMensagemListaMsg(iAux)
+'
+'          vMensagemListaMsg(iAux - 1) = "Estação do Cliente" & _
+'          IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                      " do Acesso Contingente") & _
+'                                                      " é obrigatório."
+'
+'       End If
+'
+       If ObjAcesso.objPropriedadeEBT.DataAtivacaoAcesso = "" Then
+       
+          bRetorno = False
+          iAux = iAux + 1
+    
+          ReDim Preserve vMensagemListaMsg(iAux)
+    
+          vMensagemListaMsg(iAux - 1) = "Data de Ativação " & _
+          IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                      " do Acesso Contingente") & _
+                                                      " é obrigatório."
+          
+       End If
+       
+'       Call obtemDigitoVelocidade(objAcesso.Ds_Veloc_CLA, iDigitoVeloc, sLetraVeloc)
+'
+'       'Se a Velocidade do Circuito for >= 2M e não for cabo interno, numero ots obrigatorio
+'
+'       If sLetraVeloc = "M" And iDigitoVeloc >= 2 And objAcesso.objPropriedadeEBT.TipoAcesso <> "C" Then
+'
+'            If Trim(objAcesso.objPropriedadeEBT.NumeroOTSTX) = "" Then
+'
+'               bRetorno = False
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'
+'               vMensagemListaMsg(iAux - 1) = "Número OTS TX" & _
+'               IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                          " do Acesso Contingente") & _
+'                                                          " é obrigatório."
+'
+'            End If
+'
+'
+'            If Val(objAcesso.objPropriedadeEBT.ItemOTSTX) = 0 Then
+'
+'               bRetorno = False
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'
+'               vMensagemListaMsg(iAux - 1) = "Item OTS TX" & _
+'               IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                          " do Acesso Contingente") & _
+'                                                          " é obrigatório."
+'
+'            End If
+'
+'       End If
+       
+       'Carrega a propriedade Objeto Propriedade Embratel
+       If ObjAcesso.objPropriedadeEBT.TipoAcesso = "R" Then
+           
+          Set objDadosTipoRadio = ObjAcesso.objPropriedadeEBT.objTipoAcesso
+          
+'          If objDadosTipoRadio.DIDFila = "" Then
+'
+'              bRetorno = False
+'
+'              iAux = iAux + 1
+'
+'              ReDim Preserve vMensagemListaMsg(iAux)
+'
+'              vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+'              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                          " do Acesso Contingente") & _
+'                                                          " é obrigatório."
+'
+'           End If
+'
+'           If objDadosTipoRadio.DIDArmacao = 0 Then
+'
+'              bRetorno = False
+'
+'              iAux = iAux + 1
+'
+'              ReDim Preserve vMensagemListaMsg(iAux)
+'
+'              vMensagemListaMsg(iAux - 1) = "DID armação" & _
+'              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                          " do Acesso Contingente") & _
+'                                                          " é obrigatório."
+'
+'           End If
+'           'Leonardo Ferreira - Trocando de numero para string - Inicio
+'           'If objDadosTipoRadio.DIDRegua = 0 Then
+'           If objDadosTipoRadio.DIDRegua = "" Then
+'           'Leonardo Ferreira - Fim
+'              bRetorno = False
+'
+'              iAux = iAux + 1
+'
+'              ReDim Preserve vMensagemListaMsg(iAux)
+'
+'              vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+'              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                          " do Acesso Contingente") & _
+'                                                          " é obrigatório."
+'
+'           End If
+'
+'           If objDadosTipoRadio.DIDPosicao = 0 Then
+'
+'              bRetorno = False
+'
+'              iAux = iAux + 1
+'
+'              ReDim Preserve vMensagemListaMsg(iAux)
+'
+'              vMensagemListaMsg(iAux - 1) = "DID posição" & _
+'              IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                          " do Acesso Contingente") & _
+'                                                          " é obrigatório."
+'
+'           End If
+ 
+'               If objDadosTipoRadio.NumeroRepeticoes = 0 Then
+'
+'                  objMensagem.Descricao = "Nº repetições obrigatório."
+'                  bRetorno = False
+'                  GoTo Finalizar
+'
+'               End If
+
+           Set objDadosTipoRadio = Nothing
+           
+       ElseIf ObjAcesso.objPropriedadeEBT.TipoAcesso = "F" Then  'Fibra Otica
+          
+          Set objDadosTipoFibra = ObjAcesso.objPropriedadeEBT.objTipoAcesso
+          
+          If objDadosTipoFibra.DIDFila = "" Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+          If objDadosTipoFibra.DIDArmacao = 0 Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "DID armação" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+          If objDadosTipoFibra.DIDPosicao = 0 Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "DID posição" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+          'Leonardo Ferreira - Trocando de numero para string - Inicio
+          'If objDadosTipoFibra.DIDRegua = 0 Then
+          If objDadosTipoFibra.DIDRegua = "" Then
+          'Leonardo Ferreira - Fim
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+          If objDadosTipoFibra.NumeroCabo = "" Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Número do Cabo" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+          If objDadosTipoFibra.NumeroPar = "" Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Número PAR" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+          Set objDadosTipoFibra = Nothing
+       
+       ElseIf ObjAcesso.objPropriedadeEBT.TipoAcesso = "A" Then  'ADE
+          
+          If ObjAcesso.ProprietarioModem = "" Then
+            
+             bRetorno = False
+              
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Proprietário Modem" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+              
+          End If
+            
+          Set objdadosTipoADE = ObjAcesso.objPropriedadeEBT.objTipoAcesso
+          
+'          If objdadosTipoADE.PredioEBT = "" Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Prédio Embratel" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+          
+          If objdadosTipoADE.NumeroParEBT = "" Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Número PAR Embratel" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+          If objdadosTipoADE.NumeroCaboEBT = 0 Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Número Cabo Embratel" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+          Set objdadosTipoADE = Nothing
+       
+       ElseIf ObjAcesso.objPropriedadeEBT.TipoAcesso = "C" Then  'Cabo Interno
+          
+          If ObjAcesso.ProprietarioModem = "" Then
+            
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Proprietário Modem" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+              
+          End If
+          
+'          Set objDadosTipoCabo = ObjAcesso.objPropriedadeEBT.objTipoAcesso
+'
+'          ObjAcesso.objPropriedadeEBT.objTipoAcesso = objDadosTipoCabo
+'
+'          If Trim(objDadosTipoCabo.NumeroCaboEBT) = "" Then
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Número Cabo Embratel" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'
+'          If Trim(objDadosTipoCabo.NumeroParEBT) = "" Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Número PAR Embratel" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'
+'          If Trim(objDadosTipoCabo.Predio) = "" Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Prédio" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'
+'          Set objDadosTipoCabo = Nothing
+       End If
+    
+       Set objDadosPropriedadeEBT = Nothing
+    
+    Else
+       
+       'Propriedade Acesso = Terceiros
+       Set objDadosPropriedadeTerc = ObjAcesso.objPropriedadeTerceiros
+       
+       objDadosPropriedadeTerc.InformaBanco frmgenMDI_SGAPlus.objBanco
+       
+       
+      '==================================================================================================
+      'CALLBAT - 05/07/2012 - BSoD Light II -- Não validar Estacao de Acesso para casos BSoD Light
+      '==================================================================================================
+       If objDadosPropriedadeTerc.TipoAcesso <> "L" Then
+               
+               If objDadosPropriedadeTerc.EstacaoEntregaAcessoConfiguracao = "" Then
+                 
+                  bRetorno = False
+                  
+                  iAux = iAux + 1
+             
+                  ReDim Preserve vMensagemListaMsg(iAux)
+            
+                  vMensagemListaMsg(iAux - 1) = "Estação de entrega Configuração " & _
+                  IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                              " do Acesso Contingente") & _
+                                                              " é obrigatório."
+               End If
+               
+       End If
+       
+       
+       If objDadosPropriedadeTerc.EstacaoEntregaAcesso = "" Then
+         
+          bRetorno = False
+          
+          iAux = iAux + 1
+     
+          ReDim Preserve vMensagemListaMsg(iAux)
+    
+          vMensagemListaMsg(iAux - 1) = "Estação de entrega Embratel " & _
+          IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                      " do Acesso Contingente") & _
+                                                      " é obrigatório."
+       End If
+       
+       If objDadosPropriedadeTerc.TipoAcesso = "R" Then
+
+          'If Val(objDadosPropriedadeTerc.NumeroOTSTX) = 0 Then
+
+          '   Exit Function
+
+          'End If
+
+          'If Val(objDadosPropriedadeTerc.ItemOTSTX) = 0 Then
+
+          '  Exit Function
+
+          'End If
+
+       End If
+       
+       If objDadosPropriedadeTerc.DataAtivacaoAcesso = "" Then
+         
+          bRetorno = False
+          
+          iAux = iAux + 1
+     
+          ReDim Preserve vMensagemListaMsg(iAux)
+    
+          vMensagemListaMsg(iAux - 1) = "Data de Ativação do acesso " & _
+          IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                      " do Acesso Contingente") & _
+                                                      " é obrigatório."
+       End If
+       
+       If objDadosPropriedadeTerc.DataEntregaUrbano <> "" Then
+           
+          sMaiorData = objDadosPropriedadeTerc.DataEntregaUrbano
+        
+       End If
+        
+       If sMaiorData <> "" And objDadosPropriedadeTerc.DataEntregaInterurbano <> "" Then
+            
+            If CDate(objDadosPropriedadeTerc.DataEntregaInterurbano) > CDate(sMaiorData) Then
+               
+               sMaiorData = objDadosPropriedadeTerc.DataEntregaInterurbano
+            
+            End If
+        
+       End If
+        
+       If objDadosPropriedadeTerc.DataEntregaUrbano <> "" And sMaiorData <> "" Then
+            
+            If CDate(objDadosPropriedadeTerc.DataAtivacaoAcesso) < CDate(sMaiorData) Then
+                
+               Exit Function
+           
+           End If
+        
+        End If
+      
+      
+      'Carrega a propriedade Objeto Propriedade Terceiros
+       If objDadosPropriedadeTerc.TipoAcesso = "<" Then   'Tipo de Acesso Menor 2M
+          
+          If ObjAcesso.ProprietarioModem = "" Then
+            
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Proprietário Modem" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+          End If
+           
+          Set objdadosTipoAcessoMenor = ObjAcesso.objPropriedadeTerceiros.objTipoAcesso
+          
+          If objdadosTipoAcessoMenor.InterfaceClienteID = 0 Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Interface cliente" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+'          If objdadosTipoAcessoMenor.InterfaceEBTID = 0 Then
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Interface Embratel" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+          
+          Set objdadosTipoAcessoMenor = Nothing
+
+       ElseIf objDadosPropriedadeTerc.TipoAcesso = ">" Then  'Tipo de Acesso Maior 2M
+          
+          If ObjAcesso.ProprietarioModem = "" Then
+            
+             bRetorno = False
+              
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Proprietário Modem" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+              
+          End If
+          
+          Set objdadosTipoAcessoMaior = ObjAcesso.objPropriedadeTerceiros.objTipoAcesso
+          
+'          If objdadosTipoAcessoMaior.DIDFila = "" Then
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'
+'          If objdadosTipoAcessoMaior.DIDArmacao = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID armação" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'          'Leonardo Ferreira - Trocando de numero para string - Inicio
+'          'If objdadosTipoAcessoMaior.DIDRegua = 0 Then
+'          If objdadosTipoAcessoMaior.DIDRegua = "" Then
+'          'Leonardo Ferreira - Fim
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'
+'          If objdadosTipoAcessoMaior.DIDPosicao = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID Posição" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+                        
+          If objdadosTipoAcessoMaior.Tronco = "" Then
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "Tronco (Tipo Acesso >= 2M)" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+
+          End If
+                        
+          If objdadosTipoAcessoMaior.Par = "" Then
+
+             bRetorno = False
+
+             iAux = iAux + 1
+
+             ReDim Preserve vMensagemListaMsg(iAux)
+
+             vMensagemListaMsg(iAux - 1) = "Par (Tipo Acesso >= 2M)" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+
+          End If
+                        
+          Set objdadosTipoAcessoMaior = Nothing
+       
+       ElseIf objDadosPropriedadeTerc.TipoAcesso = "R" Then  'Tipo de Acesso Rede Determ
+          
+'vcbx
+          
+          Set objdadosTipoAcessoRede = ObjAcesso.objPropriedadeTerceiros.objTipoAcesso
+       
+'          If objdadosTipoAcessoRede.Dominio = "" Then
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Domínio" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+          
+          If objdadosTipoAcessoRede.NO = "" Then
+          
+             bRetorno = False
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "Número NÓ" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+'          If objdadosTipoAcessoRede.Slot = "" Then
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "SLOT" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+          
+'          If objdadosTipoAcessoRede.Porta = "" Then
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Porta" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'
+'          If objdadosTipoAcessoRede.TSI = 0 Then
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Time Slot inicial" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'
+'          If objdadosTipoAcessoRede.TSF = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Time Slot final" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+'
+          If objdadosTipoAcessoRede.DIDFila = "" Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+'          If objdadosTipoAcessoRede.DIDArmacao = 0 Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID armação" & _
+'             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'          End If
+          
+          If objdadosTipoAcessoRede.DIDPosicao = "" Then
+          
+             bRetorno = False
+             
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "DID posição" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+
+          If objdadosTipoAcessoRede.DIDRegua = "" Then
+             
+             bRetorno = False
+             iAux = iAux + 1
+        
+             ReDim Preserve vMensagemListaMsg(iAux)
+       
+             vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+             IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                         " do Acesso Contingente") & _
+                                                         " é obrigatório."
+             
+          End If
+          
+       End If
+    
+    End If
+    
+    '-- DIF 15/10/2012 -- VCBDIF -- FALTOU COMENTAR AS LINHAS ABAIXO
+'   Set ObjAcesso = Nothing
+'   Set objdadosTipoAcessoRede = Nothing
+''   Set objDadosPropriedadeTerc = Nothing
+        '-------------------------------------
+   
+   If bRetorno Then
+      
+      VerPreenchimentoInstancia = "O"  'O - Dados OK
+      
+   End If
+   
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+    
+ErrorHandler:
+
+       If objMensagem.TipoMsg = "" Then
+          
+          objMensagem.TipoMsg = "E"
+          objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                             vbCrLf & "Houve um erro de execução no método: " & vbCrLf & vbCrLf & "VerPreenchimentoInstancia do Objeto Controle " & _
+                             "clsGenOC_TratarAcessoEmbratel"
+       
+       End If
+       
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+
+End Function
+
+
+Private Function PopularDadosEmbratel(objPropriedadeEBT As clsGenPropriedadeEmbratel)
+
+    objForm.TxtDesignacaoAcessoEBT.Text = objPropriedadeEBT.DesignacaoAcesso
+    objForm.TxtIdentificadorAcessoEBT.Text = objPropriedadeEBT.IdentificadorAcesso
+    
+    'If objPropriedadeEBT.EstacaoEntregaAcessoConfiguracao <> "" Then
+       
+    '   objForm.TxtEstacaoEntregaEbtConf.Text = objPropriedadeEBT.EstacaoEntregaAcessoConfiguracao
+    '   objForm.TxtEstacaoConfiguracao.Text = objPropriedadeEBT.EstacaoEntregaAcessoConfiguracao
+    
+    'End If
+    
+    If Trim(objForm.TxtEstacaoConfiguracao.Text) = "" Then
+        
+        objForm.TxtEstacaoConfiguracao.Text = objPropriedadeEBT.EstacaoEntregaAcessoConfiguracao
+        
+    End If
+    
+    If objForm.TxtEstacaoEntregaTercConf.Text = "" Then
+    
+        objForm.TxtEstacaoEntregaTercConf.Text = objPropriedadeEBT.EstacaoEntregaAcessoConfiguracao
+    
+    End If
+    
+    objForm.TxtEstacaoEntregaEbt.Text = objPropriedadeEBT.EstacaoEntregaAcesso
+    
+    objForm.TxtEstacaoCliente.Text = objPropriedadeEBT.estacaoCliente
+    
+    If objPropriedadeEBT.estacaoCliente = "" Then
+        objForm.TxtEstacaoCliente.Text = objDadosAcesso.estacaoCliente
+    End If
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objForm.TxtNumeroOtsTx_EBT.Text = objPropriedadeEBT.NumeroOTSTX
+    'objForm.TxtItemOtsTxEBT.Text = objPropriedadeEBT.ItemOTSTX
+    
+    objForm.UsrGenDadosAcessoTroncoTX.NumeroOTSTX = objPropriedadeEBT.NumeroOTSTX
+    objForm.UsrGenDadosAcessoTroncoTX.ItemOTSTX = objPropriedadeEBT.ItemOTSTX
+    
+    objForm.UsrGenDadosAcessoTroncoTX.StatusOTS = objdadosServico.StatusServico
+    objForm.UsrGenDadosAcessoTroncoTX.AcaoOTS = objdadosServico.Id_Acao
+    
+    Call objForm.UsrGenDadosAcessoTroncoTX.CarregaCampos
+    
+    '=================================================================
+    '=================================================================
+    
+    objForm.SpdDataAtivacaoAcessoEBT.Row = 1
+    objForm.SpdDataAtivacaoAcessoEBT.Col = 1
+    objForm.SpdDataAtivacaoAcessoEBT.Text = objPropriedadeEBT.DataAtivacaoAcesso
+    
+    If objPropriedadeEBT.TipoAcesso = "R" Then    'Tipo Acesso = Radio
+        ''FABIMENDONCA - Wireless - 11/2021
+        objForm.UsrGenDadosAcessoWireless.Visible = False
+        
+        objForm.TxtDIDFila_Radio.Text = objPropriedadeEBT.objTipoAcesso.DIDFila
+        objForm.TxtDIDArmacao_Radio.Text = objPropriedadeEBT.objTipoAcesso.DIDArmacao
+        objForm.TxtDIDRegua_Radio.Text = objPropriedadeEBT.objTipoAcesso.DIDRegua
+        objForm.TxtDIDPosicao_Radio.Text = objPropriedadeEBT.objTipoAcesso.DIDPosicao
+        objForm.TxtNumeroRepeticoes = objPropriedadeEBT.objTipoAcesso.NumeroRepeticoes
+        objForm.FrameTipoRadio.Visible = True
+    
+    ElseIf objPropriedadeEBT.TipoAcesso = "F" Then  'Tipo Acesso = Fibra Otica
+        ''FABIMENDONCA - Wireless - 11/2021
+        objForm.UsrGenDadosAcessoWireless.Visible = False
+               
+        objForm.TxtDIDFila_Fibra.Text = objPropriedadeEBT.objTipoAcesso.DIDFila
+        objForm.TxtDIDArmacao_Fibra.Text = objPropriedadeEBT.objTipoAcesso.DIDArmacao
+        objForm.TxtDidRegua_Fibra.Text = objPropriedadeEBT.objTipoAcesso.DIDRegua
+        objForm.TxtDIDPosicao_Fibra.Text = objPropriedadeEBT.objTipoAcesso.DIDPosicao
+        objForm.TxtNumeroCaboFibra.Text = objPropriedadeEBT.objTipoAcesso.NumeroCabo
+        
+        objForm.TxtNumeroParFibra.Text = objPropriedadeEBT.objTipoAcesso.NumeroPar
+        objForm.FrameTipoFibra.Visible = True
+    
+    ElseIf objPropriedadeEBT.TipoAcesso = "A" Then  'Tipo Acesso = ADE
+        ''FABIMENDONCA - Wireless - 11/2021
+        objForm.UsrGenDadosAcessoWireless.Visible = False
+        
+        objForm.TxtPredioEBT_ADE.Text = objPropriedadeEBT.objTipoAcesso.PredioEBT
+        objForm.TxtNumeroCabo_ADE.Text = objPropriedadeEBT.objTipoAcesso.NumeroCaboEBT
+        objForm.TxtNumeroPar_ADE.Text = objPropriedadeEBT.objTipoAcesso.NumeroParEBT
+        objForm.FrameTipoADE.Visible = True
+    
+    
+    ElseIf objPropriedadeEBT.TipoAcesso = "C" Then  'Tipo Acesso = Cabo
+        ''FABIMENDONCA - Wireless - 11/2021
+        objForm.UsrGenDadosAcessoWireless.Visible = False
+        
+        objForm.TxtPredioCabo_Cabo.Text = objPropriedadeEBT.objTipoAcesso.Predio
+        objForm.TxtNumeroParEBT_Cabo.Text = objPropriedadeEBT.objTipoAcesso.NumeroParEBT
+        objForm.TxtNumeroCaboEBT_Cabo.Text = objPropriedadeEBT.objTipoAcesso.NumeroCaboEBT
+        objForm.TxtNumeroParCliente_Cabo.Text = objPropriedadeEBT.objTipoAcesso.NumeroParCliente
+        objForm.TxtNumeroCaboCliente_Cabo.Text = objPropriedadeEBT.objTipoAcesso.NumeroCaboCliente
+        objForm.FrameTipoCabo.Visible = True
+    
+    ElseIf objPropriedadeEBT.TipoAcesso = "G" Then  'Tipo Acesso = GPON
+        
+        objForm.UsrGenDadosAcessoGPON.DesignacaoAcesso = objPropriedadeEBT.objTipoAcesso.DesignacaoAcesso
+        objForm.UsrGenDadosAcessoGPON.FabricanteONT = objPropriedadeEBT.objTipoAcesso.FabricanteONT
+        objForm.UsrGenDadosAcessoGPON.ModeloONT = objPropriedadeEBT.objTipoAcesso.ModeloONT
+        objForm.UsrGenDadosAcessoGPON.Vlan = objPropriedadeEBT.objTipoAcesso.Vlan
+        objForm.UsrGenDadosAcessoGPON.Porta = objPropriedadeEBT.objTipoAcesso.Porta
+        objForm.UsrGenDadosAcessoGPON.PortaOLT = objPropriedadeEBT.objTipoAcesso.PortaOLT
+        objForm.UsrGenDadosAcessoGPON.PEOLT = objPropriedadeEBT.objTipoAcesso.PEOLT
+        
+        objForm.UsrGenDadosAcessoGPON.CarregaCampos
+        
+        '=================================================================
+        'CALLBAT - 26/06/2013 - FO EDD
+        'SO-TVASS-56728SLA
+        '=================================================================
+        objForm.UsrGenDadosAcessoGPON.Visible = True
+        objForm.FrameMigracaoAcesso.Visible = False
+        objForm.UsrGenDadosAcessoRadioIP.Visible = False
+        'objForm.FrameDesignacaoBSOD.Visible = False
+        'objForm.frameBSoD.Visible = False
+        'objForm.FrameBsodNET.Visible = False
+        'AGRC - SO-TVASS-32377EYC - 25/08/2017
+        objForm.UsrGenDadosAcessoTerceiroETH1.Visible = False
+    '=================================================================
+    'CALLBAT - 26/06/2013 - FO EDD
+    'SO-TVASS-56728SLA
+    '=================================================================
+        ''FABIMENDONCA - Wireless - 11/2021
+        objForm.UsrGenDadosAcessoWireless.Visible = False
+        
+    ElseIf objPropriedadeEBT.TipoAcesso = "D" Then  'Tipo Acesso = FO EDD
+        
+        objForm.UsrGenDadosAcessoGPON.Visible = False
+        objForm.UsrGenDadosAcessoRadioIP.Visible = False
+        'AGRC - SO-TVASS-32377EYC - 25/08/2017
+        objForm.UsrGenDadosAcessoTerceiroETH1.Visible = False
+        ''FABIMENDONCA - Wireless - 11/2021
+        objForm.UsrGenDadosAcessoWireless.Visible = False
+        
+        
+        objForm.FrameMigracaoAcesso.Visible = True
+        
+        objForm.UsrGenDadosAcessoFOEDD.DesignacaoAcesso = objPropriedadeEBT.objTipoAcesso.DesignacaoAcesso
+        objForm.UsrGenDadosAcessoFOEDD.FabricanteONTFOEDD = objPropriedadeEBT.objTipoAcesso.Fabricante_ONT_FO_EDD
+        objForm.UsrGenDadosAcessoFOEDD.ModeloONTFOEDD = objPropriedadeEBT.objTipoAcesso.Modelo_Ont_FO_EDD
+        objForm.UsrGenDadosAcessoFOEDD.SVLAN = objPropriedadeEBT.objTipoAcesso.SVLAN
+        objForm.UsrGenDadosAcessoFOEDD.CVLAN = objPropriedadeEBT.objTipoAcesso.CVLAN
+        objForm.UsrGenDadosAcessoFOEDD.PE = objPropriedadeEBT.objTipoAcesso.PE
+        objForm.UsrGenDadosAcessoFOEDD.PortaPE = objPropriedadeEBT.objTipoAcesso.Porta_PE
+        objForm.UsrGenDadosAcessoFOEDD.SwitchConcentrador = objPropriedadeEBT.objTipoAcesso.Switch_Concentrador
+        objForm.UsrGenDadosAcessoFOEDD.PortaSwitch = objPropriedadeEBT.objTipoAcesso.Switch_Porta
+        objForm.UsrGenDadosAcessoFOEDD.PortaONTFOEDD = objPropriedadeEBT.objTipoAcesso.Porta_Ont_FO_EDD
+        
+        objForm.UsrGenDadosAcessoFOEDD.CarregaCampos
+    '--=================================================================
+    '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+    '--=================================================================
+    ElseIf objPropriedadeEBT.TipoAcesso = "M" Then  'Tipo Acesso = ADE DSLAM
+        
+        objForm.UsrGenDadosAcessoGPON.Visible = False
+        objForm.UsrGenDadosAcessoRadioIP.Visible = False
+        objForm.UsrGenDadosAcessoTerceiroETH1.Visible = False
+        objForm.UsrGenDadosAcessoFOEDD.Visible = False
+        ''FABIMENDONCA - Wireless - 11/2021
+        objForm.UsrGenDadosAcessoWireless.Visible = False
+        
+        objForm.FrameMigracaoAcesso.Visible = True
+        objForm.UsrGenDadosAcessoADE_DSLAM.Visible = True
+                
+        'Campos definidos pelo projeto para aparecerem na tela
+        objForm.UsrGenDadosAcessoADE_DSLAM.Numero_Acesso = objPropriedadeEBT.objTipoAcesso.Numero_Acesso
+        objForm.UsrGenDadosAcessoADE_DSLAM.VLAN_PE = objPropriedadeEBT.objTipoAcesso.VLAN_PE
+        objForm.UsrGenDadosAcessoADE_DSLAM.SVLAN = objPropriedadeEBT.objTipoAcesso.SVLAN
+        objForm.UsrGenDadosAcessoADE_DSLAM.PE = objPropriedadeEBT.objTipoAcesso.PE
+        objForm.UsrGenDadosAcessoADE_DSLAM.PortaPE = objPropriedadeEBT.objTipoAcesso.Porta_PE
+        objForm.UsrGenDadosAcessoADE_DSLAM.Designacao_DSLAM = objPropriedadeEBT.objTipoAcesso.Designacao_DSLAM
+        objForm.UsrGenDadosAcessoADE_DSLAM.Tronco_uplink_dslam = objPropriedadeEBT.objTipoAcesso.Tronco_uplink_dslam
+                
+        objForm.UsrGenDadosAcessoADE_DSLAM.CarregaCampos
+    '--=================================================================
+    '=================================================================
+    '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    '' Inclui verificacao do tipo de acesso W (Wireless)
+    '=================================================================
+    ElseIf objPropriedadeEBT.TipoAcesso = "W" Then  'Tipo Acesso = REDE WIRELESS
+        objForm.UsrGenDadosAcessoGPON.Visible = False
+        objForm.UsrGenDadosAcessoRadioIP.Visible = False
+        objForm.UsrGenDadosAcessoTerceiroETH1.Visible = False
+        objForm.UsrGenDadosAcessoFOEDD.Visible = False
+        objForm.UsrGenDadosAcessoADE_DSLAM.Visible = False
+        
+        
+        objForm.UsrGenDadosAcessoWireless.Imsi = objPropriedadeEBT.objTipoAcesso.Imsi
+        objForm.UsrGenDadosAcessoWireless.REDE_CONTRATADA = objPropriedadeEBT.objTipoAcesso.REDE_CONTRATADA
+        
+        objForm.UsrGenDadosAcessoWireless.Visible = True
+        objForm.FrameMigracaoAcesso.Visible = True
+        
+        objForm.UsrGenDadosAcessoWireless.CarregaCampos
+    
+    '--=================================================================
+    End If
+
+End Function
+
+Private Function PopularEquipamentos(objDadosAcesso As clsGenAcesso) As Boolean
+
+    Dim ObjEqpto    As clsGenEqptoComplementar
+    Dim iCount      As Integer
+    
+    iCount = 0
+    objForm.ssTabAcesso.TabEnabled(4) = True
+    objForm.TxtIDEquipamento1 = ""
+    objForm.CboTipoEquipamento_1.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_1 = ""
+    objForm.optLocalInstalacao_1(0).Value = False
+    objForm.optLocalInstalacao_1(1).Value = False
+    
+    objForm.CboTipoEquipamento_2.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_2 = ""
+    objForm.optLocalInstalacao_2(0).Value = False
+    objForm.optLocalInstalacao_2(1).Value = False
+    
+    objForm.CboTipoEquipamento_3.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_3 = ""
+    objForm.optLocalInstalacao_3(0).Value = False
+    objForm.optLocalInstalacao_3(1).Value = False
+    
+    objForm.TxtIDEquipamento1 = ""
+    objForm.TxtIDEquipamento2 = ""
+    objForm.TxtIDEquipamento3 = ""
+    
+    'Popula os campos de Equipamento Complementar
+    For Each ObjEqpto In objDadosAcesso.objColecaoEqpto
+    
+        iCount = iCount + 1
+        
+        Select Case iCount
+            Case 1
+                'Equipamento 1
+                objForm.TxtIDEquipamento1 = Str(ObjEqpto.iD)
+                
+                If Val(ObjEqpto.Equipamento_ID) <> 0 Then
+                   Call SelecionaCombo(objForm.CboTipoEquipamento_1, CLng(ObjEqpto.Equipamento_ID))
+                End If
+                
+                objForm.TxtFabricanteEquipamento_1 = ObjEqpto.Fabricante
+                
+                If ObjEqpto.LocalInstalacao = "E" Then
+                   objForm.optLocalInstalacao_1(0).Value = True
+                Else
+                   objForm.optLocalInstalacao_1(1).Value = True
+                End If
+                
+            Case 2
+                'Equipamento 2
+                objForm.TxtIDEquipamento2 = ObjEqpto.iD
+                
+                If Val(ObjEqpto.Equipamento_ID) <> 0 Then
+                    Call SelecionaCombo(objForm.CboTipoEquipamento_2, CLng(ObjEqpto.Equipamento_ID))
+                End If
+                
+                objForm.TxtFabricanteEquipamento_2 = ObjEqpto.Fabricante
+                
+                If ObjEqpto.LocalInstalacao = "E" Then
+                   objForm.optLocalInstalacao_2(0).Value = True
+                Else
+                   objForm.optLocalInstalacao_2(1).Value = True
+                End If
+                
+            Case 3
+                'Equipamento 3
+                objForm.TxtIDEquipamento3 = ObjEqpto.iD
+                
+                If Val(ObjEqpto.Equipamento_ID) <> 0 Then
+                    Call SelecionaCombo(objForm.CboTipoEquipamento_3, CLng(ObjEqpto.Equipamento_ID))
+                End If
+                
+                objForm.TxtFabricanteEquipamento_3 = ObjEqpto.Fabricante
+                
+                If ObjEqpto.LocalInstalacao = "E" Then
+                   objForm.optLocalInstalacao_3(0).Value = True
+                Else
+                   objForm.optLocalInstalacao_3(1).Value = True
+                End If
+                
+        End Select
+    
+    Next
+
+End Function
+Private Function PopularDadosTerceiros(objPropriedadeTerc As clsGenPropriedadeTerceiros)
+
+    If objPropriedadeTerc.EstacaoEntregaAcessoConfiguracao <> "" Then
+
+       objForm.TxtEstacaoEntregaTercConf.Text = objPropriedadeTerc.EstacaoEntregaAcessoConfiguracao
+       objForm.TxtEstacaoConfiguracao.Text = objPropriedadeTerc.EstacaoEntregaAcessoConfiguracao
+
+    End If
+    
+    objForm.TxtEstacaoEntregaTerc.Text = objPropriedadeTerc.EstacaoEntregaAcesso
+    
+    If Trim(objForm.TxtEstacaoConfiguracao.Text) = "" Then
+        
+        objForm.TxtEstacaoConfiguracao.Text = objPropriedadeTerc.EstacaoEntregaAcessoConfiguracao
+        
+    End If
+    
+    objForm.TxtDesignacaoAcessoTerceiro.Text = objPropriedadeTerc.DesignacaoAcesso
+    objForm.SpdNumeroAcessoUrbano.Text = objPropriedadeTerc.NumeroAcessoUrbano
+    
+    If objForm.CmdSalvar.Enabled = True And Val(objPropriedadeTerc.CodigoProvedorUrbano) <> 0 Then
+    
+        objForm.SpdNumeroAcessoUrbano.Enabled = True
+        
+    End If
+    
+    objForm.TxtCNLPontaA_Urbano.Text = objPropriedadeTerc.CNL_Ponta_A_Urbano
+    
+    objForm.SpdDataEntregaUrbano.Row = 1
+    objForm.SpdDataEntregaUrbano.Col = 1
+    objForm.SpdDataEntregaUrbano.Text = objPropriedadeTerc.DataEntregaUrbano
+   
+   If objPropriedadeTerc.TecnologiaAcesso = "L" Then
+      
+      objForm.optTipoTecnologia(0).Value = True
+    
+    ElseIf objPropriedadeTerc.TecnologiaAcesso = "R" Then
+    
+      objForm.optTipoTecnologia(1).Value = True
+      
+    ElseIf objPropriedadeTerc.TecnologiaAcesso = "F" Then
+    
+      objForm.optTipoTecnologia(2).Value = True
+     
+    Else
+      
+        objForm.optTipoTecnologia(0).Value = False
+        objForm.optTipoTecnologia(1).Value = False
+        objForm.optTipoTecnologia(2).Value = False
+    
+    End If
+    
+    If objPropriedadeTerc.DataAtivacaoAcesso <> "" Then
+       
+       objForm.SpdDataAtivacaoAcessoTerc.Row = 1
+       objForm.SpdDataAtivacaoAcessoTerc.Col = 1
+       objForm.SpdDataAtivacaoAcessoTerc.Text = Format( _
+                                    objPropriedadeTerc.DataAtivacaoAcesso, "dd/mm/yyyy")
+    
+    End If
+    
+    If objPropriedadeTerc.DataEntregaInterurbano <> "" Then
+       
+        objForm.SpdDataEntregaInterUrbano.Row = 1
+        objForm.SpdDataEntregaInterUrbano.Col = 1
+        objForm.SpdDataEntregaInterUrbano.Text = Format( _
+                                    objPropriedadeTerc.DataEntregaInterurbano, "dd/mm/yyyy")
+    
+    End If
+
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objForm.TxtNumeroOTSTXTerc.Text = objPropriedadeTerc.NumeroOTSTX
+    'objForm.TxtItemOTSTxTerc.Text = IIf(objPropriedadeTerc.ItemOTSTX = "", "", objPropriedadeTerc.ItemOTSTX)
+    
+    objForm.UsrGenDadosAcessoTroncoTX.NumeroOTSTX = objPropriedadeTerc.NumeroOTSTX
+    objForm.UsrGenDadosAcessoTroncoTX.ItemOTSTX = IIf(objPropriedadeTerc.ItemOTSTX = "", "", objPropriedadeTerc.ItemOTSTX)
+    
+    objForm.UsrGenDadosAcessoTroncoTX.StatusOTS = objdadosServico.StatusServico
+    objForm.UsrGenDadosAcessoTroncoTX.AcaoOTS = objdadosServico.Id_Acao
+    
+    
+    Call objForm.UsrGenDadosAcessoTroncoTX.CarregaCampos
+    
+    '=================================================================
+    '=================================================================
+    
+'    objForm.TxtNumeroOTSTXTerc.Enabled = False
+'    objForm.TxtItemOTSTxTerc.Enabled = False
+    
+    objForm.TxtIDentificadorAcessoUrbano.Text = objPropriedadeTerc.IdentificadorAcessoUrbano
+
+    If objPropriedadeTerc.CodigoProvedorUrbano <> "" Then
+       
+       Call SelecionaCombo(objForm.CboProvedorUrbano, CLng(objPropriedadeTerc.CodigoProvedorUrbano))
+    
+    End If
+    
+    If Val(objPropriedadeTerc.CodigoProvedorInterUrbano) <> 0 Then
+       
+       objForm.optExisteAcessoIU(0).Value = True
+       
+       Call SelecionaCombo(objForm.CboProvedorInterurbano, CLng(objPropriedadeTerc.CodigoProvedorInterUrbano))
+       
+       objForm.TxtIdentificadorAcessoEBTInterUrbano.Text = objPropriedadeTerc.IdentificadorAcessoInterUrbano
+    
+       objForm.SpdNumeroAcessoInterurbano.Text = objPropriedadeTerc.NumeroAcessoInterurbano
+       objForm.TxtCNLPontaA.Text = objPropriedadeTerc.CNLPontaA
+       objForm.TxtCNLPontaB.Text = objPropriedadeTerc.CNLPontaB
+       
+       If Not bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+            
+            objForm.SpdNumeroAcessoUrbano.Enabled = False
+            
+       End If
+    
+    Else
+    
+       objForm.optExisteAcessoIU(1).Value = True
+    
+    End If
+    
+    If objPropriedadeTerc.TipoAcesso = "<" Then     'Tipo Acesso = Menor 2M
+        
+        If objPropriedadeTerc.objTipoAcesso.InterfaceEbtId <> 0 Then
+           
+           Call SelecionaCombo(objForm.CboInterfaceEBTMenor, _
+                               CLng(objPropriedadeTerc.objTipoAcesso.InterfaceEbtId))
+        
+        End If
+         
+        If objPropriedadeTerc.objTipoAcesso.InterfaceClienteID <> 0 Then
+           
+           Call SelecionaCombo(objForm.CboInterfaceClienteMenor, _
+                               CLng(objPropriedadeTerc.objTipoAcesso.InterfaceClienteID))
+        
+        End If
+         
+        objForm.TxtNumeroCaboAcessoMenor.Text = objPropriedadeTerc.objTipoAcesso.NumeroCabo
+        objForm.TxtNumeroParAcessoMenor.Text = objPropriedadeTerc.objTipoAcesso.NumeroPar
+        objForm.TxtBlocoDGMenor.Text = objPropriedadeTerc.objTipoAcesso.BlocoDG
+        objForm.TxtParDGMenor.Text = objPropriedadeTerc.objTipoAcesso.ParDG
+        objForm.TxtBlocoTransdataMenor.Text = objPropriedadeTerc.objTipoAcesso.BlocoTransData
+        objForm.TxtParTransdataMenor.Text = objPropriedadeTerc.objTipoAcesso.ParTransData
+        
+    ElseIf objPropriedadeTerc.TipoAcesso = ">" Then  'Tipo Acesso = Maior 2M
+        
+'        objForm.TxtNumeroOTSTXTerc.Enabled = True
+'        objForm.TxtItemOTSTxTerc.Enabled = True
+        
+        With objPropriedadeTerc.objTipoAcesso
+            
+            objForm.TxtDIDArmacao.Text = IIf(.DIDArmacao = 0, "", .DIDArmacao)
+            objForm.TxtDIDFila.Text = .DIDFila
+            objForm.TxtDIDPosicao.Text = IIf(.DIDPosicao = 0, "", .DIDPosicao)
+            'Leonardo Ferreira - Trocando de numero para string - Inicio
+            'objForm.TxtDIDRegua.Text= IIf(.DIDRegua = 0, "", .DIDRegua)
+            objForm.TxtDIDRegua.Text = .DIDRegua
+            'Leonardo Ferreira - Fim
+            objForm.TxtTronco.Text = .Tronco
+            objForm.TxtPar.Text = .Par
+        
+        End With
+        
+    ElseIf objPropriedadeTerc.TipoAcesso = "R" Then  'Tipo Acesso = Rede Deterministica
+        
+'        objForm.TxtNumeroOTSTXTerc.Enabled = True
+'        objForm.TxtItemOTSTxTerc.Enabled = True
+        
+        objForm.TXTDominio.Text = objPropriedadeTerc.objTipoAcesso.Dominio
+        objForm.TxtNO.Text = objPropriedadeTerc.objTipoAcesso.NO
+        objForm.txtTSI.Text = objPropriedadeTerc.objTipoAcesso.TSI
+        objForm.txtTSF.Text = objPropriedadeTerc.objTipoAcesso.TSF
+        
+        Call SelecionaComboTexto(objForm.CboPorta_Rede, objPropriedadeTerc.objTipoAcesso.Porta)
+        Call SelecionaComboTexto(objForm.CboSlot_Rede, objPropriedadeTerc.objTipoAcesso.Slot)
+        Call SelecionaComboTexto(objForm.CboTSI_Rede, _
+                                 Format(objPropriedadeTerc.objTipoAcesso.TSI, "00"))
+        Call SelecionaComboTexto(objForm.CboTSF_Rede, _
+                                 Format(objPropriedadeTerc.objTipoAcesso.TSF, "00"))
+        
+        objForm.TxtDIDArmacao_Rede.Text = objPropriedadeTerc.objTipoAcesso.DIDArmacao
+        objForm.TxtDIDFila_Rede.Text = objPropriedadeTerc.objTipoAcesso.DIDFila
+        objForm.TxtDIDPosicao_Rede.Text = objPropriedadeTerc.objTipoAcesso.DIDPosicao
+        objForm.TxtDIDRegua_Rede.Text = objPropriedadeTerc.objTipoAcesso.DIDRegua
+    
+    '=================================================================
+    'CALLBAT - 18/02/2014 - BSoD Unificado
+    'SO-ENGNQ-55327NEG
+    '=================================================================
+    'ElseIf objPropriedadeTerc.TipoAcesso = "V" Then  'Tipo Acesso = BSoD VIA
+    ElseIf objPropriedadeTerc.TipoAcesso = "V" Or objPropriedadeTerc.TipoAcesso = "U" Then   'Tipo Acesso = BSoD VIA ou BSoD Unificado
+    
+    '=================================================================
+    '=================================================================
+        
+        '=================================================================
+        'CALLBAT - 26/06/2013 - FO EDD
+        'SO-TVASS-56728SLA
+        '=================================================================
+        'objForm.TxtLinkRedeVIA.Text = objPropriedadeTerc.objTipoAcesso.LinkRedeVIA
+        'objForm.TxtPE.Text = objPropriedadeTerc.objTipoAcesso.PE
+        'objForm.TxtPortaVIA.Text = objPropriedadeTerc.objTipoAcesso.PortaVia
+        'objForm.TxtVLANVia.Text = objPropriedadeTerc.objTipoAcesso.VLAN
+        'objForm.TxtDesigAcessoBSoD = objPropriedadeTerc.objTipoAcesso.DesignacaoAcessoBSoD
+        
+        objForm.UsrGenDadosAcessoBSoD.LinkRede = objPropriedadeTerc.objTipoAcesso.LinkRedeVIA
+        objForm.UsrGenDadosAcessoBSoD.PE = objPropriedadeTerc.objTipoAcesso.PE
+        objForm.UsrGenDadosAcessoBSoD.Porta = objPropriedadeTerc.objTipoAcesso.PortaVia
+        objForm.UsrGenDadosAcessoBSoD.Vlan = objPropriedadeTerc.objTipoAcesso.Vlan
+        objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso = objPropriedadeTerc.objTipoAcesso.DesignacaoAcessoBSoD
+        
+        '=================================================================
+        'CALLBAT - 18/02/2014 - BSoD Unificado
+        'SO-ENGNQ-55327NEG
+        '=================================================================
+        objForm.UsrGenDadosAcessoBSoD.SVLAN = objPropriedadeTerc.objTipoAcesso.SVLAN
+        objForm.UsrGenDadosAcessoBSoD.TipoPorta = objPropriedadeTerc.objTipoAcesso.TipoPorta
+        '=================================================================
+        '=================================================================
+        
+        objForm.UsrGenDadosAcessoRadioIP.Visible = False
+        'AGRC - SO-TVASS-32377EYC - 25/08/2017
+        objForm.UsrGenDadosAcessoTerceiroETH1.Visible = False
+        
+        objForm.UsrGenDadosAcessoBSoD.CarregaCampos
+        
+        '=================================================================
+        '=================================================================
+
+    ElseIf objPropriedadeTerc.TipoAcesso = "N" Then  'Tipo Acesso = BSoD NET
+    
+        '=================================================================
+        'CALLBAT - 26/06/2013 - FO EDD
+        'SO-TVASS-56728SLA
+        '=================================================================
+        'objForm.TxtVLAN_NET.Text = objPropriedadeTerc.objTipoAcesso.VLAN
+        'objForm.TxtDesigAcessoBSoD = objPropriedadeTerc.objTipoAcesso.DesignacaoAcessoBSoD
+        
+        objForm.UsrGenDadosAcessoBSoD.Vlan = objPropriedadeTerc.objTipoAcesso.Vlan
+        objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso = objPropriedadeTerc.objTipoAcesso.DesignacaoAcessoBSoD
+        objForm.UsrGenDadosAcessoRadioIP.Visible = False
+        'AGRC - SO-TVASS-32377EYC - 25/08/2017
+        objForm.UsrGenDadosAcessoTerceiroETH1.Visible = False
+        
+        objForm.UsrGenDadosAcessoBSoD.CarregaCampos
+        '=================================================================
+        '=================================================================
+        
+    '=================================================================
+    'CALLBAT - 05/07/2012 - BSoD Net Light II FO EtherNET
+    '=================================================================
+    ElseIf objPropriedadeTerc.TipoAcesso = "E" Then  'Tipo Acesso = FO Ethernet
+
+        '=================================================================
+        'CALLBAT - 26/06/2013 - FO EDD
+        'SO-TVASS-56728SLA
+        '=================================================================
+'        If Sigla_Acao <> "DES" Then
+            'objForm.TxtVLANVia.Text = objPropriedadeTerc.objTipoAcesso.VLAN
+            'objForm.TxtPortaVIA.Text = objPropriedadeTerc.objTipoAcesso.Porta
+            'objForm.TxtPE.Text = objPropriedadeTerc.objTipoAcesso.PE
+            'objForm.TxtLinkRedeVIA.Text = objPropriedadeTerc.objTipoAcesso.DesignacaoAcesso
+            'objForm.TxtSVLAN.Text = objPropriedadeTerc.objTipoAcesso.SVLAN
+'        End If
+
+            objForm.UsrGenDadosAcessoBSoD.Vlan = objPropriedadeTerc.objTipoAcesso.Vlan
+            objForm.UsrGenDadosAcessoBSoD.Porta = objPropriedadeTerc.objTipoAcesso.Porta
+            objForm.UsrGenDadosAcessoBSoD.PE = objPropriedadeTerc.objTipoAcesso.PE
+            objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso = objPropriedadeTerc.objTipoAcesso.DesignacaoAcesso
+            objForm.UsrGenDadosAcessoBSoD.SVLAN = objPropriedadeTerc.objTipoAcesso.SVLAN
+            
+            objForm.UsrGenDadosAcessoRadioIP.Visible = False
+            'AGRC - SO-TVASS-32377EYC - 25/08/2017
+            objForm.UsrGenDadosAcessoTerceiroETH1.Visible = False
+            
+            objForm.UsrGenDadosAcessoBSoD.CarregaCampos
+        '=================================================================
+        '=================================================================
+    '=================================================================
+    'CALLBAT - 13/09/2013 - Radio IP
+    'SO- TVASS-47468LFW
+    '=================================================================
+    ElseIf objPropriedadeTerc.TipoAcesso = "I" Then  'Tipo Acesso = Radio IP
+
+            objForm.UsrGenDadosAcessoRadioIP.DesignacaoAcesso = objPropriedadeTerc.objTipoAcesso.DesignacaoAcesso
+            objForm.UsrGenDadosAcessoRadioIP.CVLAN = objPropriedadeTerc.objTipoAcesso.CVLAN
+            objForm.UsrGenDadosAcessoRadioIP.SVLAN = objPropriedadeTerc.objTipoAcesso.SVLAN
+            objForm.UsrGenDadosAcessoRadioIP.Provedor = objPropriedadeTerc.objTipoAcesso.Provedor
+            objForm.UsrGenDadosAcessoRadioIP.SwitchDesignacaoRadioIP = objPropriedadeTerc.objTipoAcesso.Designacao_Switch
+            objForm.UsrGenDadosAcessoRadioIP.SwitchModelo = objPropriedadeTerc.objTipoAcesso.Modelo_SWITCH
+            objForm.UsrGenDadosAcessoRadioIP.SwitchPorta = objPropriedadeTerc.objTipoAcesso.Porta_Switch
+            objForm.UsrGenDadosAcessoRadioIP.SwitchFabricante = objPropriedadeTerc.objTipoAcesso.Fabricante_Switch
+            objForm.UsrGenDadosAcessoRadioIP.SwitchPE = objPropriedadeTerc.objTipoAcesso.PE_Switch
+            objForm.UsrGenDadosAcessoRadioIP.SwitchPortaPE = objPropriedadeTerc.objTipoAcesso.Porta_PE_Switch
+            
+            
+            objForm.UsrGenDadosAcessoRadioIP.CarregaCampos
+
+    '=================================================================
+    '=================================================================
+    'AGRC - SO-TVASS-32377EYC - 25/08/2017
+    ElseIf objPropriedadeTerc.TipoAcesso = "H" Then  'Tipo Acesso = Terceiro ETH
+
+            objForm.UsrGenDadosAcessoTerceiroETH1.IDLogico = objForm.LblIdSolicitcaoCLA(3).Caption
+            objForm.UsrGenDadosAcessoTerceiroETH1.DesignacaoAcesso = objPropriedadeTerc.objTipoAcesso.DesignacaoAcesso
+            objForm.UsrGenDadosAcessoTerceiroETH1.CVLAN = objPropriedadeTerc.objTipoAcesso.CVLAN
+            objForm.UsrGenDadosAcessoTerceiroETH1.SVLAN = objPropriedadeTerc.objTipoAcesso.SVLAN
+            objForm.UsrGenDadosAcessoTerceiroETH1.Switch_Concentrador = objPropriedadeTerc.objTipoAcesso.Switch_Concentrador
+            objForm.UsrGenDadosAcessoTerceiroETH1.Porta_Switch = objPropriedadeTerc.objTipoAcesso.Porta_Switch
+            objForm.UsrGenDadosAcessoTerceiroETH1.PE_Switch = objPropriedadeTerc.objTipoAcesso.PE_Switch
+            objForm.UsrGenDadosAcessoTerceiroETH1.Modelo_EDD = objPropriedadeTerc.objTipoAcesso.Modelo_EDD
+            objForm.UsrGenDadosAcessoTerceiroETH1.Porta_EDD = objPropriedadeTerc.objTipoAcesso.Porta_EDD
+            objForm.UsrGenDadosAcessoTerceiroETH1.Fabricante_EDD = objPropriedadeTerc.objTipoAcesso.Fabricante_EDD
+            objForm.UsrGenDadosAcessoTerceiroETH1.Porta_Switch_Concentrador = objPropriedadeTerc.objTipoAcesso.Porta_Switch_Concentrador
+            
+            
+            objForm.UsrGenDadosAcessoTerceiroETH1.CarregaCampos
+
+    '=================================================================
+    '=================================================================
+    End If
+
+End Function
+
+
+Public Function LimpaDadosEmbratel()
+
+    Dim iCount      As Integer
+    
+    objForm.TxtEstacaoEntregaEbtConf.Text = ""
+'    objForm.TxtEstacaoCliente.Text = ""
+    objForm.TxtEstacaoEntregaEbt.Text = ""
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objForm.TxtNumeroOtsTx_EBT.Text = ""
+    '=================================================================
+    '=================================================================
+    
+    'Objetos do tipo de acesso Radio
+    objForm.TxtDIDFila_Radio.Text = ""
+    objForm.TxtDIDArmacao_Radio.Text = ""
+    objForm.TxtDIDRegua_Radio.Text = ""
+    objForm.TxtDIDPosicao_Radio.Text = ""
+    objForm.TxtNumeroRepeticoes.Text = ""
+    
+    'Objetos do tipo de acesso fibra
+    objForm.TxtDIDFila_Fibra.Text = ""
+    objForm.TxtDIDArmacao_Fibra.Text = ""
+    objForm.TxtDidRegua_Fibra.Text = ""
+    objForm.TxtDIDPosicao_Fibra.Text = ""
+    objForm.TxtNumeroCaboFibra.Text = ""
+    objForm.TxtNumeroParFibra.Text = ""
+    
+    objForm.TxtPredioEBT_ADE.Text = ""
+    objForm.TxtNumeroCabo_ADE.Text = ""
+    objForm.TxtNumeroPar_ADE.Text = ""
+    
+    objForm.TxtPredioCabo_Cabo.Text = ""
+    objForm.TxtNumeroParEBT_Cabo.Text = ""
+    objForm.TxtNumeroCaboEBT_Cabo.Text = ""
+    objForm.TxtNumeroParCliente_Cabo.Text = ""
+    objForm.TxtNumeroCaboCliente_Cabo.Text = ""
+    
+    objForm.TxtIDEquipamento1 = ""
+    objForm.CboTipoEquipamento_1.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_1 = ""
+    objForm.optLocalInstalacao_1(0).Value = False
+    objForm.optLocalInstalacao_1(1).Value = False
+    
+    objForm.CboTipoEquipamento_2.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_2 = ""
+    objForm.optLocalInstalacao_2(0).Value = False
+    objForm.optLocalInstalacao_2(1).Value = False
+    
+    objForm.CboTipoEquipamento_3.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_3 = ""
+    objForm.optLocalInstalacao_3(0).Value = False
+    objForm.optLocalInstalacao_3(1).Value = False
+    
+    objForm.TxtIDEquipamento1 = ""
+    objForm.TxtIDEquipamento2 = ""
+    objForm.TxtIDEquipamento3 = ""
+    
+End Function
+
+Public Function CarregarCombos(objDadosAcesso As clsGenAcesso, _
+                               RefCombo As String, _
+                               cboLista As ComboBox) As Boolean
+
+On Error GoTo ErrorHandler
+
+    Dim bRetorno As Boolean
+    Dim iCont As Integer
+    Dim aLista() As Variant
+    
+    CarregarCombos = False
+    
+    ' Limpa a combo
+    bRetorno = objDadosAcesso.MontarListasAcesso(RefCombo, aLista)
+    
+    If Not bRetorno Then
+
+        GoTo ErrorHandler
+
+    End If
+
+    'Ler o array para preencher a combo
+    
+    cboLista.Clear
+    cboLista.AddItem ""
+    
+    'Ao carregar a combo de provedores, carrega as informacoes de máscara de Digitacao
+    'da designacao do Provedor
+    If RefCombo = "PROVEDOR" Then
+    
+        ReDim vMaskProvedor(UBound(aLista, 2))
+        
+    End If
+    
+    For iCont = 1 To UBound(aLista, 2)
+
+        If Not IsEmpty(aLista(0, iCont)) Then
+
+            If RefCombo = "PROVEDOR" Then
+            
+                cboLista.AddItem Trim(aLista(1, iCont)) & _
+                  Space(40 - Len(Trim(aLista(1, iCont)))) & "" & Trim(aLista(4, iCont))
+                
+            Else
+            
+                cboLista.AddItem aLista(1, iCont)
+            
+            End If
+            
+            cboLista.ItemData(iCont) = aLista(0, iCont)
+            
+            If RefCombo = "PROVEDOR" Then
+            
+               If Trim(aLista(3, iCont)) <> "" Then
+               
+                   vMaskProvedor(iCont) = "" & Trim(aLista(3, iCont))
+                   
+               Else
+               
+                   vMaskProvedor(iCont) = "" & Trim(aLista(2, iCont))
+               
+               End If
+               
+            End If
+        
+        Else
+        
+            Exit For
+            
+        End If
+
+    Next
+        
+    CarregarCombos = True
+       
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+        
+ErrorHandler:
+
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "CarregarCombos " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    
+    End If
+    
+    GoTo Finalizar
+
+End Function
+
+Public Sub CarregarComboClassifEndereco(cboLista As ComboBox)
+    
+    cboLista.Clear
+    cboLista.AddItem ""
+    cboLista.ItemData(0) = 0
+    
+    cboLista.AddItem "PPC"
+    cboLista.ItemData(1) = 1
+    
+    cboLista.AddItem "POE"
+    cboLista.ItemData(1) = 2
+    
+    cboLista.AddItem "CLIENTE"
+    cboLista.ItemData(1) = 3
+    
+    cboLista.AddItem "ATENDIDO POR PPC OUTRO PRÉDIO"
+    cboLista.ItemData(1) = 4
+    
+End Sub
+
+Public Sub CarregarComboTipoAcessoEBT(cboLista As ComboBox)
+    
+    cboLista.Clear
+    
+    cboLista.AddItem "Rádio"
+    cboLista.ItemData(0) = 0
+    
+    cboLista.AddItem "Fibra Ótica"
+    cboLista.ItemData(1) = 1
+    
+    cboLista.AddItem "ADE"
+    cboLista.ItemData(2) = 2
+    
+'    If Produto_ID <> GbIDProdutoVIP Then
+        
+        cboLista.AddItem "Cabo Interno"
+        cboLista.ItemData(3) = 3
+    
+'    End If
+'    If Grupo_ID = GbIDGrupoBLD And Not (bFlagIndicaLegado Or bFlagLegadoEmAndamento) Then
+    If Not (bFlagIndicaLegado Or bFlagLegadoEmAndamento) Then
+    
+        cboLista.AddItem "GPON"
+        cboLista.ItemData(4) = 4
+        
+        '=================================================================
+        'CALLBAT - 26/06/2013 - FO EDD
+        '=================================================================
+        cboLista.AddItem "FO EDD"
+        cboLista.ItemData(5) = 5
+        '=================================================================
+        '=================================================================
+        'FABIANA - ADE DSLAM
+        cboLista.AddItem "ADE DSLAM"
+        cboLista.ItemData(6) = 6
+    
+        '=================================================================
+        '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+        '' Inclui verificacao do tipo de acesso W (Wireless)
+        '=================================================================
+        cboLista.AddItem "REDE WIRELESS"
+        cboLista.ItemData(7) = 7
+    
+    End If
+    
+End Sub
+Public Sub CarregarComboTipoAcessoTER(cboLista As ComboBox)
+    
+    cboLista.Clear
+    
+    cboLista.AddItem "Acesso < = 2M"
+    cboLista.ItemData(0) = 0
+    
+    cboLista.AddItem "Acesso > 2M"
+    cboLista.ItemData(1) = 1
+    
+    cboLista.AddItem "Rede Determinística"
+    cboLista.ItemData(2) = 2
+    
+'    If (Produto_ID = GbIDProdutoBLD Or Produto_ID = GbIDProdutoRUDMPLS) And Not (bFlagIndicaLegado Or bFlagLegadoEmAndamento) Then
+
+    If Not (bFlagIndicaLegado Or bFlagLegadoEmAndamento) Then
+'    If (Produto_ID = GbIDProdutoBLD Or Produto_ID = GbIDProdutoBLF Or Produto_ID = GbIDProdutoRUDMPLS) And Not (bFlagIndicaLegado Or bFlagLegadoEmAndamento) Then
+        
+        cboLista.AddItem "HFC BSoD VIA"
+        cboLista.ItemData(3) = 3
+        
+        cboLista.AddItem "HFC BSoD NET"
+        cboLista.ItemData(4) = 4
+        
+        '=================================================================
+        'CALLBAT - 21/05/2012 - BSoD NET Light
+        '=================================================================
+        'If objForm.UsrBLFCabecalho_Acesso.BandaLarga = "S" Then
+            cboLista.AddItem "BSoD Light"
+            cboLista.ItemData(5) = 5
+        'End If
+        '=================================================================
+        '=================================================================
+        
+        '=================================================================
+        'CALLBAT - 02/06/2012 - FO EtherNET
+        '=================================================================
+            cboLista.AddItem "FO EtherNET"
+            cboLista.ItemData(6) = 6
+        '=================================================================
+        '=================================================================
+        
+        '=================================================================
+        'CALLBAT - 13/09/2013 - Radio IP
+        'SO- TVASS-47468LFW
+        '=================================================================
+            cboLista.AddItem "Rádio IP"
+            cboLista.ItemData(7) = 7
+        '=================================================================
+        '=================================================================
+        
+        '=================================================================
+        'CALLBAT - 18/02/2014 - BSoD Unificado
+        'SO-ENGNQ-55327NEG
+        '=================================================================
+            cboLista.AddItem "HFC BSoD"
+            cboLista.ItemData(8) = 8
+        '=================================================================
+        '=================================================================
+        
+        'AGRC - 21/08/2017 - SO-TVASS-32377EYC - 2
+        cboLista.AddItem "Terceiro ETH"
+        cboLista.ItemData(9) = 9
+        
+    End If
+    
+End Sub
+
+Public Function CarregarComboVelocidade(objDadosAcesso As clsGenAcesso, _
+                                        psVelocidade As String, _
+                                        RefCombo As String, _
+                                        cboLista As ComboBox) As Boolean
+
+On Error GoTo ErrorHandler
+
+    Dim bRetorno            As Boolean
+    Dim iCont               As Integer
+    Dim aLista()            As Variant
+    Dim iDigitoVelocCCTO    As Integer
+    Dim sLetraVelocCCTO     As String
+    Dim iDigitoVelocTab     As Integer
+    Dim sLetraVelocTab      As String
+    Dim IncluiNaCombo       As Boolean
+    Dim iAux                As Integer
+    Dim objDadosProduto     As New clsGenProduto
+    Dim sSiglaProduto       As String
+    
+    CarregarComboVelocidade = False
+    
+    iAux = 0
+        
+    objDadosProduto.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosProduto.InformaMensagem objMensagem
+    
+    bRetorno = objDadosProduto.RecuperarDados(Produto_ID)
+    
+    If bRetorno Then
+    
+        sSiglaProduto = objDadosProduto.Sigla
+        
+    End If
+    
+    If sSiglaProduto = "WD" Then
+    
+        sSiglaProduto = "WNN"
+        
+    ElseIf sSiglaProduto = "BF" Or sSiglaProduto = "BFN" Then
+    
+        sSiglaProduto = "BFN"
+        
+    ElseIf sSiglaProduto = "VN" Then
+        'IP VPN
+        'Com base no documento de interface SOE obter a sigla do IP VPN
+    
+        sSiglaProduto = GbCodigo_Produto_IPVPN
+        
+    'ElseIf sSiglaProduto = "INN" Or sSiglaProduto = "VBL" Then
+    ElseIf sSiglaProduto = "IP" Or sSiglaProduto = "VBL" Then
+    
+        sSiglaProduto = "INN"
+        
+    End If
+    
+    'Limpa a combo
+    bRetorno = objDadosAcesso.MontarListasAcesso(RefCombo, aLista, sSiglaProduto)
+    
+    If Not bRetorno Then
+
+        GoTo ErrorHandler
+
+    End If
+    
+    'Ler o array para preencher a combo
+    Call obtemDigitoVelocidade(psVelocidade, iDigitoVelocCCTO, sLetraVelocCCTO)
+      
+    cboLista.Clear
+    cboLista.AddItem ""
+    cboLista.ItemData(0) = 0
+    
+    For iCont = 1 To UBound(aLista, 2)
+
+        IncluiNaCombo = False
+        
+        If Not IsEmpty(aLista(0, iCont)) And IsNumeric(aLista(0, iCont)) Then
+            
+            If Trim(psVelocidade) <> "" Then
+            
+                Call obtemDigitoVelocidade(CStr(aLista(1, iCont)), iDigitoVelocTab, sLetraVelocTab)
+                
+                If sLetraVelocCCTO = "M" And sLetraVelocTab = "M" Then
+                    
+                   If iDigitoVelocTab >= iDigitoVelocCCTO Then
+                     
+                      IncluiNaCombo = True
+                     
+                   Else
+                     
+                      IncluiNaCombo = False
+                  
+                   End If
+                    
+                '===========================================================
+                'CALBAT - 13/02/2008 -
+                'Incluindo tratamento para Giga e Tera Byte
+                '===========================================================
+                ElseIf sLetraVelocCCTO = "G" And sLetraVelocTab = "G" Then
+                    
+                   If iDigitoVelocTab >= iDigitoVelocCCTO Then
+                     
+                      IncluiNaCombo = True
+                     
+                   Else
+                     
+                      IncluiNaCombo = False
+                  
+                   End If
+                '===========================================================
+                '===========================================================
+                
+                Else
+                   
+                   If sLetraVelocCCTO = "K" Then
+                         
+                      If sLetraVelocTab = "M" Then
+                            
+                         IncluiNaCombo = True
+                      
+                      Else
+                      
+                         If iDigitoVelocTab >= iDigitoVelocCCTO Then
+                         
+                            IncluiNaCombo = True
+                       
+                         Else
+                       
+                            IncluiNaCombo = False
+                    
+                         End If
+                      
+                      End If
+                      
+                   End If
+                    
+                End If
+            
+            Else
+            
+                IncluiNaCombo = True
+            
+            End If
+            
+            If InStr(1, aLista(1, iCont), "-") > 0 Then
+            
+                IncluiNaCombo = False
+                
+            End If
+            
+            If IncluiNaCombo Then
+               
+               iAux = iAux + 1
+               cboLista.AddItem aLista(1, iCont)
+               cboLista.ItemData(iAux) = CInt(aLista(0, iCont))
+                
+            Else
+                If sSiglaProduto = "VLI" And sLetraVelocCCTO = "" Then
+                   iAux = iAux + 1
+                   cboLista.AddItem aLista(1, iCont)
+                   cboLista.ItemData(iAux) = CInt(aLista(0, iCont))
+                End If
+                
+            End If
+            
+        End If
+
+    Next
+        
+    CarregarComboVelocidade = True
+       
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+        
+ErrorHandler:
+
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & _
+                   vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & _
+                   "CarregarComboVelocidade " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    
+    End If
+    
+    GoTo Finalizar
+
+End Function
+
+Public Function CarregarComboVelocidade_DNI(objDadosAcesso As clsGenAcesso, _
+                                            psVelocidade As String, _
+                                            RefCombo As String, _
+                                            cboLista As ComboBox) As Boolean
+
+On Error GoTo ErrorHandler
+
+    Dim bRetorno            As Boolean
+    Dim iCont               As Integer
+    Dim aLista()            As Variant
+    Dim iDigitoVelocCCTO    As Integer
+    Dim sLetraVelocCCTO     As String
+    Dim iDigitoVelocTab     As Integer
+    Dim sLetraVelocTab      As String
+    Dim IncluiNaCombo       As Boolean
+    Dim iAux                As Integer
+    Dim objDadosProduto     As New clsGenProduto
+    Dim sSiglaProduto       As String
+    
+    CarregarComboVelocidade_DNI = False
+    
+    objDadosProduto.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosProduto.InformaMensagem objMensagem
+    
+    bRetorno = objDadosProduto.RecuperarDados(Produto_ID)
+    
+    If bRetorno Then
+    
+        sSiglaProduto = objDadosProduto.Sigla
+        
+    End If
+    
+    'Limpa a combo
+    bRetorno = objDadosAcesso.MontarListasAcesso(RefCombo, aLista, sSiglaProduto)
+    
+    If Not bRetorno Then
+
+        GoTo ErrorHandler
+
+    End If
+    
+    ReDim vVelocidadeDNI(1) As StrGen
+    
+    iAux = 1
+
+    vVelocidadeDNI(0).CodigoAlpha = ""
+    vVelocidadeDNI(0).Descricao = ""
+    
+    'Ler o array para preencher a combo
+    Call obtemDigitoVelocidade(psVelocidade, iDigitoVelocCCTO, sLetraVelocCCTO)
+      
+    cboLista.Clear
+    cboLista.AddItem ""
+    cboLista.ItemData(0) = 0
+    
+    For iCont = 1 To UBound(aLista, 2)
+
+        IncluiNaCombo = False
+        
+        If Not IsEmpty(aLista(0, iCont)) Then
+            
+            Call obtemDigitoVelocidade(Mid(CStr(aLista(1, iCont)), 1, 6), iDigitoVelocTab, sLetraVelocTab)
+            
+            If sLetraVelocCCTO = "M" And sLetraVelocTab = "M" Then
+                
+               If iDigitoVelocTab >= iDigitoVelocCCTO Then
+                 
+                  IncluiNaCombo = True
+                 
+               Else
+                 
+                  IncluiNaCombo = False
+              
+               End If
+                
+            Else
+               
+               If sLetraVelocCCTO = "K" Then
+                     
+                  If sLetraVelocTab = "M" Then
+                        
+                     IncluiNaCombo = True
+                  
+                  Else
+                  
+                     If iDigitoVelocTab >= iDigitoVelocCCTO Then
+                     
+                        IncluiNaCombo = True
+                   
+                     Else
+                   
+                        IncluiNaCombo = False
+                
+                     End If
+                  
+                  End If
+                  
+               End If
+                
+            End If
+            
+            If InStr(1, aLista(1, iCont), "-") > 0 Then
+            
+                IncluiNaCombo = False
+                
+            End If
+            
+            If IncluiNaCombo Then
+               
+               iAux = iAux + 1
+               Call obtemDigitoVelocidade(Mid(CStr(aLista(0, iCont)), 1, 6), iDigitoVelocTab, sLetraVelocTab)
+               
+               cboLista.AddItem aLista(1, iCont)
+               
+               ReDim Preserve vVelocidadeDNI(iAux) As StrGen
+               
+               vVelocidadeDNI(iAux - 1).CodigoAlpha = aLista(0, iCont)
+               vVelocidadeDNI(iAux - 1).Descricao = aLista(1, iCont)
+
+            End If
+            
+        End If
+
+    Next
+        
+    CarregarComboVelocidade_DNI = True
+       
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+        
+ErrorHandler:
+
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & _
+                   vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & _
+                   "CarregarComboVelocidade " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    
+    End If
+    
+    GoTo Finalizar
+
+End Function
+
+Private Function CarregaAtributosPropriedadesEBT(objDadosAcesso As clsGenAcesso)
+
+    Dim objDadosTipoRadio      As clsGenTipoAcessoRadio
+    Dim objDadosTipoFibra      As clsGenTipoAcessoFibra
+    Dim objdadosTipoADE        As clsGenTipoAcessoADE
+    Dim objDadosTipoCabo       As clsGenTipoAcessoCabo
+    Dim objDadosPropriedadeEBT As New clsGenPropriedadeEmbratel
+    Dim objdadosTipoGPON       As clsGenTipoAcessoGPON
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - FO EDD
+    'SO-TVASS-56728SLA
+    '=================================================================
+    Dim objDadosTipoFO_EDD    As clsGenTipoAcessoFO_EDD
+    '=================================================================
+    '=================================================================
+    
+    '--=================================================================
+    '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+    '--=================================================================
+    Dim objDadosTipoADE_DSLAM  As clsGenTipoAcessoADE_DSLAM
+    
+    '=================================================================
+    '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    '''=================================================================
+    Dim objDadosTipo_WIRELESS  As clsGenTipoAcessoWIRELESS
+    
+    
+    'Carrega Propriedades da Pasta Propriedade Embratel
+    
+    With objDadosPropriedadeEBT
+         
+         .EstacaoEntregaAcessoConfiguracao = TrataPlick(Trim(objForm.TxtEstacaoConfiguracao.Text))
+         .EstacaoEntregaAcesso = TrataPlick(Trim(objForm.TxtEstacaoEntregaEbt.Text))
+         .estacaoCliente = TrataPlick(Trim(objForm.TxtEstacaoCliente.Text))
+         
+        '=================================================================
+        'CALLBAT - 26/06/2013 - Interface junto ao CFM
+        'SO-ENGNQ-83669III
+        '=================================================================
+         '.NumeroOTSTX = TrataPlick(objForm.TxtNumeroOtsTx_EBT.Text)
+         '.ItemOTSTX = Val(objForm.TxtItemOtsTxEBT.Text)
+         
+         .NumeroOTSTX = TrataPlick(objForm.UsrGenDadosAcessoTroncoTX.NumeroOTSTX)
+         .ItemOTSTX = Val(objForm.UsrGenDadosAcessoTroncoTX.ItemOTSTX)
+         
+        '=================================================================
+        '=================================================================
+         
+         If objForm.SpdDataAtivacaoAcessoEBT.Text <> "" Then
+           
+            .DataAtivacaoAcesso = Format(objForm.SpdDataAtivacaoAcessoEBT.Text, "dd/mm/yyyy")
+        
+         Else
+            
+            .DataAtivacaoAcesso = ""
+         
+         End If
+        
+         .DesignacaoAcesso = TrataPlick(objForm.TxtDesignacaoAcessoEBT.Text)
+         .IdentificadorAcesso = TrataPlick(objForm.TxtIdentificadorAcessoEBT.Text)
+         
+         Select Case objForm.CboTipoAcessoEmbratel.ListIndex
+                
+                Case 0       'Tipo de Acesso Radio
+                    
+                    .TipoAcesso = "R"
+                    
+                    Set objDadosTipoRadio = New clsGenTipoAcessoRadio
+                    
+                    objDadosTipoRadio.DIDFila = "" & TrataPlick(objForm.TxtDIDFila_Radio.Text)
+                    objDadosTipoRadio.DIDArmacao = Val(objForm.TxtDIDArmacao_Radio.Text)
+                    'Leonardo Ferreira - Trocando de numero para string - Inicio
+                    'objDadosTipoRadio.DIDRegua = Val(objForm.TxtDIDRegua_Radio.Text)
+                    objDadosTipoRadio.DIDRegua = "" & TrataPlick(objForm.TxtDIDRegua_Radio.Text)
+                    'Leonardo Ferreira - Fim
+                    objDadosTipoRadio.DIDPosicao = Val(objForm.TxtDIDPosicao_Radio.Text)
+                    objDadosTipoRadio.NumeroRepeticoes = Val(objForm.TxtNumeroRepeticoes.Text)
+                    
+                    .objTipoAcesso = objDadosTipoRadio
+                    Set objDadosTipoRadio = Nothing
+                    
+                Case 1      'Tipo de Acesso Fibra Otica
+                     .TipoAcesso = "F"
+                     
+                     Set objDadosTipoFibra = New clsGenTipoAcessoFibra
+                     
+                     objDadosTipoFibra.DIDFila = "" & TrataPlick(Trim(objForm.TxtDIDFila_Fibra.Text))
+                     objDadosTipoFibra.DIDArmacao = Val(objForm.TxtDIDArmacao_Fibra.Text)
+                     'Leonardo Ferreira - Trocando de numero para string - Inicio
+                     'objDadosTipoFibra.DIDRegua = Val(objForm.TxtDIDRegua_Fibra.Text)
+                     objDadosTipoFibra.DIDRegua = "" & TrataPlick(objForm.TxtDidRegua_Fibra.Text)
+                     'Leonardo Ferreira - Fim
+                     objDadosTipoFibra.DIDPosicao = Val(objForm.TxtDIDPosicao_Fibra.Text)
+                     objDadosTipoFibra.NumeroCabo = "" & TrataPlick(Trim(objForm.TxtNumeroCaboFibra.Text))
+                     objDadosTipoFibra.NumeroPar = "" & TrataPlick(Trim(objForm.TxtNumeroParFibra.Text))
+                     
+                     .objTipoAcesso = objDadosTipoFibra
+                     
+                     Set objDadosTipoFibra = Nothing
+                     
+                Case 2   'Tipo de Acesso ADE
+                     .TipoAcesso = "A"
+                     
+                     Set objdadosTipoADE = New clsGenTipoAcessoADE
+                     
+                     objdadosTipoADE.PredioEBT = "" & TrataPlick(Trim(objForm.TxtPredioEBT_ADE.Text))
+                     objdadosTipoADE.NumeroCaboEBT = Val(objForm.TxtNumeroCabo_ADE.Text)
+                     objdadosTipoADE.NumeroParEBT = "" & TrataPlick(Trim(objForm.TxtNumeroPar_ADE.Text))
+                     
+                     .objTipoAcesso = objdadosTipoADE
+                     Set objdadosTipoADE = Nothing
+                     
+                Case 3     'Tipo de Acesso Cabo Interno
+                     
+                     .TipoAcesso = "C"
+                     
+                     Set objDadosTipoCabo = New clsGenTipoAcessoCabo
+                     
+                     objDadosTipoCabo.Predio = "" & TrataPlick(Trim(objForm.TxtPredioCabo_Cabo.Text))
+                     objDadosTipoCabo.NumeroCaboEBT = "" & TrataPlick(Trim(objForm.TxtNumeroCaboEBT_Cabo.Text))
+                     objDadosTipoCabo.NumeroParEBT = "" & TrataPlick(Trim(objForm.TxtNumeroParEBT_Cabo.Text))
+                     objDadosTipoCabo.NumeroCaboCliente = "" & TrataPlick(Trim(objForm.TxtNumeroCaboCliente_Cabo.Text))
+                     objDadosTipoCabo.NumeroParCliente = "" & TrataPlick(Trim(objForm.TxtNumeroParCliente_Cabo.Text))
+                     
+                     .objTipoAcesso = objDadosTipoCabo
+                     
+                     
+                     Set objDadosTipoCabo = Nothing
+                     
+                Case 4     'Tipo de Acesso GPON
+                     
+                     .TipoAcesso = "G"
+                     
+                     Set objdadosTipoGPON = New clsGenTipoAcessoGPON
+                     
+                     Call objForm.UsrGenDadosAcessoGPON.CarregaAtributos
+                     
+                     objdadosTipoGPON.DesignacaoAcesso = "" & objForm.UsrGenDadosAcessoGPON.DesignacaoAcesso
+                     objdadosTipoGPON.ModeloONT = "" & objForm.UsrGenDadosAcessoGPON.ModeloONT
+                     objdadosTipoGPON.FabricanteONT = "" & objForm.UsrGenDadosAcessoGPON.FabricanteONT
+                     objdadosTipoGPON.Vlan = "" & objForm.UsrGenDadosAcessoGPON.Vlan
+                     objdadosTipoGPON.Porta = "" & objForm.UsrGenDadosAcessoGPON.Porta
+                     objdadosTipoGPON.PortaOLT = "" & objForm.UsrGenDadosAcessoGPON.PortaOLT
+                     objdadosTipoGPON.PEOLT = "" & objForm.UsrGenDadosAcessoGPON.PEOLT
+                     
+                     .objTipoAcesso = objdadosTipoGPON
+                     
+                     Set objdadosTipoGPON = Nothing
+                     
+                '=================================================================
+                'CALLBAT - 26/06/2013 - FO EDD
+                'SO-TVASS-56728SLA
+                '=================================================================
+                Case 5
+                
+                    .TipoAcesso = "D"
+                    
+                    Set objDadosTipoFO_EDD = New clsGenTipoAcessoFO_EDD
+                    
+                    Call objForm.UsrGenDadosAcessoFOEDD.CarregaAtributos
+                    
+                    objDadosTipoFO_EDD.DesignacaoAcesso = objForm.UsrGenDadosAcessoFOEDD.DesignacaoAcesso
+                    objDadosTipoFO_EDD.Fabricante_ONT_FO_EDD = objForm.UsrGenDadosAcessoFOEDD.FabricanteONTFOEDD
+                    objDadosTipoFO_EDD.Porta_Ont_FO_EDD = objForm.UsrGenDadosAcessoFOEDD.PortaONTFOEDD
+                    objDadosTipoFO_EDD.Modelo_Ont_FO_EDD = objForm.UsrGenDadosAcessoFOEDD.ModeloONTFOEDD
+                    objDadosTipoFO_EDD.SVLAN = objForm.UsrGenDadosAcessoFOEDD.SVLAN
+                    objDadosTipoFO_EDD.CVLAN = objForm.UsrGenDadosAcessoFOEDD.CVLAN
+                    objDadosTipoFO_EDD.Switch_Concentrador = objForm.UsrGenDadosAcessoFOEDD.SwitchConcentrador
+                    objDadosTipoFO_EDD.Switch_Porta = objForm.UsrGenDadosAcessoFOEDD.PortaSwitch
+                    objDadosTipoFO_EDD.PE = objForm.UsrGenDadosAcessoFOEDD.PE
+                    objDadosTipoFO_EDD.Porta_PE = objForm.UsrGenDadosAcessoFOEDD.PortaPE
+                    
+                    .objTipoAcesso = objDadosTipoFO_EDD
+                    
+                    Set objDadosTipoFO_EDD = Nothing
+                
+                '=================================================================
+                
+                '--=================================================================
+                '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+                '--=================================================================
+                Case 6
+                
+                    .TipoAcesso = "M"
+                    
+                    Set objDadosTipoADE_DSLAM = New clsGenTipoAcessoADE_DSLAM
+                    
+                    Call objForm.UsrGenDadosAcessoADE_DSLAM.CarregaAtributos
+                    
+                    objDadosTipoADE_DSLAM.Numero_Acesso = objForm.UsrGenDadosAcessoADE_DSLAM.Numero_Acesso
+                    ' objDadosTipoADE_DSLAM.ID_Logico = objForm.UsrGenDadosAcessoADE_DSLAM.ID_Logico
+                    objDadosTipoADE_DSLAM.VLAN_PE = objForm.UsrGenDadosAcessoADE_DSLAM.VLAN_PE
+                    objDadosTipoADE_DSLAM.SVLAN = objForm.UsrGenDadosAcessoADE_DSLAM.SVLAN
+                    objDadosTipoADE_DSLAM.PE = objForm.UsrGenDadosAcessoADE_DSLAM.PE
+                    objDadosTipoADE_DSLAM.Porta_PE = objForm.UsrGenDadosAcessoADE_DSLAM.PortaPE
+                    objDadosTipoADE_DSLAM.Designacao_DSLAM = objForm.UsrGenDadosAcessoADE_DSLAM.Designacao_DSLAM
+                    objDadosTipoADE_DSLAM.Tronco_uplink_dslam = objForm.UsrGenDadosAcessoADE_DSLAM.Tronco_uplink_dslam
+                    
+                    .objTipoAcesso = objDadosTipoADE_DSLAM
+                    
+                    Set objDadosTipoADE_DSLAM = Nothing
+                
+                '=================================================================
+                '=================================================================
+                '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+                '=================================================================
+                Case 7    ''' WIRELESS
+                
+                    .TipoAcesso = "W"
+                    
+                    Set objDadosTipo_WIRELESS = New clsGenTipoAcessoWIRELESS
+                    
+                    Call objForm.UsrGenDadosAcessoWireless.CarregaAtributos
+                    
+                    objDadosTipo_WIRELESS.REDE_CONTRATADA = objForm.UsrGenDadosAcessoWireless.REDE_CONTRATADA
+                    objDadosTipo_WIRELESS.Imsi = objForm.UsrGenDadosAcessoWireless.Imsi
+                    
+                    .objTipoAcesso = objDadosTipo_WIRELESS
+                    
+                    Set objDadosTipo_WIRELESS = Nothing
+                '=================================================================
+                     
+         End Select
+    
+    End With
+    
+    objDadosAcesso.objPropriedadeEBT = objDadosPropriedadeEBT
+    
+    Set objDadosPropriedadeEBT = Nothing
+    
+End Function
+
+Private Function CarregaAtributosPropriedadesTerceiros(objPropriedadeTerceiros As clsGenPropriedadeTerceiros) As Boolean
+
+    Dim objdadosTipoAcessoMenor As clsGenTipoAcessoMenor2M
+    Dim objdadosTipoAcessoMaior As clsGenTipoAcessoMaior2M
+    Dim objdadosTipoAcessoRede  As clsGenTipoAcessoRedeDeterm
+    Dim objdadosTipoBSod        As ClsGenTipoAcessoBSOD
+    
+    '=================================================================
+    'CALLBAT - 05/07/2012 - BSoD Net Light II FO EtherNET
+    '=================================================================
+    Set objdadosTipoFOEthernet = New clsGenTipoAcessoFOEtherNET
+    '=================================================================
+    '=================================================================
+    
+    '=================================================================
+    'CALLBAT - 13/09/2013 - Radio IP
+    'SO- TVASS-47468LFW
+    '=================================================================
+    Dim objdadosTipoRadioIP As clsGenTipoAcessoRadioIP
+    '=================================================================
+    '=================================================================
+    With objPropriedadeTerceiros
+
+         .CNLPontaA = TrataPlick(objForm.TxtCNLPontaA.Text)
+         .CNLPontaB = TrataPlick(objForm.TxtCNLPontaB.Text)
+
+         If objForm.CboProvedorInterurbano.ListIndex >= 0 Then
+         
+            .CodigoProvedorInterUrbano = objForm.CboProvedorInterurbano.ItemData(objForm.CboProvedorInterurbano.ListIndex)
+         
+         Else
+            
+            .CodigoProvedorInterUrbano = "0"
+         
+         End If
+         
+         If objForm.CboProvedorUrbano.ListIndex >= 0 Then
+            
+            .CodigoProvedorUrbano = objForm.CboProvedorUrbano.ItemData(objForm.CboProvedorUrbano.ListIndex)
+         
+         Else
+            
+            .CodigoProvedorUrbano = "0"
+         
+         End If
+         
+         If Trim(objForm.SpdDataEntregaInterUrbano.Text) <> "" Then
+            
+            .DataEntregaInterurbano = Format(objForm.SpdDataEntregaInterUrbano.Text, "dd/mm/yyyy")
+         
+         Else
+         
+            .DataEntregaInterurbano = ""
+            
+         End If
+         
+         objForm.TxtEstacaoEntregaTercConf.Text = objForm.TxtEstacaoConfiguracao.Text
+         
+         .EstacaoEntregaAcessoConfiguracao = TrataPlick(objForm.TxtEstacaoEntregaTercConf.Text)
+         
+         .EstacaoEntregaAcesso = TrataPlick(objForm.TxtEstacaoEntregaTerc.Text)
+         .NumeroAcessoUrbano = TrataPlick(objForm.SpdNumeroAcessoUrbano.Text)
+         .CNL_Ponta_A_Urbano = TrataPlick(objForm.TxtCNLPontaA_Urbano.Text)
+         .DataEntregaUrbano = Format(objForm.SpdDataEntregaUrbano.Text, "dd/mm/yyyy")
+    
+         .NumeroAcessoInterurbano = TrataPlick(objForm.SpdNumeroAcessoInterurbano.Text)
+         
+         '=================================================================
+         'CALLBAT - 26/06/2013 - Interface junto ao CFM
+         'SO-ENGNQ-83669III
+         '=================================================================
+         '.NumeroOTSTX = TrataPlick(objForm.TxtNumeroOTSTXTerc.Text)
+         '.ItemOTSTX = Val(objForm.TxtItemOTSTxTerc.Text)
+         
+         .NumeroOTSTX = TrataPlick(objForm.UsrGenDadosAcessoTroncoTX.NumeroOTSTX)
+         .ItemOTSTX = Val(objForm.UsrGenDadosAcessoTroncoTX.ItemOTSTX)
+         
+         '=================================================================
+         '=================================================================
+         
+         .DesignacaoAcesso = TrataPlick(objForm.TxtDesignacaoAcessoTerceiro.Text)
+'         .DesignacaoAcesso = ""
+         .IdentificadorAcessoUrbano = TrataPlick(objForm.TxtIDentificadorAcessoUrbano.Text)
+         .IdentificadorAcessoInterUrbano = TrataPlick(objForm.TxtIdentificadorAcessoEBTInterUrbano.Text)
+         
+         If objForm.SpdDataAtivacaoAcessoTerc.Text <> "" Then
+            
+            .DataAtivacaoAcesso = Format(objForm.SpdDataAtivacaoAcessoTerc.Text, "dd/mm/yyyy")
+         
+         Else
+            
+            .DataAtivacaoAcesso = ""
+         
+         End If
+                     
+         If objForm.optTipoTecnologia(0).Value = True Then
+         
+            .TecnologiaAcesso = "L"    'LP
+            
+         ElseIf objForm.optTipoTecnologia(1).Value = True Then
+         
+            .TecnologiaAcesso = "R"    'Radio
+         
+         ElseIf objForm.optTipoTecnologia(2).Value = True Then
+         
+            .TecnologiaAcesso = "F"    'Fibra
+         
+         End If
+         
+         Select Case objForm.CboTipoAcessoTerceiro.ListIndex
+
+                Case 0  'Tipo de Acesso Menor 2M
+
+                     Set objdadosTipoAcessoMenor = New clsGenTipoAcessoMenor2M
+                     .objTipoAcesso = objdadosTipoAcessoMenor
+                     Set objdadosTipoAcessoMenor = Nothing
+
+                     .TipoAcesso = "<"
+                     
+                     If objForm.CboInterfaceEBTMenor.ListIndex >= 0 Then
+                        
+                        .objTipoAcesso.InterfaceEbtId = _
+                                                 objForm.CboInterfaceEBTMenor.ItemData( _
+                                                 objForm.CboInterfaceEBTMenor.ListIndex)
+                     Else
+                        
+                        .objTipoAcesso.InterfaceEbtId = 0
+                     
+                     End If
+                     
+                     
+                     If objForm.CboInterfaceClienteMenor.ListIndex >= 0 Then
+                        .objTipoAcesso.InterfaceClienteID = _
+                                                 objForm.CboInterfaceClienteMenor.ItemData( _
+                                                 objForm.CboInterfaceClienteMenor.ListIndex)
+                     Else
+                        
+                        .objTipoAcesso.InterfaceClienteID = 0
+                     
+                     End If
+                     
+                     .objTipoAcesso.NumeroCabo = TrataPlick(objForm.TxtNumeroCaboAcessoMenor.Text)
+                     .objTipoAcesso.NumeroPar = TrataPlick(objForm.TxtNumeroParAcessoMenor.Text)
+                     .objTipoAcesso.BlocoDG = TrataPlick(objForm.TxtBlocoDGMenor.Text)
+                     .objTipoAcesso.BlocoTransData = TrataPlick(objForm.TxtBlocoTransdataMenor.Text)
+                     .objTipoAcesso.ParDG = TrataPlick(objForm.TxtParDGMenor.Text)
+                     .objTipoAcesso.ParTransData = TrataPlick(objForm.TxtParTransdataMenor.Text)
+                     
+                
+                Case 1  'Tipo de Acesso Maior 2M
+
+                     Set objdadosTipoAcessoMaior = New clsGenTipoAcessoMaior2M
+                     .objTipoAcesso = objdadosTipoAcessoMaior
+                     Set objdadosTipoAcessoMenor = Nothing
+                     
+                     .TipoAcesso = ">"
+                     .objTipoAcesso.DIDArmacao = Val(objForm.TxtDIDArmacao.Text)
+                     .objTipoAcesso.DIDFila = TrataPlick(objForm.TxtDIDFila.Text)
+                     .objTipoAcesso.DIDPosicao = Val(objForm.TxtDIDPosicao.Text)
+                     'Leonardo Ferreira - Trocando de numero para string - Inicio
+                     '.objTipoAcesso.DIDRegua = Val(objForm.TxtDIDRegua.Text)
+                     .objTipoAcesso.DIDRegua = TrataPlick(objForm.TxtDIDRegua.Text)
+                     'Leonardo Ferreira - Fim
+                
+                     .objTipoAcesso.Tronco = TrataPlick(objForm.TxtTronco.Text)
+                     .objTipoAcesso.Par = TrataPlick(objForm.TxtPar.Text)
+                
+                Case 2  'Tipo de Acesso Rede Deterministica
+
+                     Set objdadosTipoAcessoRede = New clsGenTipoAcessoRedeDeterm
+                     .objTipoAcesso = objdadosTipoAcessoRede
+                     Set objdadosTipoAcessoRede = Nothing
+                     
+                     .TipoAcesso = "R"
+                     
+                     .objTipoAcesso.Dominio = objForm.TXTDominio.Text
+                     .objTipoAcesso.NO = Val(objForm.TxtNO.Text)
+                     
+                     .objTipoAcesso.Porta = objForm.CboPorta_Rede.Text
+                     .objTipoAcesso.Slot = objForm.CboSlot_Rede.Text
+                     .objTipoAcesso.TSI = Val(objForm.CboTSI_Rede.Text)
+                     .objTipoAcesso.TSF = Val(objForm.CboTSF_Rede.Text)
+
+                     .objTipoAcesso.DIDArmacao = Val(objForm.TxtDIDArmacao_Rede.Text)
+                     .objTipoAcesso.DIDFila = TrataPlick(objForm.TxtDIDFila_Rede.Text)
+                     .objTipoAcesso.DIDPosicao = objForm.TxtDIDPosicao_Rede.Text
+                     'Leonardo Ferreira - Trocando de numero para string - Inicio
+                     '.objTipoAcesso.DIDRegua = Val(objForm.TxtDIDRegua_Rede.Text)
+                     .objTipoAcesso.DIDRegua = TrataPlick(objForm.TxtDIDRegua_Rede.Text)
+                     'Leonardo Ferreira - Fim
+         
+                Case 3      'Tipo de Acesso Cabo Interno
+                      
+                     .TipoAcesso = "V"
+                     
+                     Set objdadosTipoBSod = New ClsGenTipoAcessoBSOD
+                     
+                     '=================================================================
+                     'CALLBAT - 26/06/2013 - FO EDD
+                     'SO-TVASS-56728SLA
+                     '=================================================================
+                     
+                     'objdadosTipoBSod.LinkRedeVIA = "" & TrataPlick(Trim(objForm.TxtLinkRedeVIA.Text))
+                     'objdadosTipoBSod.PE = "" & TrataPlick(Trim(objForm.TxtPE.Text))
+                     'objdadosTipoBSod.PortaVia = "" & TrataPlick(Trim(objForm.TxtPortaVIA.Text))
+                     'objdadosTipoBSod.VLAN = CLng("0") & Trim(objForm.TxtVLANVia.Text)
+                     'objdadosTipoBSod.DesignacaoAcessoBSoD = "" & TrataPlick(Trim(objForm.TxtDesigAcessoBSoD.Text))
+                     
+                     objdadosTipoBSod.LinkRedeVIA = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.LinkRede))
+                     objdadosTipoBSod.PE = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.PE))
+                     objdadosTipoBSod.PortaVia = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.Porta))
+                     objdadosTipoBSod.Vlan = CLng("0") & Trim(objForm.UsrGenDadosAcessoBSoD.Vlan)
+                     objdadosTipoBSod.DesignacaoAcessoBSoD = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso))
+                     
+                     
+                     '=================================================================
+                     '=================================================================
+                     .objTipoAcesso = objdadosTipoBSod
+                     Set objdadosTipoBSod = Nothing
+         
+                Case 4      'Tipo de Acesso BSOD NET
+                      
+                     .TipoAcesso = "N"
+                     
+                     Set objdadosTipoBSod = New ClsGenTipoAcessoBSOD
+                     
+                     '=================================================================
+                     'CALLBAT - 26/06/2013 - FO EDD
+                     'SO-TVASS-56728SLA
+                     '=================================================================
+                     'objdadosTipoBSod.VLAN = CLng("0") & Trim(objForm.TxtVLAN_NET.Text)
+                     'objdadosTipoBSod.DesignacaoAcessoBSoD = "" & TrataPlick(Trim(objForm.TxtDesigAcessoBSoD.Text))
+                     
+                     objdadosTipoBSod.Vlan = CLng("0") & Trim(objForm.UsrGenDadosAcessoBSoD.Vlan)
+                     objdadosTipoBSod.DesignacaoAcessoBSoD = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso))
+                     
+                     .objTipoAcesso = objdadosTipoBSod
+                     '=================================================================
+                     '=================================================================
+                     Set objdadosTipoBSod = Nothing
+                  
+                Case 5      'Tipo de Acesso BSOD Light
+                
+                     .TipoAcesso = "L"
+                     
+                     Set objdadosTipoBSod = New ClsGenTipoAcessoBSOD
+                     
+                     '=================================================================
+                     'CALLBAT - 26/06/2013 - FO EDD
+                     'SO-TVASS-56728SLA
+                     '=================================================================
+                     'objdadosTipoBSod.LinkRedeVIA = "" & TrataPlick(Trim(objForm.TxtLinkRedeVIA.Text))
+                     'objdadosTipoBSod.PE = "" & TrataPlick(Trim(objForm.TxtPE.Text))
+                     'objdadosTipoBSod.PortaVia = "" & TrataPlick(Trim(objForm.TxtPortaVIA.Text))
+                     'objdadosTipoBSod.VLAN = CLng("0") & Trim(objForm.TxtVLANVia.Text)
+                     'objdadosTipoBSod.DesignacaoAcessoBSoD = "" & TrataPlick(Trim(objForm.TxtDesigAcessoBSoD.Text))
+                     
+                     objdadosTipoBSod.LinkRedeVIA = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.LinkRede))
+                     objdadosTipoBSod.PE = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.PE))
+                     objdadosTipoBSod.PortaVia = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.Porta))
+                     objdadosTipoBSod.Vlan = CLng("0") & Trim(objForm.UsrGenDadosAcessoBSoD.Vlan)
+                     objdadosTipoBSod.DesignacaoAcessoBSoD = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso))
+                     
+                     '=================================================================
+                     '=================================================================
+                     .objTipoAcesso = objdadosTipoBSod
+                     Set objdadosTipoBSod = Nothing
+                     
+            '=================================================================
+            'CALLBAT - 05/07/2012 - BSoD Net Light II FO EtherNET
+            '=================================================================
+                Case 6      'Tipo de Acesso FO EtherNET
+                
+                    .TipoAcesso = "E"
+
+                     Set objdadosTipoFOEthernet = New clsGenTipoAcessoFOEtherNET
+                     
+                     '=================================================================
+                     'CALLBAT - 26/06/2013 - FO EDD
+                     'SO-TVASS-56728SLA
+                     '=================================================================
+                     'objdadosTipoFOEthernet.VLAN = CLng("0") & Trim(objForm.TxtVLANVia.Text)
+                     'objdadosTipoFOEthernet.Porta = CLng("0") & TrataPlick(Trim(objForm.TxtPortaVIA.Text))
+                     'objdadosTipoFOEthernet.PE = "" & TrataPlick(Trim(objForm.TxtPE.Text))
+                     'objdadosTipoFOEthernet.DesignacaoAcesso = "" & TrataPlick(Trim(objForm.TxtDesigAcessoBSoD.Text))
+                     'objdadosTipoFOEthernet.SVLAN = CLng("0") & TrataPlick(Trim(objForm.txtSVLAN.Text))
+                     
+                     objdadosTipoFOEthernet.Vlan = CLng("0") & Trim(objForm.UsrGenDadosAcessoBSoD.Vlan)
+                     objdadosTipoFOEthernet.Porta = CLng("0") & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.Porta))
+                     objdadosTipoFOEthernet.PE = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.PE))
+                     objdadosTipoFOEthernet.DesignacaoAcesso = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso))
+                     objdadosTipoFOEthernet.SVLAN = CLng("0") & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.SVLAN))
+                     
+                     '=================================================================
+                     '=================================================================
+                     .objTipoAcesso = objdadosTipoFOEthernet
+                     Set objdadosTipoFOEthernet = Nothing
+                     
+            '=================================================================
+            'CALLBAT - 13/09/2013 - Radio IP
+            'SO- TVASS-47468LFW
+            '=================================================================
+            Case 7
+            
+            .TipoAcesso = "I"
+            
+                     .TipoAcesso = "I"
+
+                     Set objdadosTipoRadioIP = New clsGenTipoAcessoRadioIP
+                     
+                     objdadosTipoRadioIP.DesignacaoAcesso = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoRadioIP.DesignacaoAcesso))
+                     objdadosTipoRadioIP.CVLAN = CLng(0) & Trim(objForm.UsrGenDadosAcessoRadioIP.CVLAN)
+                     objdadosTipoRadioIP.SVLAN = CLng(0) & Trim(objForm.UsrGenDadosAcessoRadioIP.SVLAN)
+                     objdadosTipoRadioIP.Provedor = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoRadioIP.Provedor))
+                     objdadosTipoRadioIP.Designacao_Switch = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoRadioIP.SwitchDesignacaoRadioIP))
+                     objdadosTipoRadioIP.Modelo_SWITCH = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoRadioIP.SwitchModelo))
+                     objdadosTipoRadioIP.Porta_Switch = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoRadioIP.SwitchPorta))
+                     objdadosTipoRadioIP.Fabricante_Switch = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoRadioIP.SwitchFabricante))
+                     objdadosTipoRadioIP.PE_Switch = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoRadioIP.SwitchPE))
+                     objdadosTipoRadioIP.Porta_PE_Switch = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoRadioIP.SwitchPortaPE))
+                     
+                     .objTipoAcesso = objdadosTipoRadioIP
+                     Set objdadosTipoRadioIP = Nothing
+            '=================================================================
+            '=================================================================
+            
+            '=================================================================
+            'CALLBAT - 18/02/2014 - BSoD Unificado
+            'SO-ENGNQ-55327NEG
+            '=================================================================
+            Case 8
+            
+                     .TipoAcesso = "U"
+                     
+                     Set objdadosTipoBSod = New ClsGenTipoAcessoBSOD
+                                          
+                     objdadosTipoBSod.LinkRedeVIA = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.LinkRede))
+                     objdadosTipoBSod.PE = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.PE))
+                     objdadosTipoBSod.PortaVia = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.Porta))
+                     objdadosTipoBSod.Vlan = CLng("0") & Trim(objForm.UsrGenDadosAcessoBSoD.Vlan)
+                     objdadosTipoBSod.DesignacaoAcessoBSoD = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.DesignacaoAcesso))
+                     objdadosTipoBSod.SVLAN = CLng("0") & Trim(objForm.UsrGenDadosAcessoBSoD.SVLAN)
+                     
+                     objdadosTipoBSod.TipoPorta = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoBSoD.TipoPorta))
+                                          
+                     .objTipoAcesso = objdadosTipoBSod
+                     Set objdadosTipoBSod = Nothing
+
+            '=================================================================
+            '=================================================================
+          'AGRC - 21/08/2017 - SO-TVASS-32377EYC - 2
+           Case 9
+            
+            .TipoAcesso = "H"
+            
+                     .TipoAcesso = "H"
+
+                     Set objdadosTipoTerceiroETH = New clsGenTipoAcessoTerceiroETH
+                     
+                     objdadosTipoTerceiroETH.IDLogico = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.IDLogico))
+                     objdadosTipoTerceiroETH.DesignacaoAcesso = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.DesignacaoAcesso))
+                     objdadosTipoTerceiroETH.CVLAN = CLng(0) & Trim(objForm.UsrGenDadosAcessoTerceiroETH1.CVLAN)
+                     objdadosTipoTerceiroETH.SVLAN = CLng(0) & Trim(objForm.UsrGenDadosAcessoTerceiroETH1.SVLAN)
+                     objdadosTipoTerceiroETH.Porta_Switch = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.Porta_Switch))
+                     objdadosTipoTerceiroETH.PE_Switch = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.PE_Switch))
+                     objdadosTipoTerceiroETH.Modelo_EDD = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.Modelo_EDD))
+                     objdadosTipoTerceiroETH.Porta_EDD = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.Porta_EDD))
+                     objdadosTipoTerceiroETH.Fabricante_EDD = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.Fabricante_EDD))
+                     objdadosTipoTerceiroETH.Switch_Concentrador = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.Switch_Concentrador))
+                     objdadosTipoTerceiroETH.Porta_Switch_Concentrador = "" & TrataPlick(Trim(objForm.UsrGenDadosAcessoTerceiroETH1.Porta_Switch_Concentrador))
+
+                                          
+                     .objTipoAcesso = objdadosTipoTerceiroETH
+                     Set objdadosTipoTerceiroETH = Nothing
+         End Select
+
+    End With
+
+End Function
+
+Public Function CarregaAtributosEqtos(objDadosAcesso As clsGenAcesso) As Boolean
+    
+    Dim ObjEqpto               As clsGenEqptoComplementar
+    Dim cColecao               As New Collection
+    Dim FlagTemEqpto           As Boolean
+
+     FlagTemEqpto = False
+     
+     Set ObjEqpto = New clsGenEqptoComplementar
+     
+     'Carrega propriedades do Equipamento 1
+     If objForm.optLocalInstalacao_1(0).Value = True Then
+        ObjEqpto.LocalInstalacao = "E"
+
+     Else
+
+         If objForm.optLocalInstalacao_1(1).Value = True Then
+            ObjEqpto.LocalInstalacao = "C"
+
+         Else
+            ObjEqpto.LocalInstalacao = ""
+
+         End If
+
+     End If
+
+     If objForm.CboTipoEquipamento_1.ListIndex > 0 Then
+        ObjEqpto.TipoEquipamento = objForm.CboTipoEquipamento_1.ItemData(objForm.CboTipoEquipamento_1.ListIndex)
+
+     Else
+        ObjEqpto.TipoEquipamento = ""
+
+     End If
+
+     ObjEqpto.iD = Val(objForm.TxtIDEquipamento1.Text)
+     ObjEqpto.Fabricante = Trim(TrataPlick(objForm.TxtFabricanteEquipamento_1.Text))
+
+     cColecao.Add ObjEqpto
+     Set ObjEqpto = New clsGenEqptoComplementar
+
+     'Carrega propriedades do Equipamento 2
+     If objForm.optLocalInstalacao_2(0).Value = True Then
+        
+        ObjEqpto.LocalInstalacao = "E"
+
+     Else
+
+         If objForm.optLocalInstalacao_2(1).Value = True Then
+            ObjEqpto.LocalInstalacao = "C"
+
+         Else
+            ObjEqpto.LocalInstalacao = ""
+
+         End If
+
+     End If
+
+     If objForm.CboTipoEquipamento_2.ListIndex > 0 Then
+        ObjEqpto.TipoEquipamento = objForm.CboTipoEquipamento_2.ItemData(objForm.CboTipoEquipamento_2.ListIndex)
+
+     Else
+        ObjEqpto.TipoEquipamento = ""
+
+     End If
+
+     ObjEqpto.iD = Val(objForm.TxtIDEquipamento2.Text)
+     
+     ObjEqpto.Fabricante = TrataPlick(Trim(objForm.TxtFabricanteEquipamento_2.Text))
+
+     cColecao.Add ObjEqpto
+     Set ObjEqpto = New clsGenEqptoComplementar
+
+     'Carrega propriedades do Equipamento 3
+     If objForm.optLocalInstalacao_3(0).Value = True Then
+        ObjEqpto.LocalInstalacao = "E"
+
+     Else
+
+         If objForm.optLocalInstalacao_3(1).Value = True Then
+            ObjEqpto.LocalInstalacao = "C"
+
+         Else
+            ObjEqpto.LocalInstalacao = ""
+
+         End If
+
+     End If
+
+     If objForm.CboTipoEquipamento_3.ListIndex > 0 Then
+        ObjEqpto.TipoEquipamento = objForm.CboTipoEquipamento_3.ItemData(objForm.CboTipoEquipamento_3.ListIndex)
+
+     Else
+        ObjEqpto.TipoEquipamento = ""
+
+     End If
+
+     ObjEqpto.iD = Val(objForm.TxtIDEquipamento3.Text)
+     
+     ObjEqpto.Fabricante = TrataPlick(Trim(objForm.TxtFabricanteEquipamento_3.Text))
+
+     
+     cColecao.Add ObjEqpto
+     
+     objDadosAcesso.objColecaoEqpto = cColecao
+    
+     Set cColecao = Nothing
+
+End Function
+
+Public Sub SelecionaComboTexto(cbo As ComboBox, pRef As String)
+
+    Dim i As Integer
+    
+    cbo.ListIndex = -1
+    
+    If pRef = "" Then Exit Sub
+    
+    For i = 0 To cbo.ListCount
+    
+        If Trim(cbo.List(i)) = Trim(pRef) Then
+           
+           cbo.ListIndex = i
+           
+           Exit Sub
+        
+        End If
+    
+    Next i
+    
+End Sub
+
+Public Sub SelecionaComboTexto_DNI(cbo As ComboBox, pRef As String)
+
+    Dim i As Integer
+    
+    If pRef = "" Then Exit Sub
+    
+    For i = 0 To UBound(vVelocidadeDNI)
+    
+        If Trim(vVelocidadeDNI(i).CodigoAlpha) = Trim(pRef) Then
+           
+           cbo.ListIndex = i
+           
+           Exit Sub
+        
+        End If
+    
+    Next i
+    
+End Sub
+
+Public Function GravaDadosPropriedadeEmbratel(objDadosAcesso As clsGenAcesso) As Boolean
+
+    Dim bRetorno              As Boolean
+    Dim lContingenciaAcesso   As Long
+    Dim FlJaexiste            As Boolean
+    Dim objPropriedadeTerc    As clsGenPropriedadeTerceiros
+
+On Error GoTo ErrorHandler
+            
+    lContingenciaAcesso = objDadosAcesso.iD
+            
+    GravaDadosPropriedadeEmbratel = False
+    
+    objDadosAcesso.objPropriedadeEBT.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    FlJaexiste = objDadosAcesso.objPropriedadeEBT.FaseExistente(lContingenciaAcesso)
+    
+    If objMensagem.TipoMsg <> "" Then
+
+       GoTo ErrorHandler
+      
+    End If
+    
+    'Caso o Tipo de Acesso seja o mesmo, realiza somente uma Atualiza
+    'Caso contrario, exclui o tipo anterior e incluir o novo
+    
+'    If objDadosAcesso.objPropriedadeEBT.TipoAcesso <> TipoAcessoAnterior Then
+        
+        'Exclui o tipo de Acesso anterior
+'        bRetorno = ExcluiTipoAcessoEBT(TipoAcessoAnterior, lContingenciaAcesso, objmensagem)
+    
+'    End If
+    
+    If Not FlJaexiste Then  'Inclusao
+       
+       bRetorno = objDadosAcesso.objPropriedadeEBT.IncluirDados(lContingenciaAcesso, objMensagem)
+    
+       If (objMensagem.TipoMsg <> "") Then
+     
+          GoTo ErrorHandler
+           
+       End If
+       
+       'Caso o usuário tenha alterado a propriedade de Acesso para a mesma caracteristica
+       'de acesso, exclui os dados da propriedade anterior
+       
+       If PropriedadeAcessoAnterior <> "" And _
+          CaracteristicaAcessoAnterior = objDadosAcesso.CaracteristicaAcesso Then
+          
+          Set objPropriedadeTerc = New clsGenPropriedadeTerceiros
+        
+          'Exclui dados de Propriedade Terceiros
+          
+         bRetorno = ExcluiTipoAcessoTerceiros(TipoAcessoAnterior, lContingenciaAcesso, objMensagem)
+          
+         If objMensagem.TipoMsg <> "" Then
+       
+             GoTo ErrorHandler
+             
+         End If
+         
+         objPropriedadeTerc.InformaBanco frmgenMDI_SGAPlus.objBanco
+            
+          bRetorno = objPropriedadeTerc.ExcluirDados(lContingenciaAcesso, objMensagem)
+          
+          If objMensagem.TipoMsg <> "" Then
+       
+             GoTo ErrorHandler
+             
+         End If
+       
+         TipoAcessoAnterior = ""
+       
+       End If
+       
+    Else
+       
+       bRetorno = objDadosAcesso.objPropriedadeEBT.AtualizarDados(lContingenciaAcesso, objMensagem)
+    
+    End If
+    
+    If Not bRetorno Then
+    
+        GoTo ErrorHandler
+    
+    End If
+    
+    
+    'Grava dados de Tipo de Acesso
+'    If DataFinalizacao <> "" Then
+
+        If objForm.CboTipoAcessoEmbratel.ListIndex > -1 Then
+    
+            objDadosAcesso.objPropriedadeEBT.objTipoAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+               
+            If Not objDadosAcesso.objPropriedadeEBT.objTipoAcesso.VerificaExistencia(lContingenciaAcesso, objMensagem) Then
+                        
+               bRetorno = objDadosAcesso.objPropriedadeEBT.objTipoAcesso.IncluirDados( _
+                                                                lContingenciaAcesso, objMensagem)
+            Else
+             
+               bRetorno = objDadosAcesso.objPropriedadeEBT.objTipoAcesso.AtualizarDados( _
+                                                                lContingenciaAcesso, objMensagem)
+             
+            End If
+            
+            If objMensagem.TipoMsg <> "" Then
+            
+                GoTo ErrorHandler
+            
+            End If
+            
+        End If
+
+'    End If
+
+    GravaDadosPropriedadeEmbratel = True
+
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+    
+ErrorHandler:
+       
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "GravarDadosPropriedadeEmbratel " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    
+    End If
+       
+    GoTo Finalizar
+    
+End Function
+
+Private Function GravaDadosPropriedadeTerceiros(objDadosAcesso As clsGenAcesso) As Boolean
+
+    Dim bRetorno              As Boolean
+    Dim lContingenciaAcesso   As Long
+    Dim FlJaexiste            As Boolean
+    Dim objPropriedadeEBT     As clsGenPropriedadeEmbratel
+
+On Error GoTo ErrorHandler
+            
+    lContingenciaAcesso = objDadosAcesso.iD
+            
+    GravaDadosPropriedadeTerceiros = False
+    
+    objDadosAcesso.objPropriedadeTerceiros.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    'Verifica se já existe dados para a fase
+    FlJaexiste = objDadosAcesso.objPropriedadeTerceiros.FaseExistente(lContingenciaAcesso, objMensagem)
+    
+    If objMensagem.TipoMsg <> "" Then
+    
+        GoTo ErrorHandler
+    
+    End If
+    
+'    If objDadosAcesso.objPropriedadeTerceiros.TipoAcesso <> TipoAcessoAnterior Then
+        
+       ' Exclui o tipo de Acesso anterior
+'       bRetorno = ExcluiTipoAcessoTerceiros(TipoAcessoAnterior, lContingenciaAcesso, _
+                                              objmensagem)
+     
+'    End If
+    
+    If Not FlJaexiste Then  'Inclusao
+       
+       bRetorno = objDadosAcesso.objPropriedadeTerceiros.IncluirDados(lContingenciaAcesso, objMensagem)
+       
+       If objMensagem.TipoMsg <> "" Then
+     
+          GoTo ErrorHandler
+           
+       End If
+    
+       'Caso o usuário tenha alterado a propriedade de Acesso para a mesma caracteristica
+       'de acesso, exclui os dados da propriedade anterior
+       
+       If PropriedadeAcessoAnterior <> "" And _
+          CaracteristicaAcessoAnterior = objDadosAcesso.CaracteristicaAcesso Then
+          
+          Set objPropriedadeEBT = New clsGenPropriedadeEmbratel
+        
+          'Exclui dados de Propriedade EBT
+          
+         bRetorno = ExcluiTipoAcessoEBT(TipoAcessoAnterior, lContingenciaAcesso, objMensagem)
+          
+         If objMensagem.TipoMsg <> "" Then
+       
+             GoTo ErrorHandler
+             
+         End If
+         
+         objPropriedadeEBT.InformaBanco frmgenMDI_SGAPlus.objBanco
+            
+          bRetorno = objPropriedadeEBT.ExcluirDados(lContingenciaAcesso, objMensagem)
+          
+          If objMensagem.TipoMsg <> "" Then
+       
+             GoTo ErrorHandler
+             
+         End If
+       
+         TipoAcessoAnterior = ""
+       
+       End If
+    
+    Else
+       
+       bRetorno = objDadosAcesso.objPropriedadeTerceiros.AtualizarDados(lContingenciaAcesso, objMensagem)
+    
+    End If
+    
+    If objMensagem.TipoMsg <> "" Then
+    
+        GoTo ErrorHandler
+    
+    End If
+    
+    'Leonardo - Inicio
+    'Removida a validacao para o usuario salvar os campos parcialmente.
+    'If DataFinalizacao <> "" Then
+    'Leonardo - Fim
+    
+    
+    '=================================================================
+    'CALLBAT - 13/09/2013 - Radio IP
+    'SO- TVASS-47468LFW
+    '=================================================================
+    objDadosAcesso.objPropriedadeTerceiros.objTipoAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+    '=================================================================
+       
+    'Caso o Tipo de Acesso seja o mesmo, realiza somente uma Atualizacao
+    'Caso contrario, exclui o tipo anterior e incluir o novo
+    
+    '=================================================================
+    'CALLBAT - 05/07/2012 - BSoD Net Light II FO EtherNET
+    '=================================================================
+    If objDadosAcesso.objPropriedadeTerceiros.TipoAcesso <> "E" Then
+    
+            If Not objDadosAcesso.objPropriedadeTerceiros.objTipoAcesso.VerificaExistencia( _
+                                                           lContingenciaAcesso, objMensagem) Then
+            
+                bRetorno = objDadosAcesso.objPropriedadeTerceiros.objTipoAcesso.IncluirDados( _
+                                                               lContingenciaAcesso, objMensagem)
+            
+            Else
+             
+                bRetorno = objDadosAcesso.objPropriedadeTerceiros.objTipoAcesso.AtualizarDados( _
+                                                               lContingenciaAcesso, objMensagem)
+            
+            End If
+            
+            If objMensagem.TipoMsg <> "" Then
+            
+                GoTo ErrorHandler
+            
+            End If
+       
+    End If
+    '=================================================================
+    '=================================================================
+       
+
+
+    'End If
+
+    GravaDadosPropriedadeTerceiros = True
+
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+    
+ErrorHandler:
+       
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "GravaDadosPropriedadeTerceiros " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+       
+    GoTo Finalizar
+    
+End Function
+
+Public Function RecuperaDadosAcessoPorID(plId As Long, plFlagCarregaColecao As Boolean) As Boolean
+        
+    Dim bRetorno As Boolean
+    Dim lPosColecao As Byte
+    
+    Dim objDadosPropriedadeEBT  As clsGenPropriedadeEmbratel
+    Dim objDadosPropriedadeTerc As clsGenPropriedadeTerceiros
+    Dim lContingenciaAcesso_ID  As Long
+    Dim sCaracteristicaAcesso   As String
+    
+    Dim objDadosTipoRadio       As clsGenTipoAcessoRadio
+    Dim objDadosTipoFibra       As clsGenTipoAcessoFibra
+    Dim objdadosTipoADE         As clsGenTipoAcessoADE
+    Dim objDadosTipoCabo        As clsGenTipoAcessoCabo
+    Dim objdadosTipoBSod        As ClsGenTipoAcessoBSOD
+    Dim objdadosTipoGPON        As clsGenTipoAcessoGPON
+    
+    '=================================================================
+    'CALLBAT - 05/07/2012 - BSoD Net Light II FO EtherNET
+    '=================================================================
+    Dim objdadosTipoFOEthernet  As clsGenTipoAcessoFOEtherNET
+    '=================================================================
+    '=================================================================
+    
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - FO EDD
+    'SO-TVASS-56728SLA
+    '=================================================================
+    Dim objDadosTipoFO_EDD  As clsGenTipoAcessoFO_EDD
+    '=================================================================
+    
+    '--=================================================================
+    '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+    '--=================================================================
+    Dim objDadosTipoADE_DSLAM  As clsGenTipoAcessoADE_DSLAM
+    '=================================================================
+    
+    On Error GoTo ErrorHandler
+
+    RecuperaDadosAcessoPorID = False
+    
+    Set objDadosAcesso = New clsGenAcesso
+    
+    objDadosAcesso.InformaMensagem objMensagem
+    objDadosAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+
+'    'Não resgata os dados da OTS anterior quando se altera o
+'    'endereço de instalação. IP VPN
+'    If (Sigla_Acao <> "ATV" And bResgataAnterior) Then
+'
+'        If TipoOperacao = "I" Then
+'
+'           pServico_ID = Servico_ID_Anterior
+'
+'           'GbCodigoFaseAcesso - ID da fase na tabela Tipo_Fase
+'           pFase_ID = objdadosServico.ObtemIDFase(Servico_ID_Anterior, GbCodigoFaseAcesso)
+'
+'           If objmensagem.TipoMsg <> "" Then
+'
+'              GoTo ErrorHandler
+'
+'           End If
+'
+'        End If
+'
+'    End If
+    
+    sCaracteristicaAcesso = pCaracteristicaAcesso
+    
+    If Not objDadosAcesso.RecuperarDadosPorID(plId, objMensagem) Then
+    
+       If objMensagem.TipoMsg <> "" Then
+           
+          objMensagem.ExibeMensagem
+          
+          GoTo Finalizar
+        
+       End If
+       
+    Else
+        
+        lContingenciaAcesso_ID = objDadosAcesso.iD
+        CaracteristicaAcessoAnterior = objDadosAcesso.CaracteristicaAcesso
+        PropriedadeAcessoAnterior = objDadosAcesso.PropridedadeAcesso
+        SegurancaAcessoAnterior = objDadosAcesso.SegurancaAcesso
+        ParalelismoAnterior = objDadosAcesso.Paralelismo
+        
+        '=================================================================
+        'CALLBAT - 26/06/2013 - Interface junto ao CFM
+        'SO-ENGNQ-83669III
+        '=================================================================
+        UtilizaTroncoTX = objDadosAcesso.UtilizaTroncoTX
+        '=================================================================
+        '=================================================================
+        
+        'Obtem os dados de Equipamento Complementar
+        bRetorno = objDadosAcesso.RecuperarDadosEquipamentos(lContingenciaAcesso_ID, objMensagem)
+          
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+        
+        'Caso o Acesso já esteja Cadastrado, Recuperar os dados Conforme a Propriedade do
+        'Acesso
+        pFlagInclusao = False
+        
+        If objDadosAcesso.PropridedadeAcesso = "E" Then   'Propriedade Acesso = Embratel
+        
+           Set objDadosPropriedadeEBT = New clsGenPropriedadeEmbratel
+           
+           objDadosPropriedadeEBT.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+           bRetorno = objDadosPropriedadeEBT.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+            
+           If objMensagem.TipoMsg <> "" Then
+              
+              GoTo ErrorHandler
+           
+           End If
+           
+           If objDadosPropriedadeEBT.EstacaoEntregaAcessoConfiguracao = "" Then
+           
+                objDadosPropriedadeEBT.EstacaoEntregaAcessoConfiguracao = objDadosAcesso.EstacaoConfiguracao
+                
+           End If
+           
+           
+          'Carrega a propriedade Objeto Propriedade Embratel
+           If objDadosPropriedadeEBT.TipoAcesso = "R" Then
+               
+              Set objDadosTipoRadio = New clsGenTipoAcessoRadio
+              
+              objDadosTipoRadio.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoRadio.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoRadio
+
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "F" Then  'Fibra Otica
+              
+              Set objDadosTipoFibra = New clsGenTipoAcessoFibra
+              
+              objDadosTipoFibra.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoFibra.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoFibra
+           
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "A" Then  'ADE
+              
+              Set objdadosTipoADE = New clsGenTipoAcessoADE
+              
+              objdadosTipoADE.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoADE.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objdadosTipoADE
+           
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "C" Then  'Cabo Interno
+              
+              Set objDadosTipoCabo = New clsGenTipoAcessoCabo
+              
+              objDadosTipoCabo.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoCabo.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoCabo
+           
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "G" Then  'GPON
+              
+              Set objdadosTipoGPON = New clsGenTipoAcessoGPON
+              
+              objdadosTipoGPON.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoGPON.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objdadosTipoGPON
+              
+           '=================================================================
+           'CALLBAT - 26/06/2013 - FO EDD
+           'SO-TVASS-56728SLA
+           '=================================================================
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "D" Then  'FO_EDD
+              
+              Set objDadosTipoFO_EDD = New clsGenTipoAcessoFO_EDD
+              
+              objDadosTipoFO_EDD.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoFO_EDD.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoFO_EDD
+           '=================================================================
+           
+           '--=================================================================
+           '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+           '--=================================================================
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "M" Then  'ADE_DSLAM
+              
+              Set objDadosTipoADE_DSLAM = New clsGenTipoAcessoADE_DSLAM
+              
+              objDadosTipoADE_DSLAM.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoADE_DSLAM.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoADE_DSLAM
+              
+           '=================================================================
+           '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+            ElseIf objDadosPropriedadeEBT.TipoAcesso = "W" Then  'WIRELESS
+              
+              Set objDadosTipoWIRELESS = New clsGenTipoAcessoWIRELESS
+              
+              objDadosTipoWIRELESS.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoWIRELESS.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoWIRELESS
+           '=================================================================
+           End If
+           
+           
+           TipoAcessoAnterior = objDadosPropriedadeEBT.TipoAcesso
+           
+           objDadosAcesso.objPropriedadeEBT = objDadosPropriedadeEBT
+           
+           Set objDadosPropriedadeEBT = Nothing
+           
+           
+           
+           
+           
+        Else
+           
+           'Propriedade Acesso = Terceiros
+           Set objDadosPropriedadeTerc = New clsGenPropriedadeTerceiros
+           
+           objDadosPropriedadeTerc.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+           bRetorno = objDadosPropriedadeTerc.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+            
+           If objMensagem.TipoMsg <> "" Then
+              
+              GoTo ErrorHandler
+           
+           End If
+           
+           If objDadosPropriedadeTerc.EstacaoEntregaAcessoConfiguracao = "" Then
+           
+                objDadosPropriedadeTerc.EstacaoEntregaAcessoConfiguracao = objDadosAcesso.EstacaoConfiguracao
+                
+           End If
+           
+           TipoAcessoAnterior = objDadosPropriedadeTerc.TipoAcesso
+           
+          'Carrega a propriedade Objeto Propriedade Terceiros
+           If objDadosPropriedadeTerc.TipoAcesso = "<" Then   'Tipo de Acesso Menor 2M
+               
+              Set objdadosTipoAcessoMenor = New clsGenTipoAcessoMenor2M
+              
+              objdadosTipoAcessoMenor.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoAcessoMenor.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoAcessoMenor
+
+           ElseIf objDadosPropriedadeTerc.TipoAcesso = ">" Then  'Tipo de Acesso Maior 2M
+              
+              Set objdadosTipoAcessoMaior = New clsGenTipoAcessoMaior2M
+              
+              objdadosTipoAcessoMaior.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoAcessoMaior.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoAcessoMaior
+           
+           ElseIf objDadosPropriedadeTerc.TipoAcesso = "R" Then  'Tipo de Acesso Rede Determ
+              
+              Set objdadosTipoAcessoRede = New clsGenTipoAcessoRedeDeterm
+              
+              objdadosTipoAcessoRede.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoAcessoRede.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoAcessoRede
+           
+           '=================================================================
+           'CALLBAT - 18/02/2014 - BSoD Unificado
+           'SO-ENGNQ-55327NEG
+           '=================================================================
+           'ElseIf objDadosPropriedadeTerc.TipoAcesso = "V" Or objDadosPropriedadeTerc.TipoAcesso = "N" Then  'Tipo de Acesso BSOD VIA/NET
+           ElseIf objDadosPropriedadeTerc.TipoAcesso = "V" Or objDadosPropriedadeTerc.TipoAcesso = "N" Or objDadosPropriedadeTerc.TipoAcesso = "U" Then   'Tipo de Acesso BSOD VIA/NET/Unificado
+           '=================================================================
+           '=================================================================
+           
+              Set objdadosTipoBSod = New ClsGenTipoAcessoBSOD
+              
+              objdadosTipoBSod.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoBSod.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoBSod
+           
+            '=================================================================
+            'CALLBAT - 05/07/2012 - BSoD Net Light II FO EtherNET
+            '=================================================================
+           ElseIf objDadosPropriedadeTerc.TipoAcesso = "E" Then  'Tipo de Acesso FO EtherNET
+           
+           
+'               If Sigla_Acao <> "DES" Then
+           
+                    Set objdadosTipoFOEthernet = New clsGenTipoAcessoFOEtherNET
+                    
+                    objdadosTipoFOEthernet.InformaBanco frmgenMDI_SGAPlus.objBanco
+                    
+                    bRetorno = objdadosTipoFOEthernet.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+                    
+                    If objMensagem.TipoMsg <> "" Then
+                       GoTo ErrorHandler
+                    End If
+                    
+                    objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoFOEthernet
+                    
+'                End If
+
+            '=================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '=================================================================
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = "D" Then  'Tipo de Acesso FO EtherNET
+            
+                    Set objDadosTipoFO_EDD = New clsGenTipoAcessoFO_EDD
+                    
+                    objDadosTipoFO_EDD.InformaBanco frmgenMDI_SGAPlus.objBanco
+                    
+                    bRetorno = objDadosTipoFO_EDD.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+                    
+                    If objMensagem.TipoMsg <> "" Then
+                       GoTo ErrorHandler
+                    End If
+                    
+                    objDadosPropriedadeTerc.objTipoAcesso = objDadosTipoFO_EDD
+            
+            '=================================================================
+            '=================================================================
+            
+           '=================================================================
+           'CALLBAT - 13/09/2013 - Radio IP
+           'SO- TVASS-47468LFW
+           '=================================================================
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = "I" Then   'Tipo de Acesso FO EDD
+            
+              Set objdadosTipoRadioIP = New clsGenTipoAcessoRadioIP
+              
+              objdadosTipoRadioIP.InformaBanco frmgenMDI_SGAPlus.objBanco
+              objdadosTipoRadioIP.InformaMensagem objMensagem
+           
+              bRetorno = objdadosTipoRadioIP.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+             
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoRadioIP
+
+            '=================================================================
+            '=================================================================
+            
+            'AGRC - 21/08/2017 - SO-TVASS-32377EYC
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = "H" Then   'Tipo de Acesso Terceiro ETH
+              Set objdadosTipoTerceiroETH = New clsGenTipoAcessoTerceiroETH
+              
+              objdadosTipoTerceiroETH.InformaBanco frmgenMDI_SGAPlus.objBanco
+              objdadosTipoTerceiroETH.InformaMensagem objMensagem
+           
+              bRetorno = objdadosTipoTerceiroETH.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+             
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoTerceiroETH
+
+            End If
+        
+           TipoAcessoAnterior = objDadosPropriedadeTerc.TipoAcesso
+           
+           objDadosAcesso.objPropriedadeTerceiros = objDadosPropriedadeTerc
+           
+           Set objDadosPropriedadeTerc = Nothing
+        
+        End If
+    
+    End If
+    
+    If plFlagCarregaColecao Then
+        'verifica se o acesso já existe na coleção de acessos, caso não exista, executa procedure abaixo, caso exista, executa populacampostela
+        lPosColecao = ObtemPosicaoColecaoAcesso(plId)
+        bRetorno = False
+        
+        If lPosColecao = 0 Then
+           
+            cColecaoAcessos.Add objDadosAcesso
+        Else
+            cColecaoAcessos(lPosColecao) = objDadosAcesso
+            
+        End If
+    
+    End If
+    
+    RecuperaDadosAcessoPorID = True
+    
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+    
+ErrorHandler:
+       
+       If objMensagem.TipoMsg = "" Then
+          
+          objMensagem.TipoMsg = "E"
+          objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                             vbCrLf & "Houve um erro de execução no método: " & vbCrLf & vbCrLf & "RecuperadadosAcessoPorID do Objeto Controle " & _
+                             "clsGenOC_TratarAcessoEmbratel"
+       End If
+       
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+
+End Function
+
+Public Function RecuperaDadosAcesso(pCaracteristicaAcesso As String, pServico_ID As Long, pFase_ID As Long, Optional pFlagInclusao As Boolean) As Boolean
+        
+    Dim bRetorno As Boolean
+    
+    Dim objDadosPropriedadeEBT  As clsGenPropriedadeEmbratel
+    Dim objDadosPropriedadeTerc As clsGenPropriedadeTerceiros
+    Dim lContingenciaAcesso_ID  As Long
+    Dim sCaracteristicaAcesso   As String
+    
+    Dim objDadosTipoRadio       As clsGenTipoAcessoRadio
+    Dim objDadosTipoFibra       As clsGenTipoAcessoFibra
+    Dim objdadosTipoADE         As clsGenTipoAcessoADE
+    Dim objDadosTipoCabo        As clsGenTipoAcessoCabo
+    Dim objdadosTipoGPON        As clsGenTipoAcessoGPON
+    
+    Dim objdadosTipoFOEthernet As clsGenTipoAcessoFOEtherNET
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - FO EDD
+    'SO-TVASS-56728SLA
+    '=================================================================
+    Dim objDadosTipoFO_EDD As clsGenTipoAcessoFO_EDD
+    '=================================================================
+    
+    '--=================================================================
+    '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+    '--=================================================================
+    Dim objDadosTipoADE_DSLAM  As clsGenTipoAcessoADE_DSLAM
+    '=================================================================
+    
+    On Error GoTo ErrorHandler
+
+    RecuperaDadosAcesso = False
+    
+    objDadosAcesso.InformaMensagem objMensagem
+    objDadosAcesso.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    'Não resgata os dados da OTS anterior quando se altera o
+    'endereço de instalação. IP VPN
+    If (Sigla_Acao <> "ATV" And bResgataAnterior) Then
+    
+        If TipoOperacao = "I" Then
+            
+            pServico_ID = objdadosServico.ObtemIDAnteriorPorFaseReal(Servico_ID, 6)
+            'pServico_ID = Servico_ID_Anterior
+            
+            'GbCodigoFaseAcesso - ID da fase na tabela Tipo_Fase
+           'Inicio - SPED - PTS 831 - 17/09/2009 - Joao Carlos
+           'Executar a RecuperaFaseRecursivo, pois em caso de DES/CAN/ALT apos uma ALT a fase 6 nao sera encontrada
+           'pFase_ID = objdadosServico.ObtemIDFase(Servico_ID_Anterior, GbCodigoFaseAcesso)
+           pFase_ID = objdadosServico.ObtemIDFase_Recursivo(pServico_ID, GbCodigoFaseAcesso)
+           
+           If objMensagem.TipoMsg <> "" Then
+              GoTo ErrorHandler
+           End If
+           
+           'pServico_ID = objDadosServico.ObtemIDServicoAnterior_Fase(pFase_ID)
+           'Fim - SPED - PTS 831 - 17/09/2009 - Joao Carlos
+    
+           If objMensagem.TipoMsg <> "" Then
+                  
+              GoTo ErrorHandler
+        
+           End If
+            
+        End If
+        
+    End If
+    
+    sCaracteristicaAcesso = pCaracteristicaAcesso
+    
+    If Not objDadosAcesso.RecuperarDados(sCaracteristicaAcesso, pServico_ID, pFase_ID, objMensagem) Then
+    
+       pFlagInclusao = True
+       
+       If objMensagem.TipoMsg <> "" Then
+           
+          objMensagem.ExibeMensagem
+          
+          GoTo Finalizar
+        
+       End If
+       
+    Else
+        
+        lContingenciaAcesso_ID = objDadosAcesso.iD
+        CaracteristicaAcessoAnterior = objDadosAcesso.CaracteristicaAcesso
+        PropriedadeAcessoAnterior = objDadosAcesso.PropridedadeAcesso
+        SegurancaAcessoAnterior = objDadosAcesso.SegurancaAcesso
+        IDLogico = objDadosAcesso.IDLogico
+        ParalelismoAnterior = objDadosAcesso.Paralelismo
+        
+        'Obtem os dados de Equipamento Complementar
+        bRetorno = objDadosAcesso.RecuperarDadosEquipamentos(lContingenciaAcesso_ID, objMensagem)
+          
+        If objMensagem.TipoMsg <> "" Then
+            
+           GoTo ErrorHandler
+         
+        End If
+        
+        'Caso o Acesso já esteja Cadastrado, Recuperar os dados Conforme a Propriedade do
+        'Acesso
+        pFlagInclusao = False
+        
+        If objDadosAcesso.PropridedadeAcesso = "E" Then   'Propriedade Acesso = Embratel
+        
+           Set objDadosPropriedadeEBT = New clsGenPropriedadeEmbratel
+           
+           objDadosPropriedadeEBT.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+           bRetorno = objDadosPropriedadeEBT.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+            
+           If objMensagem.TipoMsg <> "" Then
+              
+              GoTo ErrorHandler
+           
+           End If
+           
+           'Carrega a propriedade Objeto Propriedade Embratel
+           If objDadosPropriedadeEBT.TipoAcesso = "R" Then
+               
+              Set objDadosTipoRadio = New clsGenTipoAcessoRadio
+              
+              objDadosTipoRadio.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoRadio.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoRadio
+
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "F" Then  'Fibra Otica
+              
+              Set objDadosTipoFibra = New clsGenTipoAcessoFibra
+              
+              objDadosTipoFibra.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoFibra.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoFibra
+           
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "A" Then  'ADE
+              
+              Set objdadosTipoADE = New clsGenTipoAcessoADE
+              
+              objdadosTipoADE.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoADE.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objdadosTipoADE
+           
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "C" Then  'Cabo Interno
+              
+              Set objDadosTipoCabo = New clsGenTipoAcessoCabo
+              
+              objDadosTipoCabo.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoCabo.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoCabo
+           
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "G" Then  'GPON
+              
+              Set objdadosTipoGPON = New clsGenTipoAcessoGPON
+              
+              objdadosTipoGPON.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoGPON.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objdadosTipoGPON
+              
+              
+           '=================================================================
+           'CALLBAT - 26/06/2013 - FO EDD
+           'SO-TVASS-56728SLA
+           '=================================================================
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "D" Then  'GPON
+              
+              Set objDadosTipoFO_EDD = New clsGenTipoAcessoFO_EDD
+              
+              objDadosTipoFO_EDD.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoFO_EDD.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoFO_EDD
+           
+           '=================================================================
+           '=================================================================
+           
+           '--=================================================================
+           '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+           '--=================================================================
+           ElseIf objDadosPropriedadeEBT.TipoAcesso = "M" Then  'ADE DSLAM
+              
+              Set objDadosTipoADE_DSLAM = New clsGenTipoAcessoADE_DSLAM
+              
+              objDadosTipoADE_DSLAM.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoADE_DSLAM.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoADE_DSLAM
+           
+           '=================================================================
+           '=================================================================
+           '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+            ElseIf objDadosPropriedadeEBT.TipoAcesso = "W" Then  'WIRELESS
+              
+              Set objDadosTipoWIRELESS = New clsGenTipoAcessoWIRELESS
+              
+              objDadosTipoWIRELESS.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objDadosTipoWIRELESS.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeEBT.objTipoAcesso = objDadosTipoWIRELESS
+           '=================================================================
+           
+           End If
+           
+           TipoAcessoAnterior = objDadosPropriedadeEBT.TipoAcesso
+           
+           objDadosAcesso.objPropriedadeEBT = objDadosPropriedadeEBT
+           
+           Set objDadosPropriedadeEBT = Nothing
+        
+        Else
+           
+           'Propriedade Acesso = Terceiros
+           Set objDadosPropriedadeTerc = New clsGenPropriedadeTerceiros
+           
+           objDadosPropriedadeTerc.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+           bRetorno = objDadosPropriedadeTerc.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+            
+           If objMensagem.TipoMsg <> "" Then
+              
+              GoTo ErrorHandler
+           
+           End If
+           
+           TipoAcessoAnterior = objDadosPropriedadeTerc.TipoAcesso
+           
+          'Carrega a propriedade Objeto Propriedade Terceiros
+            If objDadosPropriedadeTerc.TipoAcesso = "<" Then   'Tipo de Acesso Menor 2M
+               
+              Set objdadosTipoAcessoMenor = New clsGenTipoAcessoMenor2M
+              
+              objdadosTipoAcessoMenor.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoAcessoMenor.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoAcessoMenor
+
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = ">" Then  'Tipo de Acesso Maior 2M
+              
+              Set objdadosTipoAcessoMaior = New clsGenTipoAcessoMaior2M
+              
+              objdadosTipoAcessoMaior.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoAcessoMaior.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoAcessoMaior
+           
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = "R" Then  'Tipo de Acesso Rede Determ
+              
+              Set objdadosTipoAcessoRede = New clsGenTipoAcessoRedeDeterm
+              
+              objdadosTipoAcessoRede.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoAcessoRede.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoAcessoRede
+           
+           '=================================================================
+            'CALLBAT - 21/05/2012 - BSoD Net Light
+            '=================================================================
+            'ElseIf objDadosPropriedadeTerc.TipoAcesso = "V" Or objDadosPropriedadeTerc.TipoAcesso = "N" Then  'Tipo de Acesso BSOD VIA/NET
+            '=================================================================
+            'CALLBAT - 18/02/2014 - BSoD Unificado
+            'SO-ENGNQ-55327NEG
+            '=================================================================
+            'ElseIf objDadosPropriedadeTerc.TipoAcesso = "V" Or objDadosPropriedadeTerc.TipoAcesso = "N" Or objDadosPropriedadeTerc.TipoAcesso = "L" Then   'Tipo de Acesso BSOD VIA/NET ou BSoD Light
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = "V" Or objDadosPropriedadeTerc.TipoAcesso = "N" Or objDadosPropriedadeTerc.TipoAcesso = "U" Or objDadosPropriedadeTerc.TipoAcesso = "L" Then   'Tipo de Acesso BSOD VIA/NET/Unificado ou BSoD Light
+           '=================================================================
+           '=================================================================
+              
+              Set objdadosTipoBSod = New ClsGenTipoAcessoBSOD
+              
+              objdadosTipoBSod.InformaBanco frmgenMDI_SGAPlus.objBanco
+           
+              bRetorno = objdadosTipoBSod.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+              
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoBSod
+              
+              
+            '=================================================================
+            'CALLBAT - 05/07/2012 - BSoD FO Ethernet
+            '=================================================================
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = "E" Then   'Tipo de Acesso FO EtherNet
+            
+              Set objdadosTipoFOEthernet = New clsGenTipoAcessoFOEtherNET
+              
+              objdadosTipoFOEthernet.InformaBanco frmgenMDI_SGAPlus.objBanco
+              objdadosTipoFOEthernet.InformaMensagem objMensagem
+           
+              bRetorno = objdadosTipoFOEthernet.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+             
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoFOEthernet
+              
+            '=================================================================
+            '=================================================================
+            
+            '=================================================================
+            'CALLBAT - 26/06/2013 - FO EDD
+            'SO-TVASS-56728SLA
+            '=================================================================
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = "D" Then   'Tipo de Acesso FO EDD
+            
+              Set objDadosTipoFO_EDD = New clsGenTipoAcessoFO_EDD
+              
+              objDadosTipoFO_EDD.InformaBanco frmgenMDI_SGAPlus.objBanco
+              objDadosTipoFO_EDD.InformaMensagem objMensagem
+           
+              bRetorno = objDadosTipoFO_EDD.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+             
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objDadosTipoFO_EDD
+            '=================================================================
+            '=================================================================
+            
+           '=================================================================
+           'CALLBAT - 13/09/2013 - Radio IP
+           'SO- TVASS-47468LFW
+           '=================================================================
+            ElseIf objDadosPropriedadeTerc.TipoAcesso = "I" Then   'Tipo de Acesso FO EDD
+            
+              Set objdadosTipoRadioIP = New clsGenTipoAcessoRadioIP
+              
+              objdadosTipoRadioIP.InformaBanco frmgenMDI_SGAPlus.objBanco
+              objdadosTipoRadioIP.InformaMensagem objMensagem
+           
+              bRetorno = objdadosTipoRadioIP.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+             
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoRadioIP
+
+            '=================================================================
+            '=================================================================
+           
+           'AGRC - 21/08/2017 - SO-TVASS-32377EYC - 2
+           ElseIf objDadosPropriedadeTerc.TipoAcesso = "H" Then   'Tipo de Acesso Terceiro ETH
+              Set objdadosTipoTerceiroETH = New clsGenTipoAcessoTerceiroETH
+              
+              objdadosTipoTerceiroETH.InformaBanco frmgenMDI_SGAPlus.objBanco
+              objdadosTipoTerceiroETH.InformaMensagem objMensagem
+           
+              bRetorno = objdadosTipoTerceiroETH.RecuperarDados(lContingenciaAcesso_ID, objMensagem)
+             
+              If objMensagem.TipoMsg <> "" Then
+                 
+                 GoTo ErrorHandler
+                 
+              End If
+              
+              objDadosPropriedadeTerc.objTipoAcesso = objdadosTipoTerceiroETH
+           End If
+        
+           TipoAcessoAnterior = objDadosPropriedadeTerc.TipoAcesso
+           
+           objDadosAcesso.objPropriedadeTerceiros = objDadosPropriedadeTerc
+           
+           Set objDadosPropriedadeTerc = Nothing
+        
+        End If
+    
+    End If
+
+    RecuperaDadosAcesso = True
+    
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+    
+ErrorHandler:
+       
+       If objMensagem.TipoMsg = "" Then
+          
+          objMensagem.TipoMsg = "E"
+          objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                             vbCrLf & "Houve um erro de execução no método: " & vbCrLf & vbCrLf & "RecuperadadosAcesso do Objeto Controle " & _
+                             "clsGenOC_TratarAcessoEmbratel"
+       End If
+       
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+
+End Function
+
+Public Function PopulaCamposTela(objDadosAcesso As clsGenAcesso) As Boolean
+
+    Dim objDadosPlataforma As clsBLDPlataforma
+    
+    FlagRecuperando = True
+    
+    'Popula os campos da pasta DADOS GERAIS
+'    objForm.ssTabAcesso.Tab = 1
+    
+    If objForm.CboTipoAcessoEmbratel.Visible = False Then
+        objForm.CboTipoAcessoEmbratel.Visible = True
+    End If
+    
+    If objForm.CboTipoAcessoTerceiro.Visible = False Then
+        objForm.CboTipoAcessoTerceiro.Visible = True
+    End If
+    
+    If objDadosAcesso.eMailUsuario <> "" Then
+       objForm.TxtEMailGic.Text = objDadosAcesso.eMailUsuario
+    End If
+    
+    If objDadosAcesso.RIT <> "" Then
+       objForm.TxtRIT.Text = objDadosAcesso.RIT
+    End If
+    
+    objForm.SpdDataPedidoAcesso.Row = 1
+    objForm.SpdDataPedidoAcesso.Col = 1
+    objForm.SpdDataPedidoAcesso.Text = objDadosAcesso.DataPedidoAcesso
+    objForm.LblIdSolicitcaoCLA(0).Caption = objDadosAcesso.IdSolicitacaoCLA
+    objForm.LblIdSolicitcaoCLA(1).Caption = objDadosAcesso.DataEntregaCLA
+    objForm.LblIdSolicitcaoCLA(2).Caption = objDadosAcesso.IdFisico
+    objForm.LblIdSolicitcaoCLA(3).Caption = objDadosAcesso.IDLogico
+    
+    objForm.TxtEstacaoCliente.Text = objDadosAcesso.estacaoCliente
+    objForm.TxtEstacaoConfiguracao.Text = objDadosAcesso.EstacaoConfiguracao
+    
+    If objDadosAcesso.PadraoInterfaceEBT_ID > 0 Then
+       
+       Call SelecionaCombo(objForm.CboPadraoInterfaceEBT, _
+                           CLng(objDadosAcesso.PadraoInterfaceEBT_ID))
+    
+    End If
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objForm.txtTroncoOTS.Text = objDadosAcesso.TroncoOTSTx
+    'If objDadosAcesso.TroncoOTSTx <> "" Then
+        'If objDadosAcesso.UtilizaTroncoTX = "S" Then
+        '    objForm.UsrGenDadosAcessoTroncoTX.UsaTX = True
+        'Else
+        '    objForm.UsrGenDadosAcessoTroncoTX.UsaTX = False
+        'End If
+        
+    objForm.UsrGenDadosAcessoTroncoTX.UsaTX = objDadosAcesso.UtilizaTroncoTX
+        
+    
+    objForm.UsrGenDadosAcessoTroncoTX.Circuito_ID = lCircuito_ID
+    
+    objForm.UsrGenDadosAcessoTroncoTX.TroncoTX = objDadosAcesso.TroncoOTSTx
+    '=================================================================
+    '=================================================================
+    
+    If Familia_Produto = "I" Then
+         
+         If objDadosAcesso.Ds_Veloc_CLA = "" And objDadosAcesso.Cd_Veloc <> "" Then
+         
+             'Obtem a velocidade a partir do código de velocidade
+        
+             'Call SelecionaCombo(objForm.CboVelocidadeAcesso, CLng(objDadosAcesso.Cd_Veloc))
+                 
+             Set objDadosVelocidade = New clsGenVelocidade
+             
+             objDadosVelocidade.InformaMensagem objMensagem
+             objDadosVelocidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+                         
+             '#BLD
+             sTabela = ""
+        
+             If (lGrupo_ID = GbIDGrupoBLD Or Produto_ID = GbIDProdutoVOIP) Then
+    
+                sTabela = "TAB_VELOCIDADE"
+        
+             End If
+        
+             bRetorno = objDadosVelocidade.RecuperarDados(objDadosAcesso.Cd_Veloc, sTabela)
+         
+             If Not bRetorno Then
+                
+                If sTabela <> "" Then
+                   
+                   sTabela = ""
+                   
+                Else
+                   
+                   sTabela = "TAB_VELOCIDADE"
+                   
+                End If
+                
+                objMensagem.TipoMsg = ""
+                objMensagem.Descricao = ""
+                
+                bRetorno = objDadosVelocidade.RecuperarDados(objDadosAcesso.Cd_Veloc, sTabela)
+         
+             End If
+         Else
+             
+             objForm.LblVelocidadeAcesso = objDadosAcesso.Ds_Veloc_CLA
+         
+         End If
+        
+    End If
+    
+    If objDadosAcesso.CaracteristicaAcesso = "P" Then
+       
+       objForm.optCaracAcessoEmbratel(0).Value = True
+       objForm.optCaracAcessoTerceiro(0).Value = True
+       objForm.optCaracAcessoEqpto(0).Value = True
+       objForm.optCaracAcessoGen(0).Value = True
+       
+        'If (Produto_ID = GbIDProdutoBLF Or _
+                Produto_ID = GbIDProdutoBLD Or _
+                Produto_ID = GbIDProdutoVBL Or _
+                Produto_ID = GbIDProdutoVOIP) Then
+                
+        If (Produto_ID = GbIDProdutoBLF Or _
+            lGrupo_ID = GbIDGrupoBLD Or _
+            Produto_ID = GbIDProdutoVOIP) Then
+                
+            'O único produto a permitir selecionar Seguranca
+            'de acesso será o BLF
+           
+'           objForm.optSegurancaAcesso(0).Enabled = True
+'           objForm.optSegurancaAcesso(1).Enabled = True
+       
+       End If
+    
+    Else
+       
+       objForm.optCaracAcessoEmbratel(1).Value = True
+       objForm.optCaracAcessoTerceiro(1).Value = True
+       objForm.optCaracAcessoGen(1).Value = True
+       objForm.optCaracAcessoEqpto(1).Value = True
+       
+    End If
+    
+    If objDadosAcesso.SegurancaAcesso = "S" Then
+       
+       objForm.optSegurancaAcesso(0).Value = True
+       
+       objForm.CmdAcessoContingente.Visible = True
+
+       objForm.CmdAcessoPrincipal.Visible = True
+    
+    Else
+       
+       objForm.optSegurancaAcesso(1).Value = True
+    
+    End If
+    
+    objForm.optProprietarioModem(0).Value = False
+    objForm.optProprietarioModem(1).Value = False
+    
+    If objDadosAcesso.ProprietarioModem = "E" Then
+
+       objForm.optProprietarioModem(0).Value = True
+
+    Else
+
+       If objDadosAcesso.ProprietarioModem = "C" Then
+
+          objForm.optProprietarioModem(1).Value = True
+
+       End If
+
+    End If
+
+    If objDadosAcesso.ResponsavelInfra = "E" Then
+       
+       objForm.OptResponsavelInfra(0).Value = True
+    
+    Else
+        
+       If objDadosAcesso.ResponsavelInfra = "C" Then
+       
+          objForm.OptResponsavelInfra(1).Value = True
+       
+       End If
+       
+    End If
+    
+    'objForm.OptTipoRede(0).Value = False
+    'objForm.OptTipoRede(1).Value = False
+    'objForm.OptTipoRede(2).Value = False
+
+    'If objDadosAcesso.TipoRede = "E" Then   'Rede E1
+       
+    '   objForm.optTipoRede(0).Value = True
+    
+    'ElseIf objDadosAcesso.TipoRede = "T" Then    'Tellabs
+       
+    '      objForm.optTipoRede(1).Value = True
+    
+    'CALBAT - 05/10/2007 =====================================
+    'Tratar Acesso Paralelismo.                                                          =
+    '=========================================================
+    'ElseIf objDadosAcesso.TipoRede = "D" Then    'Datacom
+       
+    '      objForm.optTipoRede(2).Value = True
+    '=========================================================
+    '=========================================================
+    
+    'End If
+     
+    If objDadosAcesso.TipoRede <> "" Then
+        
+        Set objDadosPlataforma = New clsBLDPlataforma
+         
+        objDadosPlataforma.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosPlataforma.InformaMensagem objMensagem
+        
+        bRetorno = objDadosPlataforma.RecuperarDadosPorDominio(objDadosAcesso.TipoRede)
+         
+        If bRetorno Then
+         
+            Call SelecionaCombo(objForm.CboPlataformas, objDadosPlataforma.iD)
+             
+        End If
+    End If
+    
+    'If (objForm.optTipoRede(0).Value = True Or objForm.optTipoRede(1).Value = True Or objForm.optTipoRede(2).Value = True) Then
+     
+     If objForm.CboPlataformas.ListIndex > 0 Then
+        
+        If Sigla_Acao <> "DES" And Sigla_Acao <> "CAN" And objForm.CmdSalvar.Enabled = True Then
+            
+            If bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+                
+                objForm.TxtDescricaoRedeDeterministica.Enabled = True
+                objForm.txtTSI.Enabled = True
+                objForm.txtTSF.Enabled = True
+                
+            Else
+                '========================================
+                'VAGNER - 21/09/2012
+                'Projeto Causa Raiz
+                '========================================
+                If objForm.CboPlataformas.ListIndex = -1 Then
+                    objForm.TxtDescricaoRedeDeterministica.Enabled = False
+                    objForm.txtTSI.Enabled = False
+                    objForm.txtTSF.Enabled = False
+                End If
+                '========================================
+                '========================================
+            End If
+        End If
+    
+    End If
+    
+    objForm.txtTSI.Text = objDadosAcesso.TSI
+    objForm.txtTSF.Text = objDadosAcesso.TSF
+    objForm.TxtDescricaoRedeDeterministica.Text = objDadosAcesso.DescricaoRedeDeterministica
+
+    If objDadosAcesso.PropridedadeAcesso = "E" Then
+
+        objForm.optProprietarioModem(0).Enabled = False
+        objForm.optProprietarioModem(1).Enabled = False
+        
+        objForm.ssTabAcesso.TabEnabled(2) = True
+        objForm.ssTabAcesso.TabEnabled(3) = False
+        
+        objForm.CboTipoAcessoEmbratel.Visible = True
+        objForm.CboTipoAcessoTerceiro.Visible = False
+        
+        If Not objDadosAcesso.objPropriedadeEBT Is Nothing Then
+             
+           objForm.TxtEstacaoConfiguracao.Text = objDadosAcesso.EstacaoConfiguracao
+           objForm.TxtEstacaoEntregaEbtConf.Text = objDadosAcesso.EstacaoConfiguracao
+             
+           If objDadosAcesso.objPropriedadeEBT.TipoAcesso = "R" Then
+                
+               objForm.CboTipoAcessoEmbratel.ListIndex = 0
+             
+           ElseIf objDadosAcesso.objPropriedadeEBT.TipoAcesso = "F" Then
+                
+               objForm.CboTipoAcessoEmbratel.ListIndex = 1
+             
+           ElseIf objDadosAcesso.objPropriedadeEBT.TipoAcesso = "A" Then
+                
+               objForm.CboTipoAcessoEmbratel.ListIndex = 2
+               objForm.FrameTipoADE.Visible = True
+                
+'               objForm.optProprietarioModem(0).Enabled = True
+                
+'               objForm.optProprietarioModem(1).Enabled = True
+             
+           ElseIf objDadosAcesso.objPropriedadeEBT.TipoAcesso = "C" Then
+                
+               objForm.CboTipoAcessoEmbratel.ListIndex = 3
+                
+'               objForm.optProprietarioModem(0).Enabled = True
+                
+'               objForm.optProprietarioModem(1).Enabled = True
+             
+           ElseIf objDadosAcesso.objPropriedadeEBT.TipoAcesso = "G" Then
+                
+               objForm.CboTipoAcessoEmbratel.ListIndex = 4
+               
+               '=================================================================
+               'CALLBAT - 26/06/2013 - FO EDD
+               'SO-TVASS-56728SLA
+               '=================================================================
+               objForm.UsrGenDadosAcessoBSoD.Visible = False
+               objForm.UsrGenDadosAcessoFOEDD.Visible = False
+               
+               objForm.UsrGenDadosAcessoADE_DSLAM.Visible = False ' ADE DSLAM
+               '=================================================================
+               
+               objForm.UsrGenDadosAcessoWireless.Visible = False  ''FABIMENDONCA - Rede Wireless
+               '=================================================================
+               
+               objForm.UsrGenDadosAcessoBSoD.Visible = False
+               
+               objForm.ssTabAcesso.TabCaption(7) = "GPON"
+               
+               objForm.ssTabAcesso.TabVisible(7) = True
+               
+           '=================================================================
+           'CALLBAT - 26/06/2013 - FO EDD
+           'SO-TVASS-56728SLA
+           '=================================================================
+           ElseIf objDadosAcesso.objPropriedadeEBT.TipoAcesso = "D" Then
+           
+               objForm.CboTipoAcessoEmbratel.ListIndex = 5
+               
+               objForm.UsrGenDadosAcessoBSoD.Visible = False
+               objForm.UsrGenDadosAcessoGPON.Visible = False
+               objForm.UsrGenDadosAcessoADE_DSLAM.Visible = False ' ADE DSLAM
+               '=================================================================
+               objForm.UsrGenDadosAcessoWireless.Visible = False  ''FABIMENDONCA - Rede Wireless
+               '=================================================================
+               
+               objForm.UsrGenDadosAcessoFOEDD.Visible = True
+               
+               
+               objForm.ssTabAcesso.TabCaption(7) = "FO EDD"
+               
+               objForm.ssTabAcesso.TabVisible(7) = True
+           '=================================================================
+           
+           '--=================================================================
+           '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+           '--=================================================================
+           ElseIf objDadosAcesso.objPropriedadeEBT.TipoAcesso = "M" Then
+           
+               objForm.CboTipoAcessoEmbratel.ListIndex = 6
+               
+               objForm.UsrGenDadosAcessoBSoD.Visible = False
+               objForm.UsrGenDadosAcessoGPON.Visible = False
+               objForm.UsrGenDadosAcessoFOEDD.Visible = False
+               
+               
+               objForm.UsrGenDadosAcessoADE_DSLAM.Visible = True
+               '=================================================================
+               objForm.UsrGenDadosAcessoWireless.Visible = False  ''FABIMENDONCA - Rede Wireless
+               '=================================================================
+               
+'               objForm.ssTabAcesso.TabCaption(8) = "ADE DSLAM"
+               
+'               objForm.ssTabAcesso.TabVisible(8) = True
+           
+           '=================================================================
+           '-- FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+           ElseIf objDadosAcesso.objPropriedadeEBT.TipoAcesso = "W" Then
+           
+               objForm.CboTipoAcessoEmbratel.ListIndex = 7
+               
+               objForm.UsrGenDadosAcessoBSoD.Visible = False
+               objForm.UsrGenDadosAcessoGPON.Visible = False
+               objForm.UsrGenDadosAcessoFOEDD.Visible = False
+               objForm.UsrGenDadosAcessoADE_DSLAM.Visible = False
+               
+               objForm.UsrGenDadosAcessoWireless.Visible = True  ''FABIMENDONCA - Rede Wireless
+
+           '=================================================================
+           End If
+             
+            'Popula os campos da Pasta Propriedade Embratel
+            bRetorno = PopularDadosEmbratel(objDadosAcesso.objPropriedadeEBT)
+       
+        End If
+        
+        objForm.optPropriedadeAcesso(0).Value = True
+        
+    ElseIf objDadosAcesso.PropridedadeAcesso = "T" Then
+    
+        objForm.optPropriedadeAcesso(1).Value = True
+        
+        objForm.CboTipoAcessoTerceiro.Visible = True
+        
+'        objForm.optProprietarioModem(0).Enabled = True
+'        objForm.optProprietarioModem(1).Enabled = True
+    
+'        objForm.optProprietarioModem(0).Value = False
+'        objForm.optProprietarioModem(1).Value = False
+       
+        objForm.CboTipoAcessoEmbratel.Visible = False
+        objForm.CboTipoAcessoTerceiro.Visible = True
+        
+        objForm.ssTabAcesso.TabVisible(7) = False
+        
+        If Not objDadosAcesso.objPropriedadeTerceiros Is Nothing Then
+        
+            If objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "<" Then
+               
+               objForm.CboTipoAcessoTerceiro.ListIndex = 0
+            
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = ">" Then
+               
+               objForm.CboTipoAcessoTerceiro.ListIndex = 1
+            
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "R" Then
+               
+               objForm.CboTipoAcessoTerceiro.ListIndex = 2
+            
+               objForm.optProprietarioModem(0).Enabled = False
+               objForm.optProprietarioModem(1).Enabled = False
+            
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "V" Then
+            
+               objForm.CboTipoAcessoTerceiro.ListIndex = 3
+
+'               objForm.frameBSoD.Caption = "HFC BSoD VIA"
+'               objForm.TxtSVLAN.Visible = False
+'               objForm.lblLinha1.Caption = "VLAN:                             Porta:                                Link Rede VIA/PE EBT:"
+'               objForm.lblLinha2.Caption = "    PE: "
+'
+'               objForm.frameBSoD.Visible = True
+'               objForm.FrameBsodNET.Visible = False
+
+               objForm.UsrGenDadosAcessoGPON.Visible = False
+               objForm.UsrGenDadosAcessoFOEDD.Visible = False
+               objForm.UsrGenDadosAcessoBSoD.Visible = True
+               objForm.UsrGenDadosAcessoBSoD.TipoBSoD = "V"
+               
+
+               objForm.ssTabAcesso.TabCaption(7) = "BSoD Via"
+               objForm.ssTabAcesso.TabVisible(7) = True
+               
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "N" Then
+            
+               '=================================================================
+               'CALLBAT - 26/06/2013 - FO EDD
+               'SO-TVASS-56728SLA
+               '=================================================================
+               'objForm.FrameBsodNET.Visible = True
+               'objForm.frameBSoD.Visible = False
+               
+               objForm.CboTipoAcessoTerceiro.ListIndex = 4
+
+               objForm.ssTabAcesso.TabCaption(7) = "BSoD NET"
+
+               objForm.ssTabAcesso.TabVisible(7) = True
+               
+               
+               objForm.UsrGenDadosAcessoGPON.Visible = False
+               objForm.UsrGenDadosAcessoFOEDD.Visible = False
+               objForm.UsrGenDadosAcessoBSoD.Visible = True
+               objForm.UsrGenDadosAcessoBSoD.TipoBSoD = "N"
+
+               '=================================================================
+               '=================================================================
+               
+            '=================================================================
+            'CALLBAT - 21/05/2012 - BSoD Net Light
+            '=================================================================
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "L" Then
+                objForm.CboTipoAcessoTerceiro.ListIndex = 5
+                
+               '=================================================================
+               'CALLBAT - 26/06/2013 - FO EDD
+               'SO-TVASS-56728SLA
+               '=================================================================
+                'objForm.FrameBsodNET.Visible = True
+                'objForm.frameBSoD.Visible = False
+                'objForm.FrameDesignacaoBSOD.Visible = False
+                'objForm.ssTabAcesso.TabCaption(7) = "BSoD Light"
+                'objForm.ssTabAcesso.TabVisible(7) = True
+                
+                objForm.UsrGenDadosAcessoGPON.Visible = False
+                objForm.UsrGenDadosAcessoBSoD.Visible = True
+                objForm.UsrGenDadosAcessoFOEDD.Visible = False
+                objForm.UsrGenDadosAcessoBSoD.TipoBSoD = "L"
+                
+               '=================================================================
+               
+
+            '=================================================================
+            '=================================================================
+            
+            '=================================================================
+            'CALLBAT - 05/07/2012 - BSoD Net Light II FO EtherNET
+            '=================================================================
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "E" Then
+
+                objForm.CboTipoAcessoTerceiro.ListIndex = 6
+                
+                'objForm.FrameBsodNET.Visible = False
+                'objForm.FrameDesignacaoBSOD.Visible = False
+                'objForm.UsrGenDadosAcessoGPON.Visible = False
+                'objForm.TxtSVLAN.Visible = True
+                
+                'objForm.lblLinha1.Caption = "VLAN:                             Porta:                                      Designação Acesso:"
+                'objForm.lblLinha2.Caption = "    PE:                                                                            SVLAN :"
+                
+                objForm.ssTabAcesso.TabCaption(7) = "FO EtherNET"
+                objForm.ssTabAcesso.TabVisible(7) = True
+                
+                objForm.UsrGenDadosAcessoBSoD.Visible = True
+                objForm.UsrGenDadosAcessoGPON.Visible = False
+                objForm.UsrGenDadosAcessoFOEDD.Visible = False
+                objForm.UsrGenDadosAcessoBSoD.TipoBSoD = "E"
+
+                
+                'objForm.frameBSoD.Visible = True
+            '=================================================================
+            '=================================================================
+            
+            '=================================================================
+            'CALLBAT - 13/09/2013 - Radio IP
+            'SO- TVASS-47468LFW
+            '=================================================================
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "I" Then
+
+                objForm.CboTipoAcessoTerceiro.ListIndex = 7
+                
+                objForm.ssTabAcesso.TabCaption(7) = "Rádio IP"
+                objForm.ssTabAcesso.TabVisible(7) = True
+                
+                objForm.UsrGenDadosAcessoBSoD.Visible = False
+                objForm.UsrGenDadosAcessoGPON.Visible = False
+                objForm.UsrGenDadosAcessoFOEDD.Visible = False
+                objForm.UsrGenDadosAcessoRadioIP.Visible = True
+                'AGRC - SO-TVASS-32377EYC - 25/08/2017
+                objForm.UsrGenDadosAcessoTerceiroETH1.Visible = False
+                
+                'objForm.frameBSoD.Visible = True
+            '=================================================================
+            '=================================================================
+            
+            '=================================================================
+            'CALLBAT - 18/02/2014 - BSoD Unificado
+            'SO-ENGNQ-55327NEG
+            '=================================================================
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "U" Then
+            
+               objForm.CboTipoAcessoTerceiro.ListIndex = 8
+
+               objForm.UsrGenDadosAcessoGPON.Visible = False
+               objForm.UsrGenDadosAcessoFOEDD.Visible = False
+               objForm.UsrGenDadosAcessoBSoD.Visible = True
+               objForm.UsrGenDadosAcessoBSoD.TipoBSoD = "U"
+               
+
+               objForm.ssTabAcesso.TabCaption(7) = "HFC BSoD"
+               objForm.ssTabAcesso.TabVisible(7) = True
+            '=================================================================
+            '=================================================================
+            
+            ElseIf objDadosAcesso.objPropriedadeTerceiros.TipoAcesso = "H" Then
+
+                objForm.CboTipoAcessoTerceiro.ListIndex = 9
+                
+                objForm.ssTabAcesso.TabCaption(7) = "Terceiro ETH"
+                objForm.ssTabAcesso.TabVisible(7) = True
+                
+                objForm.UsrGenDadosAcessoBSoD.Visible = False
+                objForm.UsrGenDadosAcessoGPON.Visible = False
+                objForm.UsrGenDadosAcessoFOEDD.Visible = False
+                objForm.UsrGenDadosAcessoRadioIP.Visible = False
+                'AGRC - SO-TVASS-32377EYC - 25/08/2017
+                objForm.UsrGenDadosAcessoTerceiroETH1.Visible = True
+              
+            
+            End If
+            
+            objForm.TxtEstacaoEntregaTercConf.Text = objDadosAcesso.EstacaoConfiguracao
+            objForm.TxtEstacaoConfiguracao.Text = objDadosAcesso.EstacaoConfiguracao
+            
+            'Popula os campos da Pasta Propriedade Terceiros
+            bRetorno = PopularDadosTerceiros(objDadosAcesso.objPropriedadeTerceiros)
+        End If
+        
+        objForm.ssTabAcesso.TabEnabled(3) = True
+        objForm.ssTabAcesso.TabEnabled(2) = False
+   
+    End If
+    
+    'Popula os campos da Pasta Equipamentos Complementares
+    bRetorno = PopularEquipamentos(objDadosAcesso)
+
+    objForm.FlControlaAlteracao = False
+    
+'    If objForm.CmdSalvar.Enabled = False Then
+'
+'       Call DesabilitaCamposTela
+'
+'    End If
+
+    If objForm.FrameExecutarCentroLocal.Visible Then
+       
+       If objDadosAcesso.FlagExecutaCentrolocal = "S" Then
+            
+          objForm.optExecCentroLocal(0).Value = True
+       
+       Else
+          
+          objForm.optExecCentroLocal(1).Value = True
+       
+       End If
+       
+    End If
+    
+    '--- JRCRUZ -----------------------------------------------------------**
+    If objForm.FrameClassificacaoEndereco.Visible And _
+            objDadosAcesso.ClassificacaoEndereco <> "" Then
+       
+       objForm.CboClassificacaoEndereco.ListIndex = CInt(objDadosAcesso.ClassificacaoEndereco)
+       
+    End If
+    '--- JRCRUZ -----------------------------------------------------------**
+    
+    
+    'CALBAT - 05/10/2007 =====================================
+    'Tratar Acesso Paralelismo.                                                          =
+    '=========================================================
+    Dim objDadosIntegracao      As New clsBlf_IntegracaoWebIP
+    
+    objDadosIntegracao.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosIntegracao.InformaMensagem objMensagem
+    
+    If (objDadosIntegracao Is Nothing) Then
+        Set objDadosIntegracao = New clsBlf_IntegracaoWebIP
+    End If
+    
+'    bRetorno = objDadosIntegracao.VerificaIntegracao(lServico_ID)
+    
+'    If bRetorno = True Then
+     
+        'Bloqueia os campos já encaminhado para o SAIP
+'        objForm.CboPadraoInterfaceEBT.Locked = True
+'        objForm.TxtEstacaoEntregaEbtConf.Locked = True
+'        objForm.TxtEstacaoEntregaTercConf.Locked = True
+        
+        'Leonardo Ferreira - Inicio
+        'Apos enviado para o saip nao pode trocar o tipo de propriedade de acesso
+'        objForm.optPropriedadeAcesso(0).Enabled = False
+'        objForm.optPropriedadeAcesso(1).Enabled = False
+        'Leonardo Ferreira - Fim
+        
+'        objForm.CboPadraoInterfaceEBT.Enabled = False
+        
+'        objForm.optTipoRede(0).Enabled = False
+'        objForm.optTipoRede(1).Enabled = False
+'        objForm.optTipoRede(2).Enabled = False
+'        objForm.TxtDescricaoRedeDeterministica.Enabled = False
+'        objForm.txtTSI.Enabled = False
+'        objForm.txtTSF.Enabled = False
+        
+        'Muda as cores dos campos bloqueado
+'        objForm.CboPadraoInterfaceEBT.BackColor = &H80000004
+'        objForm.TxtEstacaoEntregaEbtConf.BackColor = &H80000004
+'        objForm.TxtEstacaoEntregaTercConf.BackColor = &H80000004
+        
+'        objForm.TxtDescricaoRedeDeterministica.BackColor = &H80000004
+'        objForm.txtTSI.BackColor = &H80000004
+'        objForm.txtTSF.BackColor = &H80000004
+        
+        
+        'Informa ao usuário o motivo do bloqueio
+        'objForm.TxtEstacaoEntregaEbtConf.ToolTipText = "Este campo não pode ser editado, em função " & Chr(13) & _
+                                                                                             "de já ter enviado as informações para o SAIP"
+        
+        'objForm.TxtEstacaoEntregaTercConf.ToolTipText = "Este campo não pode ser editado, em função " & Chr(13) & _
+                                                                                             "de já ter enviado as informações para o SAIP"
+                                                                                             
+        'objForm.optTipoRede(0).ToolTipText = "Este campo não pode ser editado, em função " & Chr(13) & _
+                                                                                             "de já ter enviado as informações para o SAIP"
+
+        'objForm.optTipoRede(1).ToolTipText = "Este campo não pode ser editado, em função " & Chr(13) & _
+                                                                                             "de já ter enviado as informações para o SAIP"
+                                                                                             
+        'objForm.optTipoRede(2).ToolTipText = "Este campo não pode ser editado, em função " & Chr(13) & _
+                                                                                             "de já ter enviado as informações para o SAIP"
+
+    
+'    Else
+    
+'        objForm.CboPadraoInterfaceEBT.Locked = False
+'        objForm.TxtEstacaoEntregaEbtConf.Locked = False
+'        objForm.TxtEstacaoEntregaTercConf.Locked = False
+        
+'        If Sigla_Acao <> "DES" And Sigla_Acao <> "CAN" Then
+'            objForm.optTipoRede(0).Enabled = True
+'            objForm.optTipoRede(1).Enabled = True
+'            objForm.optTipoRede(2).Enabled = True
+'        End If
+        
+'        If objForm.optTipoRede(0).Value = False And objForm.optTipoRede(1).Value = False And objForm.optTipoRede(2).Value = False Then
+'
+'            objForm.TxtDescricaoRedeDeterministica.Enabled = False
+'            objForm.txtTSI.Enabled = False
+'            objForm.txtTSF.Enabled = False
+'
+'            objForm.TxtDescricaoRedeDeterministica.BackColor = &H80000004
+'            objForm.txtTSI.BackColor = &H80000004
+'            objForm.txtTSF.BackColor = &H80000004
+'
+'        End If
+'
+'        'Muda as cores dos campos bloqueado
+'        objForm.CboPadraoInterfaceEBT.BackColor = &H80000005
+'        objForm.TxtEstacaoEntregaEbtConf.BackColor = &H80000005
+'        objForm.TxtEstacaoEntregaTercConf.BackColor = &H80000005
+'
+'        'Informa ao usuário o motivo do bloqueio
+'        objForm.TxtEstacaoEntregaEbtConf.ToolTipText = ""
+'        objForm.TxtEstacaoEntregaTercConf.ToolTipText = ""
+'        objForm.optTipoRede(0).ToolTipText = ""
+'        objForm.optTipoRede(1).ToolTipText = ""
+'        objForm.optTipoRede(2).ToolTipText = ""
+                                                                                             
+'    End If
+    
+    If objDadosAcesso.IDLogico <> "" And objDadosAcesso.IDLogico <> "IDLOGICO" Then
+       objForm.UsrBLFCabecalho_Acesso.ID_Logico = objDadosAcesso.IDLogico
+    End If
+    
+'    If FlagStatusAcessoCLA = "2" Then
+'
+'        objForm.TxtEstacaoCliente.Enabled = False
+'        objForm.CboPadraoInterfaceEBT.Enabled = False
+'
+'    End If
+    
+    objForm.FlControlaAlteracao = False
+'
+'    If objForm.CmdSalvar.Enabled = False Then
+'
+'       Call DesabilitaCamposTela
+'
+'    End If
+    
+    If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+        
+        'objForm.optTipoRede(0).Enabled = False
+        'objForm.optTipoRede(1).Enabled = False
+        'objForm.optTipoRede(2).Enabled = False
+        
+        objForm.CboPlataformas.Enabled = False
+        objForm.TxtDescricaoRedeDeterministica.Enabled = False
+        objForm.txtTSI.Enabled = False
+        objForm.txtTSF.Enabled = False
+        
+    End If
+    
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+    If DataFinalizacao <> "" Then
+        
+        Call DesabilitaCamposTela
+           
+        'objForm.TxtEstacaoConfiguracao.Enabled = True
+        'objForm.TxtEstacaoEntregaEbtConf.Enabled = True
+        'objForm.TxtEstacaoEntregaTercConf.Enabled = True
+                
+        '=================================================================
+        'CALLBAT - 26/06/2013 - Interface junto ao CFM
+        'SO-ENGNQ-83669III
+        '=================================================================
+        
+            'Habilita o botão de salvar quando estiver nas seguintes situações:
+            '   Existe no CFM e não está marcado no SGA Plus
+            '   Não existe no CFM e está marcado no SGA Plus
+            '   Existe no CFM e está marcado no SGA Plus, mas os valores do Tronco tx são diferentes
+            
+            Call RecuperaDadosTroncoTX(Circuito_ID, objMensagem)
+            
+            If objDadosAcesso.PropridedadeAcesso = "T" Then
+            
+                If (objMensagem.TipoMsg = "00" And UtilizaTroncoTX <> "S") Or _
+                   (objMensagem.TipoMsg = "02" And UtilizaTroncoTX = "S") Or _
+                   (objMensagem.TipoMsg = "00" And UtilizaTroncoTX = "S" And _
+                   (Trim(TroncoTX) <> Trim(objDadosAcesso.TroncoOTSTx) Or _
+                   (Trim(OTSTX) <> Trim(objDadosAcesso.objPropriedadeTerceiros.NumeroOTSTX) Or _
+                   (CLng(0 & ItemOTSTX) <> CLng(Trim(objDadosAcesso.objPropriedadeTerceiros.ItemOTSTX)))))) Then
+    
+    
+                   objForm.CmdSalvar.Enabled = True
+                   objForm.CmdAnotacao.Enabled = True
+                   
+                   Call objForm.UsrGenDadosAcessoTroncoTX.HabilitaOpcaoTX(True)
+                
+                End If
+                
+            ElseIf objDadosAcesso.PropridedadeAcesso = "E" Then
+            
+                If (objMensagem.TipoMsg = "00" And UtilizaTroncoTX <> "S") Or _
+                   (objMensagem.TipoMsg = "02" And UtilizaTroncoTX = "S") Or _
+                   (objMensagem.TipoMsg = "00" And UtilizaTroncoTX = "S" And _
+                   (Trim(TroncoTX) <> Trim(objDadosAcesso.TroncoOTSTx) Or _
+                   (Trim(OTSTX) <> Trim(objDadosAcesso.objPropriedadeEBT.NumeroOTSTX) Or _
+                   (CLng(0 & ItemOTSTX) <> CLng(0 & Trim(objDadosAcesso.objPropriedadeEBT.ItemOTSTX)))))) Then
+    
+    
+                   objForm.CmdSalvar.Enabled = True
+                   objForm.CmdAnotacao.Enabled = True
+                   
+                   Call objForm.UsrGenDadosAcessoTroncoTX.HabilitaOpcaoTX(True)
+                
+                End If
+            
+            End If
+
+            objMensagem.TipoMsg = ""
+            objMensagem.Descricao = ""
+
+            '=================================================================
+            '=================================================================
+
+        
+'       If objForm.optPropriedadeAcesso(0).Value = True Then
+'
+'
+'            If (Trim(objForm.TxtNumeroOtsTx_EBT) = "" Or Trim(objForm.TxtItemOtsTxEBT.Text) = "" Or _
+'               Trim(objForm.txtTroncoOTS.Text) = "") And (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+'
+'               objForm.txtTroncoOTS.Enabled = True
+'               objForm.TxtNumeroOtsTx_EBT.Enabled = True
+'               objForm.TxtItemOtsTxEBT.Enabled = True
+'               objForm.CmdSalvar.Enabled = True
+'               objForm.CmdAnotacao.Enabled = True
+'
+'            End If
+'
+'        Else
+'            If (Trim(objForm.TxtNumeroOTSTXTerc.Text) = "" Or Trim(objForm.TxtItemOTSTxTerc.Text) = "" Or _
+'            Trim(objForm.txtTroncoOTS.Text) = "") And (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+'
+'                objForm.TxtNumeroOTSTXTerc.Enabled = True
+'                objForm.TxtItemOTSTxTerc.Enabled = True
+'                objForm.txtTroncoOTS.Enabled = True
+'                objForm.CmdSalvar.Enabled = True
+'                objForm.CmdAnotacao.Enabled = True
+'
+'            End If
+'
+'        End If
+        '=================================================================
+        '=================================================================
+    End If
+        '========================================
+        '========================================
+'--------
+    Set objDadosIntegracao = Nothing
+    
+    '=========================================================
+    '=========================================================
+
+
+    objForm.FlControlaAlteracao = False
+    FlagRecuperando = False
+
+End Function
+
+Public Function LimpaCamposTela() As Boolean
+
+    'Popula os campos da pasta DADOS GERAIS
+    objForm.optProprietarioModem(0).Value = False
+    objForm.optProprietarioModem(1).Value = False
+    
+    objForm.OptResponsavelInfra(0).Value = False
+    objForm.OptResponsavelInfra(1).Value = False
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objForm.txtTroncoOTS.Text = ""
+    
+    Call objForm.UsrGenDadosAcessoTroncoTX.LimpaCampos
+    
+    '=================================================================
+    '=================================================================
+    
+'    If (objForm.TxtEstacaoEntregaEbtConf.Locked = True) Or (objForm.TxtEstacaoEntregaTercConf.Locked = True) Then
+'
+'
+'            objForm.optTipoRede(0).Value = False
+'            objForm.optTipoRede(1).Value = False
+'            objForm.optTipoRede(2).Value = False
+'
+'            objForm.TxtDescricaoRedeDeterministica.Enabled = False
+'            objForm.txtTSI.Enabled = False
+'            objForm.txtTSF.Enabled = False
+'
+''            objForm.TxtDescricaoRedeDeterministica.BackColor = &H80000004
+''            objForm.txtTSI.BackColor = &H80000004
+''            objForm.txtTSF.BackColor = &H80000004
+'
+''            objForm.TxtRIT.Text = ""
+''            objForm.TxtEMailGic.Text = ""
+'
+'
+'            '=========================================================
+'            '=========================================================
+'    Else
+'
+''             objForm.TxtEstacaoEntregaEbtConf.Text = ""
+''             objForm.TxtEstacaoEntregaTercConf.Text = ""
+''             objForm.TxtEstacaoEntregaTercConf.Text = ""
+'
+'             objForm.CboPadraoInterfaceEBT.ListIndex = -1
+'
+'            objForm.ssTabAcesso.TabEnabled(2) = False
+'            objForm.ssTabAcesso.TabEnabled(3) = False
+'            objForm.ssTabAcesso.TabEnabled(4) = False
+'
+'    End If
+    
+    objForm.CboTipoAcessoEmbratel.ListIndex = -1
+    objForm.TxtDesignacaoAcessoEBT.Text = ""
+    objForm.TxtIdentificadorAcessoEBT.Text = ""
+    objForm.TxtEstacaoEntregaEbt.Text = ""
+    objForm.TxtEstacaoCliente.Text = ""
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    'objForm.TxtNumeroOtsTx_EBT.Text = ""
+    'objForm.TxtItemOtsTxEBT.Text = ""
+    '=================================================================
+    '=================================================================
+    
+    'AGRC - 07/08/2017 - CH-85145OIE
+    'objForm.SpdDataAtivacaoAcessoEBT.Text = ""
+    objForm.TxtDIDFila_Radio.Text = ""
+    objForm.TxtDIDArmacao_Radio.Text = ""
+    objForm.TxtDIDRegua_Radio.Text = ""
+    objForm.TxtDIDPosicao_Radio.Text = ""
+    objForm.TxtNumeroRepeticoes = ""
+    objForm.TxtDIDFila_Fibra.Text = ""
+    objForm.TxtDIDArmacao_Fibra.Text = ""
+    objForm.TxtDidRegua_Fibra.Text = ""
+    objForm.TxtDIDPosicao_Fibra.Text = ""
+    objForm.TxtNumeroCaboFibra.Text = ""
+    objForm.TxtNumeroParFibra.Text = ""
+    objForm.TxtPredioEBT_ADE.Text = ""
+    objForm.TxtNumeroCabo_ADE.Text = ""
+    objForm.TxtNumeroPar_ADE.Text = ""
+    objForm.TxtPredioCabo_Cabo.Text = ""
+    objForm.TxtNumeroParEBT_Cabo.Text = ""
+    objForm.TxtNumeroCaboEBT_Cabo.Text = ""
+    objForm.TxtNumeroParCliente_Cabo.Text = ""
+    objForm.TxtNumeroCaboCliente_Cabo.Text = ""
+
+    Call LimpaCamposTerceiros
+    
+    Call LimpaCamposEquipamentos
+    
+    objForm.optSegurancaAcesso(0).Enabled = False
+    objForm.optSegurancaAcesso(1).Enabled = False
+            
+'    If Familia_Produto <> "D" Then
+    
+       objForm.optPropriedadeAcesso(0).Value = False
+       objForm.optPropriedadeAcesso(1).Value = False
+    
+       objForm.CboTipoAcessoEmbratel.Visible = False
+       objForm.CboTipoAcessoTerceiro.Visible = False
+    
+
+    'objForm.txtSEV_Wireless.Text = ""
+'    End If
+        
+End Function
+
+
+Public Function LimpaCamposTerceiros() As Boolean
+
+    objForm.CboTipoAcessoTerceiro.ListIndex = -1
+    objForm.TxtEstacaoEntregaTercConf.Text = ""
+    objForm.TxtEstacaoEntregaTerc.Text = ""
+    objForm.TxtDesignacaoAcessoTerceiro.Text = ""
+    objForm.SpdNumeroAcessoUrbano.Text = ""
+    objForm.TxtCNLPontaA_Urbano.Text = ""
+    objForm.SpdDataEntregaUrbano.Text = ""
+    
+   '=================================================================
+   'CALLBAT - 13/09/2013 - Radio IP
+   'SO- TVASS-47468LFW
+   '=================================================================
+    'objForm.TxtNumeroOTSTXTerc.Text = ""
+    'objForm.TxtItemOTSTxTerc.Text = ""
+   '=================================================================
+   '=================================================================
+   
+    objForm.TxtIDentificadorAcessoUrbano.Text = ""
+    'AGRC - 07/08/2017 - CH-85145OIE
+    'objForm.SpdDataAtivacaoAcessoTerc.Text = ""
+  
+    
+    objForm.optTipoTecnologia(0).Value = False
+    objForm.optTipoTecnologia(1).Value = False
+    objForm.optTipoTecnologia(2).Value = False
+    
+    objForm.CboProvedorUrbano.ListIndex = -1
+    objForm.optExisteAcessoIU(0).Value = False
+    objForm.optExisteAcessoIU(1).Value = False
+    objForm.CboProvedorInterurbano.ListIndex = -1
+    objForm.TxtIdentificadorAcessoEBTInterUrbano.Text = ""
+    objForm.SpdNumeroAcessoInterurbano.Text = ""
+    objForm.TxtCNLPontaA.Text = ""
+    objForm.TxtCNLPontaB.Text = ""
+    objForm.SpdDataEntregaInterUrbano.Text = ""
+    objForm.CboInterfaceEBTMenor.ListIndex = -1
+    objForm.CboInterfaceClienteMenor.ListIndex = -1
+    objForm.TxtNumeroCaboAcessoMenor.Text = ""
+    objForm.TxtNumeroParAcessoMenor.Text = ""
+    objForm.TxtBlocoDGMenor.Text = ""
+    objForm.TxtParDGMenor.Text = ""
+    objForm.TxtBlocoTransdataMenor.Text = ""
+    objForm.TxtParTransdataMenor.Text = ""
+    objForm.TxtDIDArmacao.Text = ""
+    objForm.TxtDIDFila.Text = ""
+    objForm.TxtDIDPosicao.Text = ""
+    objForm.TxtDIDRegua.Text = ""
+    objForm.TxtTronco.Text = ""
+    objForm.TxtPar.Text = ""
+    objForm.TXTDominio.Text = ""
+    objForm.TxtNO.Text = ""
+    
+    objForm.CboPorta_Rede.ListIndex = -1
+    objForm.CboSlot_Rede.ListIndex = -1
+    objForm.CboTSI_Rede.ListIndex = -1
+    objForm.CboTSF_Rede.ListIndex = -1
+    
+    objForm.TxtDIDArmacao_Rede.Text = ""
+    objForm.TxtDIDFila_Rede.Text = ""
+    objForm.TxtDIDPosicao_Rede.Text = ""
+    objForm.TxtDIDRegua_Rede.Text = ""
+
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - FO EDD
+    'SO-TVASS-56728SLA
+    '=================================================================
+    'objForm.TxtLinkRedeVIA.Text = ""
+    'objForm.TxtPE.Text = ""
+    'objForm.TxtPortaVIA.Text = ""
+    'objForm.TxtVLANVia.Text = ""
+    'objForm.TxtVLAN_NET.Text = ""
+    'objForm.TxtDesigAcessoBSoD.Text = ""
+    '=================================================================
+    '=================================================================
+
+End Function
+
+
+Public Function LimpaCamposEquipamentos() As Boolean
+
+    objForm.TxtIDEquipamento1 = ""
+    objForm.CboTipoEquipamento_1.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_1 = ""
+    objForm.optLocalInstalacao_1(0).Value = False
+    objForm.optLocalInstalacao_1(1).Value = False
+    
+    objForm.CboTipoEquipamento_2.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_2 = ""
+    objForm.optLocalInstalacao_2(0).Value = False
+    objForm.optLocalInstalacao_2(1).Value = False
+    
+    objForm.CboTipoEquipamento_3.ListIndex = -1
+    objForm.TxtFabricanteEquipamento_3 = ""
+    objForm.optLocalInstalacao_3(0).Value = False
+    objForm.optLocalInstalacao_3(1).Value = False
+    
+    objForm.TxtIDEquipamento1 = ""
+    objForm.TxtIDEquipamento2 = ""
+    objForm.TxtIDEquipamento3 = ""
+
+End Function
+
+Private Function ExcluiTipoAcessoEBT(pTipoAcesso As String, pContingenciaAcesso As Long, objMensagem As clsgenMensagem) As Boolean
+
+On Error GoTo ErrorHandler
+
+    Dim objDadosTipoRadio      As clsGenTipoAcessoRadio
+    Dim objDadosTipoFibra      As clsGenTipoAcessoFibra
+    Dim objdadosTipoADE        As clsGenTipoAcessoADE
+    Dim objDadosTipoCabo       As clsGenTipoAcessoCabo
+
+    ExcluiTipoAcessoEBT = False
+     
+    If pTipoAcesso = "R" Then    'Tipo de Acesso Radio
+        
+        Set objDadosTipoRadio = New clsGenTipoAcessoRadio
+        
+        objDadosTipoRadio.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDadosTipoRadio.ExcluirDados(pContingenciaAcesso, objMensagem)
+        
+        Set objDadosTipoRadio = Nothing
+        
+        If objMensagem.TipoMsg <> "" Then
+             
+           GoTo ErrorHandler
+             
+        End If
+     
+    ElseIf pTipoAcesso = "F" Then  'Tipo de Acesso Fibra Otica
+    
+        Set objDadosTipoFibra = New clsGenTipoAcessoFibra
+        
+        objDadosTipoFibra.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDadosTipoFibra.ExcluirDados(pContingenciaAcesso, objMensagem)
+        
+        Set objDadosTipoFibra = Nothing
+        
+        If objMensagem.TipoMsg <> "" Then
+             
+           GoTo ErrorHandler
+             
+        End If
+     
+    ElseIf TipoAcessoAnterior = "A" Then 'Tipo de Acesso ADE
+    
+        Set objdadosTipoADE = New clsGenTipoAcessoADE
+        
+        objdadosTipoADE.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objdadosTipoADE.ExcluirDados(pContingenciaAcesso, objMensagem)
+        
+        Set objdadosTipoADE = Nothing
+        
+        If objMensagem.TipoMsg <> "" Then
+             
+           GoTo ErrorHandler
+             
+        End If
+     
+    ElseIf TipoAcessoAnterior = "C" Then 'Tipo de Acesso Cabo
+    
+        Set objDadosTipoCabo = New clsGenTipoAcessoCabo
+        
+        objDadosTipoCabo.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDadosTipoCabo.ExcluirDados(pContingenciaAcesso, objMensagem)
+        
+        Set objDadosTipoCabo = Nothing
+        
+        If objMensagem.TipoMsg <> "" Then
+             
+           GoTo ErrorHandler
+             
+        End If
+     
+    '--=================================================================
+    '-- 18/02/2019 -  ADE DSLAM - "M" '--SO-SOLEN-08414BBJ_SGAP
+    '--=================================================================
+     ElseIf TipoAcessoAnterior = "M" Then 'Tipo de Acesso ADE DSLAM
+    
+        Set objDadosTipoADE_DSLAM = New clsGenTipoAcessoADE_DSLAM
+        
+        objDadosTipoADE_DSLAM.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDadosTipoADE_DSLAM.ExcluirDados(pContingenciaAcesso, objMensagem)
+        
+        Set objDadosTipoADE_DSLAM = Nothing
+        
+        If objMensagem.TipoMsg <> "" Then
+             
+           GoTo ErrorHandler
+             
+        End If
+    '--=================================================================
+     
+    End If
+    
+    ExcluiTipoAcessoEBT = True
+    
+Finalizar:
+        
+    On Error GoTo 0
+    
+    Exit Function
+    
+ErrorHandler:
+       
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "ExcluiTipoAcessoEBT " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+    
+    GoTo Finalizar
+
+End Function
+
+Private Function ExcluiTipoAcessoTerceiros(pTipoAcesso As String, pContingenciaAcesso As Long, objMensagem As clsgenMensagem) As Boolean
+
+    Dim objDadosTipoMenor2M    As clsGenTipoAcessoMenor2M
+    Dim objDadosTipoMaior2M    As clsGenTipoAcessoMaior2M
+    Dim objdadosTipoRede       As clsGenTipoAcessoRedeDeterm
+
+On Error GoTo ErrorHandler
+
+     ExcluiTipoAcessoTerceiros = False
+     
+     If pTipoAcesso = "<" Then    'Tipo de Acesso Menor 2M
+        
+        Set objDadosTipoMenor2M = New clsGenTipoAcessoMenor2M
+        
+        objDadosTipoMenor2M.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDadosTipoMenor2M.ExcluirDados(pContingenciaAcesso, objMensagem)
+        
+        Set objDadosTipoMenor2M = Nothing
+        
+        If objMensagem.TipoMsg <> "" Then
+             
+           GoTo ErrorHandler
+             
+        End If
+     
+     ElseIf pTipoAcesso = ">" Then  'Tipo de Acesso Maior 2M
+    
+        Set objDadosTipoMaior2M = New clsGenTipoAcessoMaior2M
+        
+        objDadosTipoMaior2M.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objDadosTipoMaior2M.ExcluirDados(pContingenciaAcesso, objMensagem)
+        
+        Set objDadosTipoMaior2M = Nothing
+        
+        If objMensagem.TipoMsg <> "" Then
+             
+           GoTo ErrorHandler
+             
+        End If
+     
+     ElseIf pTipoAcesso = "R" Then 'Tipo de Acesso Rede deterministica
+    
+        Set objdadosTipoRede = New clsGenTipoAcessoRedeDeterm
+        
+        objdadosTipoRede.InformaBanco frmgenMDI_SGAPlus.objBanco
+        
+        bRetorno = objdadosTipoRede.ExcluirDados(pContingenciaAcesso, objMensagem)
+        
+        Set objdadosTipoRede = Nothing
+        
+        If objMensagem.TipoMsg <> "" Then
+             
+           GoTo ErrorHandler
+             
+        End If
+     
+     End If
+    
+     ExcluiTipoAcessoTerceiros = True
+
+Finalizar:
+    
+    On Error GoTo 0
+    Exit Function
+    
+ErrorHandler:
+       
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "ExcluiTipoAcessoTerceiros " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+                   
+    End If
+    
+    GoTo Finalizar
+
+End Function
+
+Private Sub Class_Terminate()
+
+    Set objDadosAcesso = Nothing
+    Set objDadosPendencia = Nothing
+    Set objDadosAcesso = Nothing
+    Set objMensagem = Nothing
+    Set objdadosServico = Nothing
+    Set objblfOC_SelecionarOTS = Nothing
+    Set objForm = Nothing
+
+End Sub
+
+Public Function InformaSelecionarOTS(oObjSelecionarOTS As clsgenOC_SelecionarOTS)
+
+    Set objSelecionarOTS = oObjSelecionarOTS
+
+End Function
+
+Public Sub InformaOC_SelecionarOTS(ByVal objNomeClasseOC As clsgenOC_SelecionarOTS)
+
+    Set objblfOC_SelecionarOTS = objNomeClasseOC
+    
+End Sub
+
+Public Sub AtualizarListaOTS()
+
+    objblfOC_SelecionarOTS.ExibirListaOTS
+
+End Sub
+
+Private Function CarregarFormAlocacaoCF(psCodigoCFCentroLocal As String) As String
+    
+    Dim objFormAlocacao    As New frmInterCFCtrLocal
+    Dim bRetorno           As Boolean
+    
+    CarregarFormAlocacaoCF = 0
+    
+    Load objFormAlocacao
+    
+    If lProduto_ID = GbIDProdutoWID Then
+    
+        ' Dedicated
+        objFormAlocacao.Caption = "MCI Internet Dedicated"
+        
+    ElseIf lProduto_ID = GbIDProdutoVPN_RA Then
+    
+        ' VPN RA
+        objFormAlocacao.Caption = "VPN RA"
+        
+    ElseIf lProduto_ID = GbIDProdutoVPN_DIRECT Then
+    
+        ' VPN Direct
+        objFormAlocacao.Caption = "VPN Direct"
+        
+    ElseIf lProduto_ID = GbIDProdutoBLF Then
+    
+        ' BLF
+        objFormAlocacao.Caption = "Business Link Flex"
+        
+    
+    ElseIf lProduto_ID = GbIDProdutoBIV Then
+    
+        ' VPN
+        objFormAlocacao.Caption = "IP VPN"
+    
+    ElseIf lProduto_ID = GbIDProdutoBLD Then
+    
+        ' BLD
+        objFormAlocacao.Caption = "Business Link Direct"
+        
+    ElseIf lProduto_ID = GbIDProdutoRUDMPLS Then
+    
+        ' BLD
+        objFormAlocacao.Caption = "RUD MPLS"
+    
+    ElseIf lProduto_ID = GbIDProdutoVBL Then
+    
+        ' Line trio
+        objFormAlocacao.Caption = "LINE TRIO"
+
+    ElseIf lProduto_ID = GbIDProdutoVOIP Then
+    
+        ' BLD
+        objFormAlocacao.Caption = "Internet Voice"
+
+
+    End If
+    
+    objFormAlocacao.lblCentroFuncionalAlocado.Caption = psCodigoCFCentroLocal
+    
+    bRetorno = objblfOC_SelecionarOTS.ExibirListaCentroFuncional( _
+                                                  objFormAlocacao.cboCentroFuncional, _
+                                                  GbCodigoFaseCentroLocal, _
+                                                  True)
+        
+    If Not bRetorno Then
+        
+        Exit Function
+        
+    End If
+    
+    objFormAlocacao.informa_OC Me
+    
+    objFormAlocacao.Show vbModal
+    
+    CarregarFormAlocacaoCF = CentroFuncID_Realoc
+    
+    Set objFormAlocacao = Nothing
+    
+End Function
+
+Public Function CamposPreenchidosOK() As Boolean
+
+    Dim objDadosFase            As clsgenFase
+    Dim bRetorno                As Boolean
+    Dim sDataFim                As String
+    Dim sMaiorData              As String
+    Dim iAux                    As Integer
+    Dim bDataValida             As Boolean
+    Dim bCriticaData            As Boolean
+    Dim objDadosLogSGAP         As clsBLD_LogSGAPCLA
+    Dim objDadosLocalidade      As clsGenLocalidade
+    
+    CamposPreenchidosOK = False
+    
+    If objForm.SpdListaAcessos.DataRowCnt > 0 Then
+        
+        If VerificaPreencAcessoOk And Sigla_Acao <> "CAN" And Sigla_Acao <> "DES" Then
+        
+           objForm.SpdListaAcessos.Row = objForm.SpdListaAcessos.ActiveRow
+           objForm.SpdListaAcessos.Col = 5
+           objForm.SpdListaAcessos.Text = True
+        Else
+           objForm.SpdListaAcessos.Row = objForm.SpdListaAcessos.ActiveRow
+           objForm.SpdListaAcessos.Col = 5
+           objForm.SpdListaAcessos.Text = False
+        End If
+    
+    End If
+    
+    iAux = 1
+    
+    If (objForm.optPropriedadeAcesso(0).Value = True And Trim(objForm.TxtEstacaoEntregaEbtConf.Text) = "" And objForm.TxtEstacaoEntregaEbtConf.Visible = True) Or _
+       (objForm.optPropriedadeAcesso(1).Value = True And Trim(objForm.TxtEstacaoEntregaTercConf.Text) = "" And objForm.TxtEstacaoEntregaTercConf.Visible = True) Or _
+       (objForm.optPropriedadeAcesso(0).Value = False And objForm.optPropriedadeAcesso(1).Value = False) Then
+
+       CamposPreenchidosOK = False
+       
+       If objForm.UsrBLFCabecalho_Acesso.StatusCla = "Solicitação iniciada no CLA." Then
+       
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Aguardando retorno do tratamento do acesso do CLA!"
+            objMensagem.ExibeMensagem
+       
+       Else
+       
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Os campos Propriedade do Acesso, Padrão de Interface Embratel, Estação de Entrega - Configuração são de preenchimento obrigatório para início da fase!"
+            objMensagem.ExibeMensagem
+       
+       End If
+       
+       Exit Function
+        
+    End If
+    
+    If (objForm.TxtEstacaoEntregaEbtConf.Visible = True And Trim(objForm.TxtEstacaoEntregaEbtConf.Text) = "") And (objForm.TxtEstacaoEntregaTerc.Visible = True And Trim(objForm.TxtEstacaoEntregaTerc.Text) = "") Then
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "A Estação de Entrega Configuração é obrigatória!"
+        bRetorno = False
+    End If
+    
+    bRetorno = True
+        
+    bCriticaData = True
+    
+    If (Sigla_Acao = "ATG" Or Sigla_Acao = "ALT" Or Sigla_Acao = "ALG") And objdadosServico.Origem = "SGA" Then
+       
+       bCriticaData = False
+       
+    End If
+    
+    ReDim vMensagemListaMsg(iAux)
+    
+    vMensagemListaMsg(0) = "Os campos abaixo foram preenchidos incorretamente ou não foram preenchidos:"
+    iAux = iAux + 1
+    
+    CamposPreenchidosOK = False
+    
+    If (Not VerificaDataOK(objForm.SpdDataPedidoAcesso.Text)) And _
+                      Trim(objForm.SpdDataPedidoAcesso.Text) <> "" Then
+        
+        bRetorno = False
+        
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "Data de Pedido do Acesso não é uma data válida!"
+        objForm.SpdDataPedidoAcesso.Text = ""
+    
+    End If
+    
+    If objForm.optSegurancaAcesso(0).Value = False And _
+       objForm.optSegurancaAcesso(1).Value = False Then
+        
+        bRetorno = False
+        
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "Segurança do acesso " & _
+        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                      " é obrigatória."
+    End If
+    
+    If objForm.optPropriedadeAcesso(0).Value = False And _
+       objForm.optPropriedadeAcesso(1).Value = False Then
+        
+        bRetorno = False
+        
+        iAux = iAux + 1
+        
+        ReDim Preserve vMensagemListaMsg(iAux)
+        vMensagemListaMsg(iAux - 1) = "Propriedade do acesso" & _
+        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+                                                       " do Acesso Contingente") & _
+                                      " é obrigatório."
+        
+    End If
+    
+    Set objDadosFase = New clsgenFase
+    
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+    
+    sDataFim = objDadosFase.ObtemDataFimRealFaseAnterior(Servico_ID, _
+                                                         Sequencia_Acao, Familia_Produto)
+    
+    Set objDadosFase = Nothing
+    
+    If TipoOperacao = "I" And Grupo_ID = GbIDGrupoVLI And bFlagAcessoJaConstruido Then
+        
+        bCriticaData = False
+        
+    End If
+    
+    'If objForm.optTipoRede(0).Value <> False Or objForm.optTipoRede(1).Value <> False Or objForm.optTipoRede(2).Value <> False Then
+    
+    If objForm.CboPlataformas.ListIndex > 0 Then
+        
+'        If Trim(objForm.TxtDescricaoRedeDeterministica.Text) = "" Then
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Descrição de Rede Deterministica " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                          " é obrigatório."
+'            bRetorno = False
+'        End If
+    
+'        If Trim(objForm.txtTSI.Text) = "" Then
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "A informação de TSI de Rede Determinística " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                          " é obrigatório."
+'
+'            bRetorno = False
+'
+'        End If
+'
+'        If Trim(objForm.txtTSF.Text) = "" Then
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "A informação de TSF de Determinística " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                          " é obrigatório."
+'
+'            bRetorno = False
+'        End If
+    
+    End If
+    
+    If objForm.optPropriedadeAcesso(0).Value = True Then 'Propriedade Embratel
+        
+        'If Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "" And _
+           Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "0" And _
+           (objForm.TxtNumeroOtsTx_EBT.Enabled = True) Then
+        
+            'If Not MascaraOTSTX_OK(Trim(objForm.TxtNumeroOtsTx_EBT.Text)) Then
+                
+            '    objForm.ssTabAcesso.Tab = 1
+                
+            '    bRetorno = False
+                 
+            '    iAux = iAux + 1
+                 
+            '    ReDim Preserve vMensagemListaMsg(iAux)
+            '    vMensagemListaMsg(iAux - 1) = "A máscara do número de OTS TX deve ser " & _
+                 "composta de (1 a 5 dígitos) seguido de "
+            
+            '    iAux = iAux + 1
+                 
+            '    ReDim Preserve vMensagemListaMsg(iAux)
+            '    vMensagemListaMsg(iAux - 1) = "'-' mais (1 a 4) caracteres!"
+            
+            'End If
+        
+        'End If
+    
+        If (Not VerificaDataOK(objForm.SpdDataAtivacaoAcessoEBT.Text)) And _
+                          Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) <> "" Then
+            
+            bRetorno = False
+            
+            iAux = iAux + 1
+            
+            ReDim Preserve vMensagemListaMsg(iAux)
+            vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Embratel não é uma data válida!"
+            
+            objForm.SpdDataAtivacaoAcessoEBT.Text = ""
+            
+        Else
+        
+            If (bFlagIndicaLegado Or bFlagLegadoEmAndamento) And objForm.SpdDataAtivacaoAcessoEBT.Enabled Then
+            
+                If Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) <> "" And sDataFim <> "" And _
+                   (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+                        
+                    If CDate(sDataFim) > CDate(objForm.SpdDataAtivacaoAcessoEBT.Text) And _
+                       bCriticaData Then
+                        
+                        bRetorno = False
+                        
+                        iAux = iAux + 1
+                        
+                        ReDim Preserve vMensagemListaMsg(iAux)
+                        vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Embratel não pode ser menor que " & _
+                                                      "a data de finalização da fase anterior!"
+                        
+                    Else
+                        
+                        If objForm.SpdDataAtivacaoAcessoEBT.Text <> "" Then
+                            
+                            If CDate(objForm.SpdDataAtivacaoAcessoEBT.Text) > Date Then
+                            
+                                bRetorno = False
+                                
+                                iAux = iAux + 1
+                                
+                                ReDim Preserve vMensagemListaMsg(iAux)
+                                vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Embratel não pode ser maior que " & _
+                                                              "a data corrente!"
+                            
+                            End If
+                        
+                        End If
+                    
+                    End If
+                    
+                End If
+            
+            End If
+        
+        End If
+    
+    Else
+        
+'       If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+'
+'            If Trim(objForm.TxtNumeroOTSTXTerc) <> "" And _
+'               Trim(objForm.TxtNumeroOTSTXTerc) <> "0" Then
+'
+'                If Not MascaraOTSTX_OK(Trim(objForm.TxtNumeroOTSTXTerc.Text)) Then
+'
+'                    bRetorno = False
+'
+'                    iAux = iAux + 1
+'
+'                    ReDim Preserve vMensagemListaMsg(iAux)
+'                    vMensagemListaMsg(iAux - 1) = "A máscara do número de OTS TX deve ser " & _
+'                     "composta de (1 a 5 dígitos) seguido de "
+'
+'                    iAux = iAux + 1
+'
+'                    ReDim Preserve vMensagemListaMsg(iAux)
+'                    vMensagemListaMsg(iAux - 1) = "'-' mais (1 a 4) caracteres!"
+'                End If
+'
+'            End If
+'
+'            If Val(objForm.TxtNumeroOTSTXTerc.Text) = 0 Then
+'
+'                objMensagem.Descricao = "Nº OTS TX obrigatório."
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                vMensagemListaMsg(iAux - 1) = "Nº OTS TX obrigatório " & _
+'                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                               " do Acesso Contingente") & _
+'                                                               " é obrigatório."
+'
+'            End If
+'
+'            If Val(objForm.TxtItemOTSTxTerc.Text) = 0 Then
+'
+'               objMensagem.Descricao = "Item OTS TX obrigatório."
+'               bRetorno = False
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'
+'               vMensagemListaMsg(iAux - 1) = "Item OTS TX obrigatório " & _
+'               IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                             " do Acesso Contingente") & _
+'                                                             " é obrigatório."
+'
+'            End If
+'
+'        End If
+        
+        If Trim(objForm.TxtCNLPontaA_Urbano.Text) <> "" Then
+            
+            Set objDadosLocalidade = New clsGenLocalidade
+            
+            objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objDadosLocalidade.InformaMensagem objMensagem
+            
+            If Not objDadosLocalidade.VerificaExistenciaCNL( _
+                                      TrataPlick(objForm.TxtCNLPontaA_Urbano.Text)) Then
+            
+               bRetorno = False
+                 
+               iAux = iAux + 1
+                 
+               ReDim Preserve vMensagemListaMsg(iAux)
+               vMensagemListaMsg(iAux - 1) = "CNL da ponta A do provedor urbano informado " & _
+                                             "não foi encontrado na tabela de"
+
+               iAux = iAux + 1
+                 
+               ReDim Preserve vMensagemListaMsg(iAux)
+               vMensagemListaMsg(iAux - 1) = " Localidades!"
+               
+            End If
+        
+            Set objDadosLocalidade = Nothing
+        
+        End If
+        
+        'If objForm.SpdDataEntregaUrbano.Enabled = True Then
+            
+            If (Not VerificaDataOK(objForm.SpdDataEntregaUrbano.Text)) And _
+                              Trim(objForm.SpdDataEntregaUrbano.Text) <> "" Then
+                
+                bRetorno = False
+                 
+                iAux = iAux + 1
+                 
+                ReDim Preserve vMensagemListaMsg(iAux)
+                vMensagemListaMsg(iAux - 1) = "Data de Entrega do Acesso Urbano " & _
+                                              "não é uma data válida!"
+                                              
+                objForm.SpdDataEntregaUrbano.Text = ""
+            Else
+                If objForm.SpdDataEntregaUrbano.Text <> "" Then
+                    
+                   If CDate(objForm.SpdDataEntregaUrbano.Text) > Date Then
+                        
+                        bRetorno = False
+                         
+                        iAux = iAux + 1
+                         
+                        ReDim Preserve vMensagemListaMsg(iAux)
+                        vMensagemListaMsg(iAux - 1) = "Data de Entrega do Acesso Urbano não pode ser maior que " & _
+                                                      "a data corrente!"
+                        
+                   End If
+                
+                End If
+            
+            End If
+        
+        'End If
+        
+        If Trim(objForm.TxtCNLPontaA.Text) <> "" Then
+            
+            Set objDadosLocalidade = New clsGenLocalidade
+            
+            objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objDadosLocalidade.InformaMensagem objMensagem
+            
+            If Not objDadosLocalidade.VerificaExistenciaCNL( _
+                                      TrataPlick(objForm.TxtCNLPontaA.Text)) Then
+            
+               bRetorno = False
+                 
+               iAux = iAux + 1
+                 
+               ReDim Preserve vMensagemListaMsg(iAux)
+               vMensagemListaMsg(iAux - 1) = "CNL da ponta A do provedor interurbano informado " & _
+                                             "não foi encontrado na tabela de"
+             
+               iAux = iAux + 1
+                 
+               ReDim Preserve vMensagemListaMsg(iAux)
+               vMensagemListaMsg(iAux - 1) = "'Localidades!"
+               
+            End If
+            
+            Set objDadosLocalidade = Nothing
+        
+        End If
+        
+        If Trim(objForm.TxtCNLPontaB.Text) <> "" Then
+            
+            Set objDadosLocalidade = New clsGenLocalidade
+            
+            objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objDadosLocalidade.InformaMensagem objMensagem
+                
+            If Not objDadosLocalidade.VerificaExistenciaCNL( _
+                                      TrataPlick(objForm.TxtCNLPontaB.Text)) Then
+            
+               bRetorno = False
+                 
+               iAux = iAux + 1
+                 
+               ReDim Preserve vMensagemListaMsg(iAux)
+               vMensagemListaMsg(iAux - 1) = "CNL da ponta B do provedor interurbano informado " & _
+                                             "não foi encontrado na tabela de"
+             
+               iAux = iAux + 1
+                 
+               ReDim Preserve vMensagemListaMsg(iAux)
+               vMensagemListaMsg(iAux - 1) = "'Localidades!"
+               
+            End If
+            
+            Set objDadosLocalidade = Nothing
+        
+        End If
+        
+        If objForm.SpdDataEntregaInterUrbano.Enabled = True Then
+            
+            If (Not VerificaDataOK(objForm.SpdDataEntregaInterUrbano.Text)) And _
+                              Trim(objForm.SpdDataEntregaInterUrbano.Text) <> "" Then
+            
+                bRetorno = False
+                 
+                iAux = iAux + 1
+                 
+                ReDim Preserve vMensagemListaMsg(iAux)
+                vMensagemListaMsg(iAux - 1) = "Data de Entrega do Acesso InterUrbano não é uma data válida!"
+                objForm.SpdDataEntregaInterUrbano.Text = ""
+                
+            Else
+                If objForm.SpdDataEntregaInterUrbano.Text <> "" Then
+                    
+                    If CDate(objForm.SpdDataEntregaInterUrbano.Text) > Date Then
+                    
+                        bRetorno = False
+                          
+                         iAux = iAux + 1
+                          
+                         ReDim Preserve vMensagemListaMsg(iAux)
+                         vMensagemListaMsg(iAux - 1) = "Data de Entrega do Acesso InterUrbano não pode ser maior que " & _
+                                                       "a data corrente!"
+                          
+                    End If
+                
+                End If
+                
+            End If
+        
+        End If
+        
+'        If objForm.SpdDataAtivacaoAcessoTerc.Enabled Then
+            
+            If (Not VerificaDataOK(objForm.SpdDataAtivacaoAcessoTerc.Text)) And _
+                              Trim(objForm.SpdDataAtivacaoAcessoTerc.Text) <> "" Then
+            
+                 bRetorno = False
+                  
+                 iAux = iAux + 1
+                  
+                 ReDim Preserve vMensagemListaMsg(iAux)
+                 vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Terceiros não é uma data válida!"
+                 
+                 objForm.SpdDataAtivacaoAcessoTerc.Text = ""
+                 
+                 bDataValida = False
+            Else
+            
+                bDataValida = True
+
+            End If
+        
+'        End If
+        
+        If objForm.SpdDataEntregaUrbano.Text <> "" Then
+           
+           sMaiorData = objForm.SpdDataEntregaUrbano.Text
+        
+        End If
+        
+        If sMaiorData <> "" And objForm.SpdDataEntregaInterUrbano.Text <> "" Then
+            
+            If CDate(objForm.SpdDataEntregaInterUrbano.Text) > CDate(sMaiorData) Then
+               
+               sMaiorData = objForm.SpdDataEntregaInterUrbano.Text
+            
+            End If
+        
+        End If
+        
+'        If bFlagIndicaLegado Then
+            
+            If objForm.SpdDataAtivacaoAcessoTerc.Text <> "" And sMaiorData <> "" And _
+               bDataValida Then
+                
+                If CDate(objForm.SpdDataAtivacaoAcessoTerc.Text) < CDate(sMaiorData) Then
+                    
+                    bRetorno = False
+                      
+                    iAux = iAux + 1
+                      
+                    ReDim Preserve vMensagemListaMsg(iAux)
+                    vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Terceiro não pode ser menor " & _
+                          " que a maior data de Entrega entre o Acesso Urbano e o Interurbano!"
+                End If
+            
+            End If
+        
+'        End If
+        
+        If bFlagIndicaLegado Then
+            
+            If Trim(objForm.SpdDataAtivacaoAcessoTerc.Text) <> "" And sDataFim <> "" And _
+               (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") And bDataValida Then
+            
+                If CDate(sDataFim) > CDate(objForm.SpdDataAtivacaoAcessoTerc.Text) And _
+                   bCriticaData Then
+                    
+                    iAux = iAux + 1
+                      
+                    ReDim Preserve vMensagemListaMsg(iAux)
+                    vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso terceiro não pode ser menor que " & _
+                                            "a data de finalização da fase anterior!"
+                
+                   bRetorno = False
+                End If
+                
+            End If
+        
+        End If
+        
+    End If
+    
+    If objForm.FrameClassificacaoEndereco.Visible = True Then
+        If objForm.CboClassificacaoEndereco.ListIndex = -1 Then
+        
+           bRetorno = False
+             
+           iAux = iAux + 1
+            
+           ReDim Preserve vMensagemListaMsg(iAux)
+           vMensagemListaMsg(iAux - 1) = "Classificação de Endereço é obrigatório!"
+        
+        End If
+    End If
+    '-- JRCRUZ --------------------------------------------**
+    
+    '=================================================================
+    'CALLBAT - 26/06/2013 - Interface junto ao CFM
+    'SO-ENGNQ-83669III
+    '=================================================================
+    If objForm.UsrGenDadosAcessoTroncoTX.UsaTX = "" Then
+    
+      bRetorno = False
+      iAux = iAux + 1
+ 
+      ReDim Preserve vMensagemListaMsg(iAux)
+
+      vMensagemListaMsg(iAux - 1) = "Informações de Tronco TX" & _
+      IIf(sCaracteristicaAcesso = "P", " do Acesso Principal", _
+                                                  " do Acesso Contingente") & _
+                                                  " são obrigatórias."
+    
+    End If
+    '=================================================================
+    '=================================================================
+    
+    If Not bRetorno Then
+    
+        Call ExibeListaMensagem
+    
+    Else
+    
+        CamposPreenchidosOK = True
+        
+    End If
+    
+End Function
+
+'Public Function ExibeCriticas() As Boolean
+'
+'    Dim iDigitoVeloc            As Integer
+'    Dim sLetraVeloc             As String
+'    Dim bRetornoDadosOK         As Boolean
+'    Dim sRetAux                 As String
+'
+'    Dim objDadosFase            As clsgenFase
+'    Dim bRetorno                As Boolean
+'    Dim sDataFim                As String
+'    Dim sMaiorData              As String
+'    Dim iAux                    As Integer
+'    Dim bDataValida             As Boolean
+'    Dim bCriticaData            As Boolean
+'    Dim objDadosLogSGAP         As clsBLD_LogSGAPCLA
+'    Dim objDadosLocalidade      As clsGenLocalidade
+'
+'    ExibeCriticas = False
+'
+'    If objForm.SpdListaAcessos.DataRowCnt = 0 Then
+'
+'       Exit Function
+'
+'    End If
+'
+'    If (objForm.optPropriedadeAcesso(0).Value = True And Trim(objForm.TxtEstacaoEntregaEbtConf.Text) = "" And objForm.TxtEstacaoEntregaEbtConf.Visible = True) Or _
+'       (objForm.optPropriedadeAcesso(1).Value = True And Trim(objForm.TxtEstacaoEntregaTerc.Text) = "" And objForm.TxtEstacaoEntregaTerc.Visible = True) Or _
+'       (objForm.optPropriedadeAcesso(0).Value = False And objForm.optPropriedadeAcesso(1).Value = False) Then
+'
+'       ExibeCriticas = False
+'
+'       If objForm.UsrBLFCabecalho_Acesso.StatusCla = "Solicitação iniciada no CLA." Then
+'
+'            objMensagem.TipoMsg = "A"
+'            objMensagem.Descricao = "Aguardando retorno do tratamento do acesso do CLA!"
+'            objMensagem.ExibeMensagem
+'
+'       Else
+'
+'            objMensagem.TipoMsg = "A"
+'            objMensagem.Descricao = "Os campos Propriedade do Acesso, Padrão de Interface Embratel, Estação de Entrega - Configuração são de preenchimento obrigatório para início da fase!"
+'            objMensagem.ExibeMensagem
+'
+'       End If
+'
+'       Exit Function
+'
+'    End If
+'
+'    If (objForm.TxtEstacaoEntregaEbtConf.Visible = True And Trim(objForm.TxtEstacaoEntregaEbtConf.Text) = "") And (objForm.TxtEstacaoEntregaTerc.Visible = True And Trim(objForm.TxtEstacaoEntregaTerc.Text) = "") Then
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "A Estação de Entrega Configuração é obrigatória!"
+'        bRetorno = False
+'    End If
+'
+'    iAux = iAux + 1
+'
+'    bRetorno = True
+'
+'    bCriticaData = True
+'
+'    If (Sigla_Acao = "ATG" Or Sigla_Acao = "ALT" Or Sigla_Acao = "ALG") And objdadosServico.Origem = "SGA" Then
+'
+'       bCriticaData = False
+'
+'    End If
+'
+'    ReDim vMensagemListaMsg(iAux)
+'
+'    vMensagemListaMsg(0) = "Os campos abaixo foram preenchidos incorretamente ou não foram preenchidos:"
+'    iAux = iAux + 1
+'
+'    ExibeCriticas = False
+'
+'    If (Not VerificaDataOK(objForm.SpdDataPedidoAcesso.Text)) And _
+'                      Trim(objForm.SpdDataPedidoAcesso.Text) <> "" Then
+'
+'        bRetorno = False
+'
+'        iAux = iAux + 1
+'
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "Data de Pedido do Acesso não é uma data válida!"
+'
+'
+'    End If
+'
+'    If objForm.optSegurancaAcesso(0).Value = False And _
+'       objForm.optSegurancaAcesso(1).Value = False Then
+'
+'        bRetorno = False
+'
+'        iAux = iAux + 1
+'
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "Segurança do acesso " & _
+'        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                       " do Acesso Contingente") & _
+'                                      " é obrigatória."
+'    End If
+'
+'    If objForm.optPropriedadeAcesso(0).Value = False And _
+'       objForm.optPropriedadeAcesso(1).Value = False Then
+'
+'        bRetorno = False
+'
+'        iAux = iAux + 1
+'
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "Propriedade do acesso" & _
+'        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                       " do Acesso Contingente") & _
+'                                      " é obrigatório."
+'
+'    End If
+'
+'    Set objDadosFase = New clsgenFase
+'
+'    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+'    objDadosFase.InformaMensagem objMensagem
+'
+'    sDataFim = objDadosFase.ObtemDataFimRealFaseAnterior(Servico_ID, _
+'                                                         Sequencia_Acao, Familia_Produto)
+'
+'    Set objDadosFase = Nothing
+'
+'    If TipoOperacao = "I" And Grupo_ID = GbIDGrupoVLI And bFlagAcessoJaConstruido Then
+'
+'        bCriticaData = False
+'
+'    End If
+'
+'    If objForm.optPropriedadeAcesso(0).Value = True Then 'Propriedade Embratel
+'
+'        If Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "" And _
+'           Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "0" And _
+'           (objForm.TxtNumeroOtsTx_EBT.Enabled = True) Then
+'
+'            If Not MascaraOTSTX_OK(Trim(objForm.TxtNumeroOtsTx_EBT.Text)) Then
+'
+'                objForm.ssTabAcesso.Tab = 1
+'
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "A máscara do número de OTS TX deve ser " & _
+'                 "composta de (1 a 5 dígitos) seguido de "
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "'-' mais (1 a 4) caracteres!"
+'
+'            End If
+'
+'        End If
+'
+'       If Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "" And Trim(objForm.TxtTroncoOTS.Text) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Tronco OTS TX " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'       End If
+'
+'        If (Not VerificaDataOK(objForm.SpdDataAtivacaoAcessoEBT.Text)) And _
+'                          Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) <> "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Embratel não é uma data válida!"
+'
+'        Else
+'
+'            If bFlagIndicaLegado Then
+'
+'                If Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) <> "" And sDataFim <> "" And _
+'                   (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+'
+'                    If CDate(sDataFim) > CDate(objForm.SpdDataAtivacaoAcessoEBT.Text) And _
+'                       bCriticaData Then
+'
+'                        bRetorno = False
+'
+'                        iAux = iAux + 1
+'
+'                        ReDim Preserve vMensagemListaMsg(iAux)
+'                        vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Embratel não pode ser menor que " & _
+'                                                      "a data de finalização da fase anterior!"
+'
+'                    Else
+'
+'                        If objForm.SpdDataAtivacaoAcessoEBT.Text <> "" Then
+'
+'                            If CDate(objForm.SpdDataAtivacaoAcessoEBT.Text) > Date Then
+'
+'                                bRetorno = False
+'
+'                                iAux = iAux + 1
+'
+'                                ReDim Preserve vMensagemListaMsg(iAux)
+'                                vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Embratel não pode ser maior que " & _
+'                                                              "a data corrente!"
+'
+'                            End If
+'
+'                        End If
+'
+'                    End If
+'
+'                End If
+'
+'            End If
+'
+'        End If
+'    Else
+'
+'        If objForm.CboTipoAcessoTerceiro.ListIndex = -1 Then
+'
+'           bRetorno = False
+'
+'           iAux = iAux + 1
+'
+'        End If
+'
+'        If Trim(objForm.TxtNumeroOTSTXTerc) <> "" And _
+'           Trim(objForm.TxtNumeroOTSTXTerc) <> "0" Then
+'
+'            If Not MascaraOTSTX_OK(Trim(objForm.TxtNumeroOTSTXTerc.Text)) Then
+'
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "A máscara do número de OTS TX deve ser " & _
+'                 "composta de (1 a 5 dígitos) seguido de "
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "'-' mais (1 a 4) caracteres!"
+'            End If
+'
+'        End If
+'
+'       If Trim(objForm.TxtNumeroOTSTXTerc.Text) <> "" And Trim(objForm.TxtTroncoOTS.Text) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Tronco OTS TX " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'       End If
+'
+'        If Trim(objForm.TxtCNLPontaA_Urbano.Text) <> "" Then
+'
+'            Set objDadosLocalidade = New clsGenLocalidade
+'
+'            objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+'            objDadosLocalidade.InformaMensagem objMensagem
+'
+'            If Not objDadosLocalidade.VerificaExistenciaCNL( _
+'                                      TrataPlick(objForm.TxtCNLPontaA_Urbano.Text)) Then
+'
+'               bRetorno = False
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'               vMensagemListaMsg(iAux - 1) = "CNL da ponta A do provedor urbano informado " & _
+'                                             "não foi encontrado na tabela de"
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'               vMensagemListaMsg(iAux - 1) = " Localidades!"
+'
+'            End If
+'
+'            Set objDadosLocalidade = Nothing
+'
+'        End If
+'
+'        If objForm.SpdDataEntregaUrbano.Enabled = True Then
+'
+'            If (Not VerificaDataOK(objForm.SpdDataEntregaUrbano.Text)) And _
+'                              Trim(objForm.SpdDataEntregaUrbano.Text) <> "" Then
+'
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "Data de Entrega do Acesso Urbano " & _
+'                                              "não é uma data válida!"
+'            Else
+'
+'                If objForm.SpdDataEntregaUrbano.Text <> "" Then
+'
+'                   If CDate(objForm.SpdDataEntregaUrbano.Text) > Date Then
+'
+'                        bRetorno = False
+'
+'                        iAux = iAux + 1
+'
+'                        ReDim Preserve vMensagemListaMsg(iAux)
+'                        vMensagemListaMsg(iAux - 1) = "Data de Entrega do Acesso Urbano não pode ser maior que " & _
+'                                                      "a data corrente!"
+'
+'                   End If
+'
+'                End If
+'
+'            End If
+'
+'        End If
+'
+'        If Trim(objForm.TxtCNLPontaA.Text) <> "" Then
+'
+'            Set objDadosLocalidade = New clsGenLocalidade
+'
+'            objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+'            objDadosLocalidade.InformaMensagem objMensagem
+'
+'            If Not objDadosLocalidade.VerificaExistenciaCNL( _
+'                                      TrataPlick(objForm.TxtCNLPontaA.Text)) Then
+'
+'               bRetorno = False
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'               vMensagemListaMsg(iAux - 1) = "CNL da ponta A do provedor interurbano informado " & _
+'                                             "não foi encontrado na tabela de"
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'               vMensagemListaMsg(iAux - 1) = "'Localidades!"
+'
+'            End If
+'
+'            Set objDadosLocalidade = Nothing
+'
+'        End If
+'
+'        If Trim(objForm.TxtCNLPontaB.Text) <> "" Then
+'
+'            Set objDadosLocalidade = New clsGenLocalidade
+'
+'            objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+'            objDadosLocalidade.InformaMensagem objMensagem
+'
+'            If Not objDadosLocalidade.VerificaExistenciaCNL( _
+'                                      TrataPlick(objForm.TxtCNLPontaB.Text)) Then
+'
+'               bRetorno = False
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'               vMensagemListaMsg(iAux - 1) = "CNL da ponta B do provedor interurbano informado " & _
+'                                             "não foi encontrado na tabela de"
+'
+'               iAux = iAux + 1
+'
+'               ReDim Preserve vMensagemListaMsg(iAux)
+'               vMensagemListaMsg(iAux - 1) = "'Localidades!"
+'
+'            End If
+'
+'            Set objDadosLocalidade = Nothing
+'
+'        End If
+'
+'        If objForm.SpdDataEntregaInterUrbano.Enabled = True Then
+'
+'            If (Not VerificaDataOK(objForm.SpdDataEntregaInterUrbano.Text)) And _
+'                              Trim(objForm.SpdDataEntregaInterUrbano.Text) <> "" Then
+'
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'                vMensagemListaMsg(iAux - 1) = "Data de Entrega do Acesso InterUrbano não é uma data válida!"
+'
+'            Else
+'                If objForm.SpdDataEntregaInterUrbano.Text <> "" Then
+'
+'                    If CDate(objForm.SpdDataEntregaInterUrbano.Text) > Date Then
+'
+'                        bRetorno = False
+'
+'                         iAux = iAux + 1
+'
+'                         ReDim Preserve vMensagemListaMsg(iAux)
+'                         vMensagemListaMsg(iAux - 1) = "Data de Entrega do Acesso InterUrbano não pode ser maior que " & _
+'                                                       "a data corrente!"
+'
+'                    End If
+'
+'                End If
+'
+'            End If
+'
+'        End If
+'
+''        If objForm.SpdDataAtivacaoAcessoTerc.Enabled Then
+'
+'            If (Not VerificaDataOK(objForm.SpdDataAtivacaoAcessoTerc.Text)) And _
+'                              Trim(objForm.SpdDataAtivacaoAcessoTerc.Text) <> "" Then
+'
+'                 bRetorno = False
+'
+'                 iAux = iAux + 1
+'
+'                 ReDim Preserve vMensagemListaMsg(iAux)
+'                 vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Terceiros não é uma data válida!"
+'
+'                 bDataValida = False
+'            Else
+'
+'                bDataValida = True
+'
+'            End If
+'
+''        End If
+'
+'        If objForm.SpdDataEntregaUrbano.Text <> "" Then
+'
+'           sMaiorData = objForm.SpdDataEntregaUrbano.Text
+'
+'        End If
+'
+'        If sMaiorData <> "" And objForm.SpdDataEntregaInterUrbano.Text <> "" Then
+'
+'            If CDate(objForm.SpdDataEntregaInterUrbano.Text) > CDate(sMaiorData) Then
+'
+'               sMaiorData = objForm.SpdDataEntregaInterUrbano.Text
+'
+'            End If
+'
+'        End If
+'
+''        If bFlagIndicaLegado Then
+'
+'            If objForm.SpdDataAtivacaoAcessoTerc.Text <> "" And sMaiorData <> "" And _
+'               bDataValida Then
+'
+'                If CDate(objForm.SpdDataAtivacaoAcessoTerc.Text) < CDate(sMaiorData) Then
+'
+'                    bRetorno = False
+'
+'                    iAux = iAux + 1
+'
+'                    ReDim Preserve vMensagemListaMsg(iAux)
+'                    vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso Terceiro não pode ser menor " & _
+'                          " que a maior data de Entrega entre o Acesso Urbano e o Interurbano!"
+'                End If
+'
+'            End If
+'
+''        End If
+'
+'        If bFlagIndicaLegado Then
+'
+'            If Trim(objForm.SpdDataAtivacaoAcessoTerc.Text) <> "" And sDataFim <> "" And _
+'               (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") And bDataValida Then
+'
+'                If CDate(sDataFim) > CDate(objForm.SpdDataAtivacaoAcessoTerc.Text) And _
+'                   bCriticaData Then
+'
+'                    iAux = iAux + 1
+'
+'                    ReDim Preserve vMensagemListaMsg(iAux)
+'                    vMensagemListaMsg(iAux - 1) = "Data de Ativação do Acesso terceiro não pode ser menor que " & _
+'                                            "a data de finalização da fase anterior!"
+'
+'                End If
+'
+'            End If
+'
+'        End If
+'
+'    End If
+'
+'
+'    If objForm.FrameClassificacaoEndereco.Visible = True Then
+'        If objForm.CboClassificacaoEndereco.ListIndex = -1 Then
+'
+'           bRetorno = False
+'
+'           iAux = iAux + 1
+'
+'           ReDim Preserve vMensagemListaMsg(iAux)
+'           vMensagemListaMsg(iAux - 1) = "Classificação de Endereço é obrigatório!"
+'
+'        End If
+'    End If
+'
+'    If Produto_ID <> GbIDProdutoVIP Then
+'
+'        If objForm.OptResponsavelInfra(0).Value = False And _
+'           objForm.OptResponsavelInfra(1).Value = False And objForm.optPropriedadeAcesso(0).Value = True Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Responsabilidade da infraEstrutura " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                          " é obrigatório."
+'
+'        End If
+'
+'    End If
+'
+'    If objForm.optTipoRede(0).Value <> False Or objForm.optTipoRede(1).Value <> False Or objForm.optTipoRede(2).Value <> False Then
+'
+'        If Trim(objForm.TxtDescricaoRedeDeterministica.Text) = "" Then
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Descrição de Rede Deterministica " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                          " é obrigatório."
+'            bRetorno = False
+'        End If
+'
+'        If Trim(objForm.txtTSI.Text) = "" Then
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "A informação de TSI de Rede Determinística " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                          " é obrigatório."
+'
+'            bRetorno = False
+'
+'        End If
+'
+'        If Trim(objForm.txtTSF.Text) = "" Then
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "A informação de TSF de Determinística " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                          " é obrigatório."
+'
+'            bRetorno = False
+'        End If
+'
+'    End If
+'
+'    If objForm.TxtEMailGic.Text = "" Then
+'
+'        bRetorno = False
+'
+'        iAux = iAux + 1
+'
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "E-mail " & _
+'        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                       " do Acesso Contingente") & _
+'                                                       " é obrigatório."
+'
+'    End If
+'
+'    If objForm.TxtRIT.Text = "" Then
+'
+'        bRetorno = False
+'
+'        iAux = iAux + 1
+'
+'        ReDim Preserve vMensagemListaMsg(iAux)
+'        vMensagemListaMsg(iAux - 1) = "RIT " & _
+'        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                       " do Acesso Contingente") & _
+'                                                       " é obrigatório."
+'
+'    End If
+'
+'    If objForm.optPropriedadeAcesso(0).Value = True Then  'Propriedade Embratel
+'
+'       If Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Data de Ativação " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'       End If
+'
+'       If Trim(objForm.TxtEstacaoEntregaEbtConf) = "" And _
+'          objForm.TxtEstacaoEntregaEbtConf.Visible = True Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Estação de entrega Configuração " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       If Trim(objForm.TxtEstacaoEntregaEbt) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Estação de entrega Embratel " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       If Trim(objForm.LblVelocidadeAcesso) <> "" Then
+'
+'          Call obtemDigitoVelocidade(objForm.LblVelocidadeAcesso, iDigitoVeloc, sLetraVeloc)
+'
+'          'Se a Velocidade do Circuito for >= 2M e não for cabo interno, numero ots obrigatorio
+'
+'          If sLetraVeloc = "M" And iDigitoVeloc >= 2 And _
+'             objForm.CboTipoAcessoEmbratel.ListIndex <> 3 Then
+'
+'             If Trim(objForm.TxtNumeroOtsTx_EBT.Text) = "" Then
+'
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                vMensagemListaMsg(iAux - 1) = "Número OTS TX " & _
+'                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                              " do Acesso Contingente") & _
+'                                                              " é obrigatório."
+'
+'             End If
+'
+'             If Val(objForm.TxtItemOtsTxEBT.Text) = 0 Then
+'
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                vMensagemListaMsg(iAux - 1) = "Item OTS TX " & _
+'                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                            " do Acesso Contingente") & _
+'                                                            " é obrigatório."
+'
+'             End If
+'
+'          End If
+'
+'       End If
+'
+'       If Trim(objForm.TxtDesignacaoAcessoEBT.Text) = "" And objForm.CboTipoAcessoEmbratel.ListIndex <> 1 Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Designação do Acesso Embratel " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       'Se tipo de acesso for ADE
+'       If objForm.CboTipoAcessoEmbratel.ListIndex = 2 Then
+'
+'          If objForm.optProprietarioModem(0).Value = False And _
+'             objForm.optProprietarioModem(1).Value = False Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'       End If
+'
+'       'Se tipo de acesso for Cabo Interno
+'       If objForm.CboTipoAcessoEmbratel.ListIndex = 3 Then
+'
+'          If objForm.optProprietarioModem(0).Value = False And _
+'             objForm.optProprietarioModem(1).Value = False Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'       End If
+'    Else
+'
+'       'Propriedade Acesso Terceiro
+'        If objForm.optProprietarioModem(0).Value = False And _
+'           objForm.optProprietarioModem(1).Value = False And _
+'           objForm.CboTipoAcessoTerceiro.ListIndex <> 2 Then  'É obrigatório quando o
+'                                                              'tipo de acesso for <>
+'                                                              'de Rede Determinística
+'           bRetorno = False
+'
+'           iAux = iAux + 1
+'
+'           ReDim Preserve vMensagemListaMsg(iAux)
+'
+'           vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+'           IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                         " do Acesso Contingente") & _
+'                                                         " é obrigatório."
+'
+'        End If
+'
+'       If objForm.SpdDataAtivacaoAcessoTerc.Text = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Data de Ativação " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       If Trim(objForm.TxtDesignacaoAcessoTerceiro.Text) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Designação de acesso " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       If Trim(objForm.TxtEstacaoEntregaTercConf.Text) = "" Then
+'
+'            bRetorno = False
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Estação de Entrega Configuração" & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       If Trim(objForm.TxtEstacaoEntregaTerc.Text) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Estação de Entrega Embratel " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       If objForm.CboProvedorUrbano.ListIndex <= 0 Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Provedor urbano " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       If Trim(objForm.TxtCNLPontaA_Urbano.Text) = "" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "CNL Ponta A do Provedor Urbano " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'       End If
+'
+'       If objForm.optExisteAcessoIU(0).Value = True Then
+'
+'          If objForm.CboProvedorInterurbano.ListIndex <= 0 Then
+'
+'             bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Provedor interurbano " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If bFlagIndicaLegado Then
+'              'Numero do acesso provedor interurbano
+'              If Trim(objForm.SpdNumeroAcessoInterurbano.Text) = "" Then
+'
+'                objMensagem.Descricao = "Nº acesso interurbano obrigatório."
+'                bRetorno = False
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                vMensagemListaMsg(iAux - 1) = "Número do acesso interurbano " & _
+'                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                               " do Acesso Contingente") & _
+'                                                               " é obrigatório."
+'
+'              End If
+'          End If
+'
+'          If Trim(objForm.TxtCNLPontaA.Text) = "" Then
+'
+'            objMensagem.Descricao = "CNL ponta A interurbano obrigatório."
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "CNL Ponta A interurbano " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Trim(objForm.TxtCNLPontaB.Text) = "" Then
+'
+'            objMensagem.Descricao = "CNL ponta B interurbano obrigatório."
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "CNL Ponta B interurbano " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Trim(objForm.SpdDataEntregaInterUrbano.Text) = "" Then
+'
+'            objMensagem.Descricao = "Data entrega interurbano obrigatório."
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Data de entrega do Provedor interurbano " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'
+'       End If
+'
+'       If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+'
+'          If Val(objForm.TxtNumeroOTSTXTerc.Text) = 0 Then
+'
+'            objMensagem.Descricao = "Nº OTS TX obrigatório."
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Nº OTS TX obrigatório " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtItemOTSTxTerc.Text) = 0 Then
+'
+'            objMensagem.Descricao = "Item OTS TX obrigatório."
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Item OTS TX obrigatório " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'       End If
+'
+'       'Tipo de acesso < 2M
+'       If objForm.CboTipoAcessoTerceiro.ListIndex = 0 Then
+'
+'          If Trim(objForm.TxtNumeroCaboAcessoMenor.Text) = "" Then
+'
+'                objMensagem.Descricao = "Nº cabo obrigatório."
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                vMensagemListaMsg(iAux - 1) = "Nº cabo obrigatório. "
+'
+'                bRetorno = False
+'
+'          End If
+'
+'          If Trim(objForm.TxtNumeroParAcessoMenor.Text) = "" Then
+'                objMensagem.Descricao = "Nº par obrigatório."
+'
+'                iAux = iAux + 1
+'
+'                ReDim Preserve vMensagemListaMsg(iAux)
+'
+'                vMensagemListaMsg(iAux - 1) = "Nº par obrigatório. "
+'                bRetorno = False
+'
+'
+'          End If
+'
+'          If objForm.CboInterfaceClienteMenor.ListIndex <= 0 Then
+'
+'            objMensagem.Descricao = "Interface Cliente obrigatório."
+'            bRetorno = False
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'            vMensagemListaMsg(iAux - 1) = "Interface cliente " & _
+'            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'       End If
+'
+'       'Tipo de acesso Rede Deterministica
+'       If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+'
+'          If Trim(objForm.TxtDIDFila_Rede.Text) = "" Then
+'
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtDIDArmacao_Rede.Text) = 0 Then
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID armação" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'          'Leonardo Ferreira - Trocando de numero para string - Inicio
+'          'If Val(objForm.TxtDIDRegua_Rede.Text) = 0 Then
+'          If Trim(objForm.TxtDIDRegua_Rede.Text) = "" Then
+'          'Leonardo Ferreira - Fim
+'             bRetorno = False
+'
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'          If Val(objForm.TxtDIDPosicao_Rede.Text) = 0 Then
+'
+'             bRetorno = False
+'             iAux = iAux + 1
+'
+'             ReDim Preserve vMensagemListaMsg(iAux)
+'
+'             vMensagemListaMsg(iAux - 1) = "DID Posição" & _
+'             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'                                                           " do Acesso Contingente") & _
+'                                                           " é obrigatório."
+'
+'          End If
+'
+'       End If
+'
+'    End If
+'
+'
+'    If objForm.ssTabAcesso.TabVisible(5) = True Then
+'
+'        If objForm.UsrVIPDadosSwitch.VerificaComboObterEnderecoIP <> "Dados de Switch - OK" Then
+'
+'            bRetorno = False
+'
+'            iAux = iAux + 1
+'
+'            ReDim Preserve vMensagemListaMsg(iAux)
+'
+'            vMensagemListaMsg(iAux - 1) = "Os dados de Switch são obrigatórios para a finalização da fase!"
+'
+'        End If
+'
+'    End If
+'
+'    If Not bRetorno Then
+'
+'        Call ExibeListaMensagem
+'
+'    Else
+'
+'        ExibeCriticas = True
+'
+'    End If
+'
+'End Function
+
+Private Function ExibeListaMensagem() As Boolean
+
+    Dim iAux     As Integer
+    
+    Load FrmGenListaMensagem
+    
+    FrmGenListaMensagem.Left = 1335
+    FrmGenListaMensagem.Top = 1785
+    
+    For iAux = 0 To UBound(vMensagemListaMsg, 1)
+    
+        FrmGenListaMensagem.LstMensagem.AddItem vMensagemListaMsg(iAux)
+    
+    Next iAux
+    
+    ReDim vMensagemListaMsg(1)
+    FrmGenListaMensagem.Show vbModal
+    
+End Function
+
+Public Function CarregarFormCFsDaFase(ByVal plIdFase As Long) As Boolean
+    
+    'IP VPN
+    Dim objDadosProduto         As New clsGenProduto
+    Dim objAlocCFs              As clsGen_DetalheAlocarCF
+    Dim objDadosFaseVariosCfs   As clsgenFase
+    Dim objDadosVariosCFs       As clsBLF_AlocacaoCF
+    Dim objOcAlocarCF           As clsInterOC_AlocarCF
+
+    On Error GoTo ErrorHandler
+    
+    CarregarFormCFsDaFase = False
+    
+    'Formulário
+    '''Set objFormVariasFases = New frmgenAlocaCFVariasFases
+    
+    'Instância a classe para fornecer ao formulário
+    Set objOcAlocarCF = New clsInterOC_AlocarCF
+
+    'Dados váris CFs alocados por Fase
+    Set objDadosFaseVariosCfs = New clsgenFase
+    objDadosFaseVariosCfs.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFaseVariosCfs.InformaMensagem objMensagem
+    
+    'Dados váris CFs Alocados
+    Set objDadosVariosCFs = New clsBLF_AlocacaoCF
+    objDadosVariosCFs.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosVariosCFs.InformaMensagem objMensagem
+    
+    'Obtém dados do Produto
+    objDadosProduto.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosProduto.InformaMensagem objMensagem
+        
+    bRetorno = objDadosProduto.RecuperarDados(Produto_ID)
+    
+    If Not bRetorno Then
+        GoTo Finalizar
+    End If
+       
+    'Instancia o formulário na classe de controle que fica responsável
+    'pela atualização da coleção
+    bRetorno = objOcAlocarCF.InstanciaoFormVariasFases
+        
+    If Not bRetorno Then
+        GoTo Finalizar
+    End If
+       
+    'Atualiza o caption da Tela Vários CFs
+    'objFormVariasFases.Caption = objDadosProduto.Descricao
+    objOcAlocarCF.objFormVariasFases.Caption = objDadosProduto.Descricao
+    
+    'objFormVariasFases.FramTituloFase.Caption = "Alocação Centros Funcionais da Fase Tratar Centro Local"
+    objOcAlocarCF.objFormVariasFases.FramTituloFase.Caption = "Alocação Centros Funcionais da Fase Tratar Centro Local"
+        
+    'Carrega os CFs alocados para o Fase
+    If Not objDadosFaseVariosCfs.MontaCFsDaFase(plIdFase) Then
+        Exit Function
+    End If
+        
+    'Retorna os CFs da Fase carregando o combo da tela
+    bRetorno = objblfOC_SelecionarOTS.ExibirListaCentroFuncional( _
+           objOcAlocarCF.objFormVariasFases.cboCentroFunc, _
+            GbCodigoFaseCentroLocal, _
+            True)
+            
+    If Not bRetorno Then
+    
+        GoTo Finalizar
+        
+    End If
+
+    'Carrega na tela os CFs já selecionados
+    For Each objAlocCFs In objDadosFaseVariosCfs.ColecaoCFsDaFase
+        
+        objOcAlocarCF.objFormVariasFases.lstCfs.AddItem objAlocCFs.Codigo_Centro_Funcional
+        objOcAlocarCF.objFormVariasFases.lstCfs.ItemData(objOcAlocarCF.objFormVariasFases.lstCfs.NewIndex) = objAlocCFs.Centro_Funcional_ID
+    
+    Next objAlocCFs
+    
+    With objOcAlocarCF.objFormVariasFases
+
+        .cboCentroFunc.Enabled = True
+        .lstCfs.Enabled = True
+        .CmdAdd.Enabled = True
+        .CmdDel.Enabled = True
+        .CmdSalvar.Enabled = True
+        .CmdLimpar.Enabled = True
+    
+    End With
+    
+    'Informa a classe de Dados Fase Vários CFs
+    Call objOcAlocarCF.objFormVariasFases.InformaClasseVariosCFsGEN(objDadosFaseVariosCfs)
+        
+    'Informa a classe de Controle ALocar CF
+    Call objOcAlocarCF.objFormVariasFases.InformaClasseAlocarCFOC(objOcAlocarCF)
+    
+    'Passa ao controlador do formulário vários CFs a classe com os CFs alocados
+    Set objOcAlocarCF.objDadosFaseVariosCfs = objDadosFaseVariosCfs
+    
+    
+    'Carrega o formulário Vários CFs
+    objOcAlocarCF.objFormVariasFases.Show 1
+    
+    'Atualiza e grava a coleção de CF's, relacionada aquela fase da OTS
+    Set objAlocCFs = New clsGen_DetalheAlocarCF
+    
+    If objOcAlocarCF.objDadosFaseVariosCfs.ColecaoCFsDaFase.Count > 0 Then
+    
+        If objDadosVariosCFs.ExcluiDadosVariasFases(plIdFase) Then
+            
+            For Each objAlocCFs In objOcAlocarCF.objDadosFaseVariosCfs.ColecaoCFsDaFase
+                
+                Set objAlocacaoFase = New clsGen_DetalheAlocarCF
+                    
+                If Not objDadosVariosCFs.GravaDadosVariasFases(plIdFase, _
+                        objAlocCFs.Centro_Funcional_ID) Then
+                        
+                    GoTo ErrorHandler
+                    
+                End If
+            
+            Next objAlocCFs
+        
+        End If
+    
+    Else
+        objMensagem.TipoMsg = "A"
+        objMensagem.Descricao = "Ao menos um Centro Funcional deve ser selecionado."
+        objMensagem.ExibeMensagem
+        CarregarFormCFsDaFase = False
+        
+        GoTo Finalizar
+        
+    End If
+    
+    'Executa método para popular os campos do Controle Cabecalho
+    CarregarFormCFsDaFase = True
+
+    GoTo Finalizar
+    
+Finalizar:
+    
+    Set objDadosProduto = Nothing
+    Set objAlocCFs = Nothing
+    
+    
+    Set objDadosProduto = Nothing
+    Set objDadosFaseVariosCfs = Nothing
+    Set objDadosVariosCFs = Nothing
+    
+    Exit Function
+    
+ErrorHandler:
+
+       objMensagem.TipoMsg = "E"
+       
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                           vbCrLf & "Houve um erro de execução no método: " & vbCrLf & vbCrLf & "CarregarForm do Objeto Controle " & _
+                          "clsGenOC_TratarAcessoEmbratel"
+       
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+End Function
+
+Public Function RealocarCF() As Boolean
+
+    Dim objDadosFase           As New clsgenFase
+
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+
+    If Not objForm.FlControlaAlteracao And _
+       Not bFlagControlaAlteracao Then
+    
+    'Verificar se a fase já foi iniciada, em caso afirmativo, exibe mensagem de alerta
+    '
+        If objDadosFase.ObtemUltimaFaseRealizada(Servico_ID) <> Fase_ID Then
+        
+            If CarregarFormRealocarCF(CentroFuncionalID, GbCodigoFaseAcesso, _
+                      objblfOC_SelecionarOTS, Me) <> 0 Then
+        
+                Unload objForm
+        
+            End If
+        
+        Else
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Não é possível a realocação do Centro Funcional! Esta fase encontra-se iniciada/concluída!"
+            objMensagem.ExibeMensagem
+            
+        End If
+    
+    Else
+        If objDadosFase.ObtemUltimaFaseRealizada(Servico_ID) <> Fase_ID Then
+        
+            objMensagem.TipoMsg = "Q"
+            objMensagem.Descricao = "Existem dados da tela que serão perdido! Continua assim mesmo? "
+            
+            If objMensagem.ExibeMensagem = "S" Then
+            
+                If CarregarFormRealocarCF(CentroFuncionalID, GbCodigoFaseAcesso, _
+                          objblfOC_SelecionarOTS, Me) <> 0 Then
+            
+                    Unload objForm
+            
+                End If
+            
+            End If
+            
+        End If
+        
+    End If
+
+End Function
+
+Public Function SolicitarDadosSwitch() As Boolean
+
+    Dim objDadosEqptoNGN As VIP_Equipamento_NGN
+    
+    Set objDadosEqptoNGN = New VIP_Equipamento_NGN
+    
+    objDadosEqptoNGN.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosEqptoNGN.InformaMensagem objMensagem
+    
+    bRetorno = objDadosEqptoNGN.SolicitarDadosSwitch(Fase_ID)
+        
+    If objMensagem.TipoMsg <> "" Then
+    
+        objMensagem.ExibeMensagem
+        Exit Function
+        
+    End If
+    
+    sStatusEqptoNGN = objDadosEqptoNGN.Status
+    
+    'If sStatusEqptoNGN = "A" Then
+'
+'        '===================================================================
+'        '===================================================================
+'        'CALBAT - 23/01/2008 -
+'        'Alterado para contemplar a alteração do Botão para dentro do UserControl
+'        '===================================================================
+'        'objForm.CmdObterEnderecoIP.Caption = "Aguardando dados de Switch"
+'
+'        Call objForm.UsrVIPDadosSwitch.AlteraComboObterEnderecoIP("a")
+'
+'
+ '       objForm.UsrVIPDadosSwitch.AlteraComboObterEnderecoIP ("Aguardando dados de Switch")
+'
+'        '===================================================================
+'        '===================================================================
+'
+ '   End If
+    
+    Set objDadosEqptoNGN = Nothing
+    
+End Function
+
+Public Function CarregarComboEqpto(plFaseId As Long) As Boolean
+
+    Dim objDadosEqptoNGN As VIP_Equipamento_NGN
+    Dim lFaseIDAux       As Long
+    Set objDadosEqptoNGN = New VIP_Equipamento_NGN
+    
+    objDadosEqptoNGN.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosEqptoNGN.InformaMensagem objMensagem
+    
+    Set objOC_DadosSwitch = New clsVIPoc_CadastrarEqptoNGN
+    
+    lFaseIDAux = plFaseId
+    
+    If Not objDadosEqptoNGN.RecuperarDados(plFaseId) Then
+        
+       If bFlagAcessoJaConstruido Then
+       
+          lFaseIDAux = AcessoConstruidoFaseID
+          
+       End If
+    
+    End If
+    
+    bRetorno = objOC_DadosSwitch.CarregarDadosSwitch(objDadosEqptoNGN, lFaseIDAux, _
+                                 objForm.UsrVIPDadosSwitch)
+    
+End Function
+
+'Exibe tela com motivo de devolução da OTS pelo ConfServ na fase NGN Acesso
+Public Sub ExibeMotivoDevolucao()
+
+    Dim lIDFase As Long
+    Dim objFormObs As frmVIPObsDEvolucao
+    Dim objDadosCtrlCorrecao As clsGenDadosControleCorrecao
+    
+    lIDFase = objdadosServico.ObtemIDFase(Servico_ID, GbCodigoFaseConfiguracaoNGN)
+    
+    Set objDadosCtrlCorrecao = New clsGenDadosControleCorrecao
+    
+    objDadosCtrlCorrecao.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosCtrlCorrecao.InformaMensagem objMensagem
+    
+    If objDadosCtrlCorrecao.RecuperarDados(lIDFase, "D") Then
+        
+        Set objFormObs = New frmVIPObsDEvolucao
+        
+        objFormObs.TxtObsCorrecao.Text = objDadosCtrlCorrecao.Justificativa
+        objFormObs.LblDataSolicitacao.Caption = objDadosCtrlCorrecao.DataSolicitacao
+        objFormObs.TxtObsCorrecao.Locked = True
+        objFormObs.cmdGravar.Enabled = False
+        objFormObs.cmdGravar.Visible = False
+        
+        Set objDadosUsuario = New clsgenUsuario
+        
+        objDadosUsuario.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objDadosUsuario.InformaMensagem objMensagem
+        
+        bRetorno = objDadosUsuario.RecuperarDados(objDadosCtrlCorrecao.UsuarioIDSolic)
+        
+        If bRetorno Then
+            
+            objFormObs.LblUsuarioSolicitacao.Caption = objDadosUsuario.Login
+             
+        End If
+        
+        Set objDadosUsuario = Nothing
+        
+        objFormObs.Show vbModal
+        
+    End If
+
+End Sub
+
+Public Sub CarregarFormEqptoNGN()
+    
+    Dim lFaseAcessoID As Long
+    
+    Dim objEqptoNGN As New VIP_Equipamento_NGN
+    Dim sDesignacaoEqpto As String
+    
+    objOc_EqptoNGN.DesignacaoEqpto = ""
+    
+    'objOc_EqptoNGN.Fase_ID = Fase_ID
+    'objOc_EqptoNGN.Fase_ID = Fase_ID_Switch
+    
+    objOc_EqptoNGN.IDServico = Servico_ID
+    objOc_EqptoNGN.Sequencia_Acao = Sequencia_Acao
+    
+    
+    Set objEqptoNGN = New VIP_Equipamento_NGN
+    
+    ' Informar o nome do banco desejado
+    objEqptoNGN.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objEqptoNGN.InformaMensagem objMensagem
+    
+'    Set objOc_EqptoNGN = New clsVIPoc_CadastrarEqptoNGN
+    
+    If AcessoConstruidoFaseID <> 0 And TipoOperacao = "I" Then
+        
+        'lFaseAcessoID = AcessoConstruidoFaseIDSwitch
+        
+        lFaseAcessoID = objEqptoNGN.VerificaFaseIDporEquipamento(Equipamento)
+        
+        If lFaseAcessoID = 0 Then
+            lFaseAcessoID = Fase_ID
+        End If
+    
+    Else
+        
+        lFaseAcessoID = Fase_ID
+        
+        'lFaseAcessoID = Fase_ID_Switch
+
+    End If
+'alterado vcb 28/05
+    objOc_EqptoNGN.Fase_ID = Fase_ID  'lFaseAcessoID
+    
+    objOc_EqptoNGN.FaseIdAtual = Fase_ID
+'-----
+    
+    If objForm.CmdSalvar.Enabled = True Then
+       
+       objOc_EqptoNGN.TipoOperacao = "A"
+    
+    Else
+       
+       objOc_EqptoNGN.TipoOperacao = "C"
+    
+    End If
+
+    
+    'Verifica se existe equipamento cadastrado para a fase
+'alterado vcb 28/05
+    sDesignacaoEqpto = objEqptoNGN.VerificaEqptoNaOTS(Fase_ID)
+    
+    '----- errado sDesignacaoEqpto = objEqptoNGN.VerificaEqptoNaOTS(lFaseAcessoID)
+'--------
+
+    If sDesignacaoEqpto = "" Then
+        
+        'Caso não exista eqpto para a fase, verifica se existe para a OTS já cadastrada
+        'para o endereco do cliente
+        
+        sDesignacaoEqpto = objEqptoNGN.VerificaEqptoNaOTS(lFaseAcessoID)
+        
+        If sDesignacaoEqpto <> "" Then
+                
+    '        objOc_EqptoNGN.TipoOperacao = "A"
+            objOc_EqptoNGN.DesignacaoEqpto = sDesignacaoEqpto
+                    
+        End If
+    
+    End If
+    
+    'Verifica se já existe eqpto Cadastrado
+    objOc_EqptoNGN.Contrato_ID = ContratoID
+    objOc_EqptoNGN.Endereco_ID = EnderecoID
+    
+    bFlagControlaAlteracao = objOc_EqptoNGN.CarregarFormEquipamento
+    
+    Call CarregarComboEqpto(Fase_ID)
+    
+    Call VerificarStatusEqpto(Fase_ID)
+    
+    'Call CarregarComboEqpto(lFaseAcessoID)
+    
+    'Call VerificarStatusEqpto(lFaseAcessoID)
+
+
+End Sub
+
+Private Function VerificarStatusEqpto(plIdFase As Long) As Boolean
+
+    Dim objDadosEqptoNGN As VIP_Equipamento_NGN
+    
+    Set objDadosEqptoNGN = New VIP_Equipamento_NGN
+    
+    objDadosEqptoNGN.InformaMensagem objMensagem
+    objDadosEqptoNGN.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    sStatusSwitch = objDadosEqptoNGN.VerificaStatusSwitch(plIdFase)
+    
+    objForm.UsrVIPDadosSwitch.DesabilitaCampos
+'    If sStatusSwitch = "" Then
+'
+'        objForm.CmdObterEnderecoIP.Caption = "Obter Endereço IP"
+'        objForm.CmdObterEnderecoIP.Enabled = True
+'
+'    ElseIf sStatusSwitch = "A" Then
+'
+'        objForm.CmdObterEnderecoIP.Caption = "Aguardando dados de Switch"
+'        objForm.CmdObterEnderecoIP.Enabled = True
+'
+'    ElseIf sStatusSwitch = "P" Then
+'
+'        objForm.CmdObterEnderecoIP.Caption = "Dados de Switch - OK"
+'
+'        objForm.CmdObterEnderecoIP.Enabled = False
+'
+'        Set objOC_DadosSwitch = New clsVIPoc_CadastrarEqptoNGN
+'
+'        bRetorno = objOC_DadosSwitch.CarregarDadosSwitch(objDadosEqptoNGN, plIdFase, _
+'                                     objForm.UsrVIPDadosSwitch)
+'
+'    End If
+
+
+End Function
+
+Public Function VerificarStatusEqptoPorID(plId As Long) As Boolean
+
+    Dim objDadosEqptoNGN As VIP_Equipamento_NGN
+    Dim lIDFase As Long
+    Set objDadosEqptoNGN = New VIP_Equipamento_NGN
+    
+        objDadosEqptoNGN.InformaMensagem objMensagem
+    objDadosEqptoNGN.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    sStatusSwitch = objDadosEqptoNGN.VerificaStatusSwitchPorID(plId)
+    
+    bRetorno = objDadosEqptoNGN.RecuperarDadosPorID(plId)
+    
+    lIDFase = objDadosEqptoNGN.Fase_ID
+    
+    objForm.UsrVIPDadosSwitch.DesabilitaCampos
+    
+    If sStatusSwitch = "" Then
+    
+        objForm.UsrVIPDadosSwitch.AlteraComboObterEnderecoIP ("Obter Endereço IP")
+        
+    
+    ElseIf sStatusSwitch = "A" Then
+    
+        objForm.UsrVIPDadosSwitch.AlteraComboObterEnderecoIP ("Aguardando dados de Switch")
+        'objForm.CmdObterEnderecoIP.Enabled = True
+    
+    ElseIf sStatusSwitch = "P" Then
+        
+        objForm.UsrVIPDadosSwitch.AlteraComboObterEnderecoIP ("Dados de Switch - OK")
+        
+        'objForm.CmdObterEnderecoIP.Enabled = False
+        
+'        Set objOC_DadosSwitch = New clsVIPoc_CadastrarEqptoNGN
+        
+'        bRetorno = objOC_DadosSwitch.CarregarDadosSwitch(objDadosEqptoNGN, lIdFase, _
+                                     objForm.UsrVIPDadosSwitch)
+        
+    End If
+
+
+End Function
+
+Public Sub EnviarSolicitacaoCLA()
+    
+    Dim strXml              As String
+    Dim oXML                As XMLHTTPRequest
+    Dim sUrl                As String
+    Dim msRespostaXml       As String
+    Dim objRoot             As IXMLDOMElement
+    Dim objElement          As IXMLDOMElement
+    Dim m_objDOM            As DOMDocument
+               
+    Dim objNameNode         As IXMLDOMNode
+    Dim objAttributes       As IXMLDOMNamedNodeMap
+    Dim objAttributeNode    As IXMLDOMNode
+    Dim objNodeElement      As IXMLDOMElement
+    Dim iIndice             As Integer
+    Dim objDadosFase        As clsgenFase
+    Dim sDataFimPrevisto    As String
+    Dim bFlagRetornoOk      As Boolean
+    Dim sMsgRetorno         As String
+    Dim objDadosLogSGAP     As clsBLD_LogSGAPCLA
+    Dim bRetorno            As Boolean
+    Dim FlagIniciouTransacao As Boolean
+    Dim sDescrRespCLA        As String
+    
+    Dim lAcessoID                   As Long
+    Dim sVar                        As Variant
+    Dim bFlagRetornoCancelamentoOk  As Boolean
+    Dim lServicoIdCla               As Long
+    Dim lCircuitoID                 As Long
+    'VCB 22/01/2020
+    Dim sSituacaoIDEnviado As String
+    'FIM
+    '==================================================================================================
+    'CALLBAT - 05/07/2012 - BSoD Light II
+    '==================================================================================================
+    Dim objDadosCorrecao As New clsGenDadosControleCorrecao
+    Dim lFase_ID_Anterior As Long
+    '==================================================================================================
+    '==================================================================================================
+    
+    'If Trim(objForm.TxtEstacaoConfiguracao.Text) = "" Or Trim(objForm.CboPadraoInterfaceEBT.Text) = "" Then
+        
+    '    objMensagem.TipoMsg = "A"
+    '    objMensagem.Descricao = "Os campos Estação Configuração e Padrão de Interface devem ser preenchidos!"
+    '    objMensagem.ExibeMensagem
+        
+    '    Exit Sub
+        
+    'End If
+
+'    If Acao_ID = 7 Or Acao_ID = 14 Then
+'
+'        If Not bFlagIndicaLegado And (objForm.CboTipoAcessoTerceiro.ListIndex < 3 And objForm.CboTipoAcessoTerceiro.ListIndex >= 0) Then
+'
+'            objMensagem.TipoMsg = "A"
+'            objMensagem.Descricao = "Não é permitido a seleção de propriedade/tipo de acesso no SGA Plus, exceto os tipos Terceiros/HFC BSoD VIA e HFC BSoD NET."
+'            objMensagem.ExibeMensagem
+'
+'            Exit Sub
+'
+'        End If
+    
+'       objForm.CboTipoAcessoTerceiro.ListIndex = -1
+       
+'       objForm.CboTipoAcessoEmbratel.ListIndex = -1
+       
+'       objForm.optPropriedadeAcesso(0).Value = False
+'       objForm.optPropriedadeAcesso(1).Value = False
+       
+'       objForm.optProprietarioModem(0).Value = False
+'       objForm.optProprietarioModem(1).Value = False
+    
+'    End If
+    
+    bFlagEnviaCancelamentoCLA = False
+    
+    
+    '=================================================================
+    'CALLBAT - 18/02/2014 - BSoD Unificado
+    'SO-ENGNQ-55327NEG
+    '=================================================================
+    If objForm.CboTipoAcessoTerceiro.ListIndex = 3 Or objForm.CboTipoAcessoTerceiro.ListIndex = 4 Then
+    
+        
+        '=================================================================
+        'CALLBAT - 18/09/2014 - BSoD Unificado
+        'Correção efetuada para atendimento da Solicitação da Analista de
+        'Processo Aline Silva
+        'If Acao_ID <> 8 Or Acao_ID <> 9 Then
+        '=================================================================
+        If Acao_ID <> 8 And Acao_ID <> 9 Then
+        '=================================================================
+        '=================================================================
+            
+            objMensagem.TipoMsg = "A"
+            
+            If Acao_ID = 7 Or Acao_ID = 14 Then
+            
+                objMensagem.Descricao = "Estão bloqueadas novas ativações para " & _
+                                    "acessos BSoD NET e BSoD Via."
+                                    
+            ElseIf Acao_ID = 10 Or Acao_ID = 15 Then
+            
+                objMensagem.Descricao = "Estão bloqueadas novas alterações para " & _
+                        "acessos BSoD NET e BSoD Via."
+            
+            End If
+            
+            objMensagem.ExibeMensagem
+            
+            GoTo Finalizar
+            
+        End If
+        
+    End If
+    '=================================================================
+    '=================================================================
+    
+    'AGRC - CH-83814ZEK 24/01/2016
+    'Esta mensagem era válida quando ainda existia alterações que foram criadas antes da interface SGAP x CLA e que ainda estavam pendente de execução no CLA .
+    'Após a implantação da interface, como não tinha registro de envio da alteração na log_sgap_cla, não era possível cancelar no SGAP.
+    'Como não existe nenhuma alteração criada  no CLA antes da interface e que ainda esteja pendente, estas mensagem não são mais necessárias.
+    'Estas mensagens também eram exibidas quando o cancelamento estava cancelando uma correção do tipo alocação de configuração, ou seja, que não foi encaminhado para o CLA,
+    'Desta forma esta ots de correção não existia no CLA. Logo esta mensagem era exibida pois a OTS de correção não foi localizada no cla. Esta mensagem não deve ser mais exibida e no xml de cancelamento
+    'encaminhar o ultimo servico_id_cla encaminhado.
+    'If (bFlagLegadoEmAndamento) Or (bFlagIndicaLegado And Acao_ID = 9) Then
+    If (bFlagLegadoEmAndamento) Or (bFlagIndicaLegado And Acao_ID = 9) And bFlagExibeMsgLegado Then
+    
+        
+        objMensagem.TipoMsg = "A"
+        
+        If Acao_ID = 9 Then
+           
+           objMensagem.Descricao = "Cancelamento de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                   "Executar o Cancelamento do serviço/acesso no CLA."
+        
+        ElseIf Acao_ID = 10 Then
+
+           objMensagem.Descricao = "Alteração de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                   "Executar a Alteração do serviço/acesso no CLA."
+
+
+        ElseIf Acao_ID = 14 Or Acao_ID = 15 Then
+
+           objMensagem.Descricao = "Correção de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                   "Executar a Correção do serviço/acesso no CLA."
+
+        ElseIf Acao_ID = 7 Then
+
+           objMensagem.Descricao = "Ativação de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                   "Executar a Ativação do serviço/acesso no CLA."
+
+        ElseIf Acao_ID = 8 Then
+
+           objMensagem.Descricao = "Desativação de Legado: Este processo não passa pela interface SGA Plus x CLA. " & vbCrLf & _
+                                   "Executar a Desativação do serviço/acesso no CLA."
+
+        End If
+        
+        objMensagem.ExibeMensagem
+        
+        GoTo Finalizar
+        
+    End If
+    
+    If FlagStatusAcessoCLA = "7" Then
+        
+        objMensagem.TipoMsg = "A"
+        objMensagem.Descricao = "OTS aguardando a finalização do SAIP!"
+        objMensagem.ExibeMensagem
+        
+        GoTo Finalizar
+    
+    End If
+    
+    Set objDadosFase = New clsgenFase
+    
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+    
+    ' Verifica a ação da OTS a ser enviada para o CLA, caso seja uma OTS de Correção, a partir do servico_anterior_id, verifica se o acesso
+    ' já foi entregue, em caso afirmativo, envia um XML de desativação, caso contrário, envia um XML de cancelamento.
+    ' exibe mensagem 'Cancelamento da solicitação anterior enviada com sucesso!'
+    ' Exibe status de 'AGUARDANDO O CANCELAMENTO DA SOLICITAÇÃO ANTERIOR'
+    ' Desabilita o botão de envio e os demais campos da tela
+    
+    If Trim(objForm.LblNumeroEndBR.Caption) = "" Or Trim(objForm.LblDadosComplementares(6).Caption) = "" Then
+        
+        Screen.MousePointer = vbDefault
+        
+        Call TrataAjusteEndereco
+        
+        If Trim(objForm.LblNumeroEndBR.Caption) = "" Then
+           
+           objMensagem.TipoMsg = "A"
+           objMensagem.Descricao = "O campo número do Logradouro deve ser preenchido corretamente antes do envio da OTS para o CLA!"
+           objMensagem.ExibeMensagem
+           
+           GoTo Finalizar
+           
+        End If
+        
+        If Trim(objForm.LblDadosComplementares(6).Caption) = "" Then
+           
+           objMensagem.TipoMsg = "A"
+           objMensagem.Descricao = "O campo Tipo de Logradouro deve ser preenchido corretamente antes do envio da OTS para o CLA!"
+           objMensagem.ExibeMensagem
+           
+           GoTo Finalizar
+           
+        End If
+        
+        Screen.MousePointer = vbArrowHourglass
+        
+    End If
+
+    Screen.MousePointer = vbArrowHourglass
+    
+    Set objDadosLogSGAP = New clsBLD_LogSGAPCLA
+        
+    objDadosLogSGAP.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosLogSGAP.InformaMensagem objMensagem
+
+    sDataFimPrevisto = objDadosFase.ObtemDataFimPrevisto(Fase_ID)
+    
+    bFlagRetornoCancelamentoOk = True
+    
+    'AGRC - CH-83814ZEK 24/01/2016
+    lCircuitoID = objdadosServico.ObtemIDCircuito(Servico_ID)
+     
+    '--- OBTEM_ID_
+
+    '=================================================================
+    '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    '''---- Validar para NAO permitir campo SEV editavel seja Null, 0 ou letras
+    '''
+    If Trim(objForm.UsrBLFCabecalho_Acesso.WIRELESS = "S") Then
+        If Not IsNumeric(Trim(objForm.txtSEV_Wireless.Text)) Or Trim(objForm.txtSEV_Wireless.Text) = "" Then
+              
+            Screen.MousePointer = vbDefault
+           
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Favor informar um valor válido para o campo Numero Viabilidade Wireless!" & sMsgRetorno
+            objMensagem.ExibeMensagem
+            
+            objForm.txtSEV_Wireless.Text = ""
+            
+            GoTo Finalizar
+        ElseIf Trim(objForm.txtSEV_Wireless.Text) = 0 Then
+            Screen.MousePointer = vbDefault
+           
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Favor informar um valor válido para o campo Numero Viabilidade Wireless!" & sMsgRetorno
+            objMensagem.ExibeMensagem
+            
+            objForm.txtSEV_Wireless.Text = ""
+            
+            GoTo Finalizar
+        
+        End If
+    End If
+    ''
+
+    If Acao_ID = 14 Or Acao_ID = 15 Then
+'VCB 02/03/2020 CH-01121HER
+        'lServicoIDCLA = objDadosLogSGAP.ObtemServicoEnviadoAoCLA(lCircuitoID)
+         lServicoIdCla = objDadosLogSGAP.ObtemUltimo_ID_ENV_CLA(lCircuitoID, sSituacaoIDEnviado)
+'FIM
+        'AGRC - CH-83814ZEK 24/01/2016
+        'lCircuitoID = objdadosServico.ObtemIDCircuito(Servico_ID)
+        
+        'lServicoIDCLA = objDadosLogSGAP.ObtemServicoEnviadoAoCLA(lCircuitoID)
+        'FIM AGRC
+        'bFlagEnviaCancelamento = objDadosLogSGAP.VerificaNotificacaoEnviada(lServicoIDCLA)
+        
+        '=======================================================================
+        'CALLBAT - 05/07/2012 - BSoD Light - FO EtherNET
+        'Verifica se o Servico encaminhado para o CLA se encontra finalizado
+        '=======================================================================
+        'If objDadosLogSGAP.VerificaNotificacaoEnviada(lServicoIDCLA) Then
+        
+'Alterar procedure abaixo
+
+'VCB 20/01/2020 -- CH-01121HER
+        
+'        If objDadosLogSGAP.VerificaNotificacaoEnviada(lServicoIDCLA) = False Then
+'        '=======================================================================
+'        '=======================================================================
+'
+'            bFlagEnviaCancelamento = True
+'
+'        Else
+'            bFlagEnviaCancelamento = False
+'
+'        End If
+
+''R' --- RETORNADO PELO CLA
+''N' --- NOTIFICAO ENVIADA AO CLA
+''E' --- ENVIADO AO CLA
+
+      If sSituacaoIDEnviado <> "N" And sSituacaoIDEnviado <> "" Then
+
+           bFlagEnviaCancelamento = True
+
+       Else
+
+           bFlagEnviaCancelamento = False
+
+       End If
+        
+        If bFlagEnviaCancelamento Then
+
+            bRetorno = objDadosLogSGAP.RecuperarDados(lServicoIdCla)
+'FIM VCB
+           'If objDadosLogSGAP.StatusAcesso = "0" Or objDadosLogSGAP.StatusAcesso = "1" Then
+           'If Trim(objDadosLogSGAP.XMLRetornoSinc) = "" Then
+                
+                '==================================================================================================
+                'CALLBAT - 05/07/2012 - BSoD Light II
+                '==================================================================================================
+                'strXml = ObtemXmlCancelamento(objDadosLogSGAP.IDLogico, Servico_ID, lServicoIDCLA)
+                                
+                '-----------------------------------------------------------------------------------------------------------------------------------------------
+                'Captura mensagem de retorno do SAIP ser encaminhada para o CLA, em caso de cancelamento.
+                '-----------------------------------------------------------------------------------------------------------------------------------------------
+                'Identifica o ID_Fase da OTS anterior, que o SAIP retornou
+                lFase_ID_Anterior = objDadosFase.ObtemIDFase(objdadosServico.ID_Servico_Anterior, GbCodigoFaseConfiguracao)
+                
+                Set objDadosCorrecao = New clsGenDadosControleCorrecao
+
+                objDadosCorrecao.InformaBanco frmgenMDI_SGAPlus.objBanco
+                objDadosCorrecao.InformaMensagem objMensagem
+                
+                'Captura a justificativa inclusa na OTS que foi cancelada
+                Call objDadosCorrecao.RecuperarDados(lFase_ID_Anterior, "C")
+                '-----------------------------------------------------------------------------------------------------------------------------------------------
+                '-----------------------------------------------------------------------------------------------------------------------------------------------
+                strXml = ObtemXmlCancelamento(objDadosLogSGAP.IDLogico, Servico_ID, lServicoIdCla, Left(objDadosCorrecao.Justificativa, 200))
+          
+                '==================================================================================================
+                '==================================================================================================
+                
+                objDadosLogSGAP.XMLCancelSinc = strXml
+                
+                objDadosLogSGAP.StatusAcesso = "4" 'Aguardando cancelamento solicitação anterior
+    
+                bFlagRetornoCancelamentoOk = AcionaInterfaceCLA(strXml, msRespostaXml, sMsgRetorno)
+                
+                objDadosLogSGAP.XMLRetornoCancSinc = msRespostaXml
+
+                If bFlagRetornoCancelamentoOk Then
+                
+                
+                    '================================================================
+                    'Callbat - 07/04/2015
+                    'Chamado CH-74999UGL
+                    '================================================================
+                    If bLimpaStatusCLA = True Then
+                        bRetorno = objDadosLogSGAP.AtualizarServicoIDCLA(Servico_ID)
+                    End If
+                    '================================================================
+                    '================================================================
+                
+                    'Conforme definição do Eduardo, sempre que o SGAP for enviar um Correção para o CLA, o XML a ser enviado logo após
+                    'o envio do XML de cancelamento (Síncrono), deve ser um XML de Ativação sem ID Lógico
+
+                    If Acao_ID = 14 Then
+
+                       strXml = ObtemXmlEnvioAcao(7)
+
+                    Else
+                       
+                       strXml = ObtemXmlEnvioAcao(Acao_ID)
+                    
+                    End If
+                                '========================================
+                                'VAGNER - 21/09/2012
+                                'Projeto Causa Raiz
+                                '========================================
+                Else
+                    objDadosLogSGAP.StatusAcesso = "6"
+                End If
+                                '========================================
+                                '========================================
+        Else
+            strXml = ObtemXmlEnvioAcao(Acao_ID)
+        
+        End If
+        
+        'End If
+    Else
+        If Acao_ID = 7 Or Acao_ID = 8 Or Acao_ID = 10 Or Acao_ID = 15 Then
+        
+            strXml = ObtemXmlEnvioAcao(Acao_ID)
+        
+        ElseIf Acao_ID = 9 Then
+            'AGRC - CH-83814ZEK 24/01/2016
+            'Quando o Servico_ID_Anterior for uma correção do tipo alocação de configuração, ou seja, não foi encaminhado para o CLA,
+            'o XML de cancelamento com o id-tarefa-can do Servico_ID de Correção. Como o Servico_ID de Correção não existe no CLA, o CLA não efetuava o cancelamento.
+            'strXml = ObtemXmlCancelamento(sIdLogico, Servico_ID, Servico_ID_Anterior)
+            'lServicoIDCLA --- ULTIMO ID COM NOTIFICACAO ENVIADA COM SUCESSO
+'VCB 30/10/2019 Correção causa raíz para obter o ID correto
+'          bRetorno = objDadosLogSGAP.RecuperarDados(lServicoIDCLA) --- Este código deverá ser revisado antes de entrar em produção.
+'            strXml = ObtemXmlCancelamento(objDadosLogSGAP.IDLogico, Servico_ID, lServicoIDCLA)
+'fim VCB
+            strXml = ObtemXmlCancelamento(sIdLogico, Servico_ID, Servico_ID_Anterior)
+            
+        End If
+    
+    End If
+    
+    If bFlagRetornoCancelamentoOk Then
+       
+       bFlagRetornoOk = AcionaInterfaceCLA(strXml, msRespostaXml, sMsgRetorno)
+       
+    End If
+    
+    If objForm.CboPadraoInterfaceEBT.ListIndex > 0 Then
+       
+       objDadosAcesso.PadraoInterfaceEBT_ID = objForm.CboPadraoInterfaceEBT.ItemData( _
+                                              objForm.CboPadraoInterfaceEBT.ListIndex)
+    Else
+       
+       objDadosAcesso.PadraoInterfaceEBT_ID = 0
+    
+    End If
+    
+    bRetorno = objDadosLogSGAP.RecuperarDados(Servico_ID)
+    
+    objDadosLogSGAP.ServicoID = Servico_ID
+    
+    sDescrRespCLA = ""
+    
+    If Trim(msRespostaXml) <> "" And InStr(1, msRespostaXml, "<mensagem>") > 0 And InStr(1, msRespostaXml, "</mensagem>") > 0 Then
+       
+       sDescrRespCLA = Mid(msRespostaXml, InStr(1, msRespostaXml, "<mensagem>") + 10, InStr(1, msRespostaXml, "</mensagem>") - 10 - InStr(1, msRespostaXml, "<mensagem>"))
+    
+    End If
+    
+    If InStr(1, sDescrRespCLA, "ucesso") > 0 Then
+    
+       If Acao_ID = 9 Then
+          
+          objDadosLogSGAP.StatusAcesso = "2"  '--- status solicitação finalizada no CLA
+       
+       Else
+          
+          objDadosLogSGAP.StatusAcesso = "0"  '--- status solicitação enviada ao CLA
+       
+       End If
+    
+    Else
+       
+       objDadosLogSGAP.StatusAcesso = "6"  '--- solicitacao rejeitada pelo CLA
+       objForm.UsrBLFCabecalho_Acesso.StatusCla = "Solicitação recusada pelo CLA"
+        
+    End If
+    
+    FlagStatusAcessoCLA = objDadosLogSGAP.StatusAcesso
+    
+    objDadosLogSGAP.XMLEnvio = TrataPlick(strXml)
+    objDadosLogSGAP.ServicoAnteriorID = Servico_ID_Anterior
+    
+    If objDadosLogSGAP.ServicoID_CLA = 0 Then
+       
+       objDadosLogSGAP.ServicoID_CLA = lServicoIdCla
+    
+    End If
+    
+    objDadosLogSGAP.XMLRetornoSinc = TrataPlick(Mid(msRespostaXml, 1, 500))
+    objDadosLogSGAP.estacaoCliente = objForm.TxtEstacaoCliente.Text
+    objDadosLogSGAP.InterfaceEbtId = objDadosAcesso.PadraoInterfaceEBT_ID
+    objDadosLogSGAP.EstacaoConfiguracao = TrataPlick(objForm.TxtEstacaoConfiguracao.Text)
+     
+    
+    If Not bRetorno Then
+        
+        'Inicia a Transacao
+        bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+            
+        If Not bRetorno Then
+            
+            GoTo ErrorHandler
+        
+        End If
+    
+        FlagIniciouTransacao = True
+        
+        If objDadosLogSGAP.StatusAcesso = "0" Then
+            objDadosFase.Usuario_ID = GbID_Usuario
+            bRetorno = objDadosFase.IniciaFase(Fase_ID, GbID_Usuario)
+        
+                If (objMensagem.TipoMsg <> "") Then
+                        GoTo ErrorHandler
+                End If
+    
+        End If
+        
+        bRetorno = objDadosLogSGAP.IncluirDados(Servico_ID)
+        
+        If objMensagem.TipoMsg <> "" Then GoTo ErrorHandler
+        
+        '=================================================================
+        '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+        '''---- Gravar o numero SEV na tabela SERVICO
+        bRetorno = objdadosServico.AtualizaSEV_Wireless(Servico_ID, objForm.txtSEV_Wireless.Text)
+        
+        If Not bRetorno Then
+
+            GoTo ErrorHandler
+
+        End If
+        
+        
+        'fecha a Transacao
+        bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao()
+        
+        
+       '================================================================
+       'Callbat - 07/04/2015
+       'Chamado CH-74999UGL
+       '================================================================
+        bRetorno = objDadosLogSGAP.AtualizarServicoIDCLA(Servico_ID)
+       '================================================================
+        
+        FlagIniciouTransacao = False
+    Else
+        'Inicia a Transacao
+        bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+
+        If Not bRetorno Then
+
+            GoTo ErrorHandler
+
+        End If
+
+        bRetorno = objDadosLogSGAP.AtualizarDados(Servico_ID)
+
+        If objMensagem.TipoMsg <> "" Then GoTo ErrorHandler
+        
+        '=================================================================
+        '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+        '''---- Gravar o numero SEV do campo editavel na tabela SERVICO
+        bRetorno = objdadosServico.AtualizaSEV_Wireless(Servico_ID, objForm.txtSEV_Wireless.Text)
+        
+        If Not bRetorno Then
+
+            GoTo ErrorHandler
+
+        End If
+        
+        'fecha a Transacao
+        bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao()
+
+        FlagIniciouTransacao = False
+    End If
+    
+    If Not bFlagRetornoOk Then
+       
+       Screen.MousePointer = vbDefault
+       
+       objMensagem.TipoMsg = "A"
+       objMensagem.Descricao = "Solicitação recusada pelo CLA! " & sMsgRetorno
+       objMensagem.ExibeMensagem
+    
+    End If
+    
+    objForm.CmdEnviarSolicCLA.Enabled = False
+    objForm.TxtEstacaoCliente.Enabled = False
+    objForm.TxtEstacaoConfiguracao.Enabled = False
+    objForm.CboPadraoInterfaceEBT.Enabled = False
+    objForm.optPropriedadeAcesso(0).Enabled = False
+    objForm.optPropriedadeAcesso(1).Enabled = False
+    objForm.CboTipoAcessoEmbratel.Enabled = False
+    objForm.CboTipoAcessoTerceiro.Enabled = False
+    
+    '=================================================================
+    '''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    objForm.txtSEV_Wireless.Enabled = False
+    '=================================================================
+    
+    If bFlagRetornoOk Then
+
+            If Produto_ID <> 13 Then
+               objForm.UsrBLFCabecalho_Acesso.StatusCla = "Solicitação enviada ao CLA"
+            Else
+               objForm.UsrVozBandaCabecalho.StatusCla = "Solicitação enviada ao CLA"
+            End If
+
+    End If
+
+    objDadosAcesso.eMailUsuario = TrataPlick(objForm.TxtEMailGic.Text)
+    objDadosAcesso.RIT = objForm.TxtRIT.Text
+    objDadosAcesso.UsuarioAtualizacao_ID = frmgenMDI_SGAPlus.objAutenticacao.IDUsuario
+    objDadosAcesso.EstacaoConfiguracao = TrataPlick(objForm.TxtEstacaoConfiguracao.Text)
+
+    objDadosAcesso.CaracteristicaAcesso = "P"
+    objDadosAcesso.SegurancaAcesso = "N"
+    objDadosAcesso.estacaoCliente = objForm.TxtEstacaoCliente.Text
+    objDadosAcesso.IDLogico = objBlfCabecalho.IDLogico
+    
+    
+    
+    'Gravar dados do acesso anterior na OTS atual quando for uma desativação ou um cancelamento
+
+    FlagIniciouTransacao = True
+    
+    lAcessoID = 0
+        
+    Call objForm.SpdListaAcessos.GetText(6, objForm.SpdListaAcessos.ActiveRow, sVar)
+    
+    lAcessoID = CLng("0" & sVar)
+    
+    If Not bFlagIndicaLegado Then
+       
+       If lAcessoID <> 0 Then
+          
+          bRetorno = GravarDadosPorId(lAcessoID, True)
+       
+       Else
+       
+          bRetorno = GravarDados(False, True, True)
+          
+       End If
+    
+    Else
+       
+       bRetorno = GravarDados(False, True, True)
+    
+    End If
+    
+    If bRetorno Then
+    
+       SalvarDados = True
+
+       FlControlaAlteracao = False
+       
+       Flag_Atualiza_Pendencia = False
+       
+       If FlagDescarregaForm Then
+          
+          Unload Me
+       
+       End If
+       
+       If (objMensagem.TipoMsg <> "") Then
+           
+           GoTo ErrorHandler
+           
+       End If
+        
+       FlagIniciouTransacao = False
+       bFlagControlaAlteracao = False
+       objForm.FlControlaAlteracao = False
+       
+       Screen.MousePointer = vbDefault
+        
+       If bFlagRetornoOk Then
+          
+          objMensagem.TipoMsg = "A"
+          objMensagem.Descricao = "Solicitação enviada ao CLA com sucesso!"
+          If objForm.UsrBLFCabecalho_Acesso.WIRELESS = "S" Then
+             objMensagem.Descricao = objMensagem.Descricao & Chr(10) & "Este produto (Rede Wireless) possui cadastramento/aceite automático do pedido no CLA.  Por favor, aguarde pelo retorno da interface."
+          End If
+          objMensagem.ExibeMensagem
+       
+       End If
+
+       '-- VAGNERR 18/09
+       If Acao_ID = 9 And (FlagStatusAcessoCLA = "0" Or FlagStatusAcessoCLA = "2") Then
+            'finaliza a fase automaticamente
+            
+            FlagDescarregaForm = False
+            
+            Call FinalizarCancelamento
+            
+            If FlagDescarregaForm Then
+               
+               Unload Me
+            
+            End If
+           
+           Exit Sub
+            
+       End If
+       '-------------
+    Else
+           Screen.MousePointer = vbDefault
+           
+           objMensagem.TipoMsg = "A"
+           objMensagem.Descricao = "Solicitação enviada ao CLA com sucesso!"
+           objMensagem.ExibeMensagem
+    
+    End If
+    
+    'Caso a acao da OTS seja de cancelamento, verifica o statusacesso da OTS que está sendo cancelada,
+    'caso seja igual a 0 - Solicitacao enviada ao CLA, finaliza a fase automaticamente
+    
+'    Else
+'
+'       Screen.MousePointer = vbDefault
+'
+'       objMensagem.TipoMsg = "A"
+'       objMensagem.Descricao = "Solicitação recusada pelo CLA! " & sMsgRetorno
+'       objMensagem.ExibeMensagem
+'
+'    End If
+
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    Set oXML = Nothing
+  
+    Set objRoot = Nothing
+    Set objElement = Nothing
+    Set m_objDOM = Nothing
+    Set oXML = Nothing
+    
+    On Error GoTo 0
+    Exit Sub
+
+ErrorHandler:
+    ' Cancelar Transação
+    Screen.MousePointer = vbDefault
+
+    If FlagIniciouTransacao Then
+       
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+    
+    End If
+    
+    If objMensagem.TipoMsg = "" And Err.Number <> 0 Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "EnviarSolicitacaoCLA " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+       
+    If Err.Number <> 0 Or objMensagem.TipoMsg <> "" Then
+       
+       objMensagem.ExibeMensagem
+    
+    End If
+    
+    GoTo Finalizar
+ 
+End Sub
+
+Private Function ObtemXmlEnvioAcao(plAcaoID As Integer) As String
+
+
+    Dim strXml              As String
+    Dim sCNPJaux            As String
+    Dim iTamStr             As Integer
+    Dim iAux                As Integer
+    
+    strXml = ""
+'    strXml = "<?xml version = ''1.0'' encoding = ''iso-8859-1''?>" & vbCrLf
+    strXml = strXml & "<requisicao-cla>" & vbCrLf
+    
+    'strXml = strXml & "<acao>" & IIf(plAcaoID = 7, "ATV", IIf(plAcaoID = 8, "DES", IIf(plAcaoID = 10, "ALT", IIf(plAcaoID = 14, "ALT", "ALT")))) & "</acao> " & vbCrLf
+    
+    '=================================================================
+    'CALLBAT - 21/05/2012 - BSoD Net Light
+    ' Acerto causa raiz - Quando era gerada uma OTS de correção de alteração
+    'não era encaminhada como alteração e sim como Ativação
+    '=================================================================
+    'strXml = strXml & "<acao>" & IIf(plAcaoID = 7, "ATV", IIf(plAcaoID = 8, "DES", IIf(plAcaoID = 10, "ALT", IIf(plAcaoID = 14, "ATV", "ATV")))) & "</acao> " & vbCrLf
+    strXml = strXml & "<acao>" & IIf(plAcaoID = 7, "ATV", IIf(plAcaoID = 8, "DES", IIf(plAcaoID = 10, "ALT", IIf(plAcaoID = 15, "ALT", IIf(plAcaoID = 14, "ATV", "ATV"))))) & "</acao> " & vbCrLf
+    '=================================================================
+    '=================================================================
+    
+    If plAcaoID = 7 Then
+       strXml = strXml & "<id-logico />" & vbCrLf
+    Else
+       If objForm.UsrBLFCabecalho_Acesso.ID_Logico <> "" Then
+          
+          If (plAcaoID = 14 Or plAcaoID = 15) And Left(objForm.UsrBLFCabecalho_Acesso.ID_Logico, 3) = "677" Then
+          
+             strXml = strXml & "<id-logico>" & "678" & Mid(objForm.UsrBLFCabecalho_Acesso.ID_Logico, 4) & "</id-logico>" & vbCrLf
+          
+          Else
+             
+             strXml = strXml & "<id-logico>" & IIf(objForm.UsrBLFCabecalho_Acesso.ID_Logico = "0", "", objForm.UsrBLFCabecalho_Acesso.ID_Logico) & "</id-logico>" & vbCrLf
+          
+          End If
+       
+       Else
+          strXml = strXml & "<id-logico></id-logico>" & vbCrLf
+       
+       End If
+       
+    End If
+    '123456789012345'
+    strXml = strXml & "<origem>SGAP</origem> " & vbCrLf
+    strXml = strXml & "<id-tarefa>" & Servico_ID & "</id-tarefa> " & vbCrLf
+    strXml = strXml & "<cliente>" & vbCrLf
+    strXml = strXml & "  <conta>" & Mid(objBlfCabecalho.ContaCorrente, 1, 11) & "</conta> " & vbCrLf
+    strXml = strXml & "  <subconta>" & Mid(objBlfCabecalho.ContaCorrente, 12, 4) & "</subconta> " & vbCrLf
+    strXml = strXml & "  <razao-social><![CDATA[" & objBlfCabecalho.NomeCliente & "]]></razao-social> " & vbCrLf
+    strXml = strXml & "  <nome-fantasia><![CDATA[" & objForm.LblDadosComplementares(0).Caption & "]]></nome-fantasia> " & vbCrLf
+    strXml = strXml & "</cliente>" & vbCrLf
+    strXml = strXml & "<servico>" & vbCrLf
+    strXml = strXml & "          <order-entry>" & vbCrLf
+    
+    strXml = strXml & "<vel_voz><![CDATA[" & objBlfCabecalho.BandaVoz & "]]></vel_voz>" & vbCrLf
+    strXml = strXml & "<dados></dados>" & vbCrLf
+    strXml = strXml & "                      <ano>" & objBlfCabecalho.AnoOE & "</ano> " & vbCrLf
+    strXml = strXml & "                      <numero>" & objBlfCabecalho.NumeroOE & "</numero> " & vbCrLf
+    strXml = strXml & "                      <item>" & objBlfCabecalho.ItemOE & "</item> " & vbCrLf
+    strXml = strXml & "                      <servico><![CDATA[" & Mid(objForm.Caption, 1, InStr(1, objForm.Caption, "-") - 1) & "]]></servico> " & vbCrLf
+    
+    strXml = strXml & "                      <servico-desc><![CDATA[" & Trim(objForm.lblProduto.Caption) & "]]></servico-desc> " & vbCrLf
+    
+    
+    strXml = strXml & "                      <designacao><![CDATA[" & objBlfCabecalho.DesignacaoPrincipal & "]]></designacao> " & vbCrLf
+    strXml = strXml & "                      <contrato><![CDATA[" & objBlfCabecalho.Contrato & "]]></contrato> " & vbCrLf
+    strXml = strXml & "                      <tipo-contrato>2</tipo-contrato> " & vbCrLf
+    strXml = strXml & "                      <data-prevista>" & sDataFimPrevisto & "</data-prevista> " & vbCrLf
+    strXml = strXml & "                     <contato-tecnico>" & vbCrLf
+    strXml = strXml & "                                 <cliente><![CDATA[" & Mid(objForm.LblNomeContatoTecnico, 1, 30) & "]]></cliente> " & vbCrLf
+    strXml = strXml & "                                 <e-mail></e-mail> " & vbCrLf
+    strXml = strXml & "                                 <telefone><![CDATA[" & objForm.LblTelefoneContatoT1 & "]]></telefone> " & vbCrLf
+    strXml = strXml & "              </contato-tecnico>" & vbCrLf
+    
+    If Produto_ID = 13 Then  '--TEMPORARIO
+       objBlfCabecalho.Velocidade = "2M"
+    End If
+    
+    strXml = strXml & "                      <velocidade><![CDATA[" & objBlfCabecalho.Velocidade & "]]></velocidade> " & vbCrLf
+    'strXml = strXml & "                      <interface-cliente>" & Trim(objForm.LblPadraoInterface.Caption) & "</interface-cliente> " & vbCrLf
+    'Conforme solicitação da área usuária, o campo interface-cliente não mais será enviado para o CLA. 05/02/010
+    
+    strXml = strXml & "                      <interface-cliente></interface-cliente> " & vbCrLf
+    
+    If objForm.CboPadraoInterfaceEBT.ListIndex >= 0 Then
+       strXml = strXml & "                      <interface-embratel><![CDATA[" & objForm.CboPadraoInterfaceEBT.List(objForm.CboPadraoInterfaceEBT.ListIndex) & "]]></interface-embratel> " & vbCrLf
+    Else
+         '''=================================================================
+         ''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+         '''---interface EBT = LTE (Fixado para o caso circuito para Wireless)
+         If objForm.UsrBLFCabecalho_Acesso.WIRELESS = "S" And plAcaoID = 10 Then
+            strXml = strXml & "                      <interface-embratel><![CDATA[" & Trim("LTE") & "]]></interface-embratel> " & vbCrLf
+         Else
+            strXml = strXml & "                      <interface-embratel></interface-embratel> " & vbCrLf
+         End If
+    End If
+    
+    strXml = strXml & "                      <servico-temporario>" & vbCrLf
+    strXml = strXml & "                                  <data-inicio></data-inicio> " & vbCrLf
+    strXml = strXml & "                                 <data-fim /> " & vbCrLf
+    strXml = strXml & "                      </servico-temporario>" & vbCrLf
+    strXml = strXml & "                      <cadastrador>" & vbCrLf
+    strXml = strXml & "                                 <telefone><![CDATA[" & objForm.TxtRIT.Text & "]]></telefone> " & vbCrLf
+    strXml = strXml & "                                 <username><![CDATA[" & frmgenMDI_SGAPlus.objAutenticacao.Login & "]]></username> " & vbCrLf
+    strXml = strXml & "                      </cadastrador>" & vbCrLf
+    strXml = strXml & "                     <endereco-instalacao>" & vbCrLf
+    
+    sCNPJaux = objForm.LblDadosComplementares(2).Caption
+    
+    iTamStr = Len(Trim(sCNPJaux))
+    sStrZeros = ""
+    If iTamStr < 14 Then
+        
+        For iAux = 1 To 14 - (iTamStr)
+        
+            sStrZeros = sStrZeros & "0"
+        
+        Next iAux
+        
+        sCNPJaux = sStrZeros & sCNPJaux
+        
+    End If
+    
+    
+    strXml = strXml & "                                 <cnpj>" & sCNPJaux & "</cnpj> " & vbCrLf
+    strXml = strXml & "                                 <inscricao-estadual>" & objForm.LblDadosComplementares(4).Caption & "</inscricao-estadual>" & vbCrLf
+    strXml = strXml & "                                 <inscricao-municipal>" & objForm.LblDadosComplementares(5).Caption & "</inscricao-municipal>" & vbCrLf
+    strXml = strXml & "                                 <cnl><![CDATA[" & objBlfCabecalho.CNL & "]]></cnl> " & vbCrLf
+    strXml = strXml & "                                 <proprietario><![CDATA[" & objBlfCabecalho.NomeCliente & "]]></proprietario> " & vbCrLf
+    strXml = strXml & "                                 <bairro><![CDATA[" & objForm.LblBairroEndBR & "]]></bairro> " & vbCrLf
+    strXml = strXml & "                                 <cep>" & objForm.LblCEP & "</cep> " & vbCrLf
+    strXml = strXml & "                                 <cidade><![CDATA[" & objForm.LblCidadeEndBR & "]]></cidade> " & vbCrLf
+    strXml = strXml & "                                 <complemento><![CDATA[" & objForm.LblComplementoEndBR & "]]></complemento>" & vbCrLf
+    
+'    If InStr(1, objForm.LblLogradouro, " ") > 0 Then
+'       strXml = strXml & "                                  <logradouro>" & Trim(Mid(objForm.LblLogradouro, InStr(1, objForm.LblLogradouro, " "))) & "</logradouro> " & vbCrLf
+'    Else
+       
+    strXml = strXml & "                                  <logradouro><![CDATA[" & Trim(objForm.LblLogradouro) & "]]></logradouro> " & vbCrLf
+
+'    End If
+    
+    strXml = strXml & "                                 <numero><![CDATA[" & objForm.LblNumeroEndBR & "]]></numero> " & vbCrLf
+    strXml = strXml & "                                 <tipo-logradouro><![CDATA[" & objForm.LblDadosComplementares(6).Caption & "]]></tipo-logradouro> " & vbCrLf
+    
+'    If InStr(1, objForm.LblLogradouro, " ") > 0 Then
+''       strXml = strXml & "                                 <tipo-logradouro>" & Mid(objForm.LblLogradouro, 1, InStr(1, objForm.LblLogradouro, " ") - 1) & " </tipo-logradouro> " & vbCrLf
+'       strXml = strXml & "                                 <tipo-logradouro>" & objForm.LblDadosComplementares(6).Caption & " </tipo-logradouro> " & vbCrLf
+'    Else
+'       strXml = strXml & "                                 <tipo-logradouro>" & "" & " </tipo-logradouro> " & vbCrLf
+'    End If
+    
+    strXml = strXml & "                                 <uf><![CDATA[" & objForm.LBlUFEndBR & "]]></uf> " & vbCrLf
+    strXml = strXml & "                                 <centro-cliente></centro-cliente> " & vbCrLf
+    strXml = strXml & "                      </endereco-instalacao>" & vbCrLf
+    '''=================================================================
+    ''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    If objForm.UsrBLFCabecalho_Acesso.WIRELESS = "S" Then
+    '''Quando for Wireless verifica e informa o campo sev novo (que passou a ser gravado no SGAPLUS)
+    '''caso o campo SEV informado pelo GSIDADOS seja rejeitado pelo CLA podera ser incluido novamente neste campo editavel no SGAPLUS.
+    ''If (objForm.txtSEV_Wireless.Text <> "") And (objForm.txtSEV_Wireless.Text <> objForm.LblNumeroEstudoViabilidade.Caption) Then
+        strXml = strXml & "                      <numero-sev><![CDATA[" & Trim(objForm.txtSEV_Wireless.Text) & "]]></numero-sev> " & vbCrLf
+    Else
+        strXml = strXml & "                      <numero-sev><![CDATA[" & objForm.LblNumeroEstudoViabilidade.Caption & "]]></numero-sev> " & vbCrLf
+    End If
+    
+    '''=================================================================
+    strXml = strXml & "                      <codDescargaSAP></codDescargaSAP> " & vbCrLf
+    
+    '''=================================================================
+    ''----===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    '''---estcliente = RJO (Fixado para o caso circuito para Wireless)
+    If objForm.UsrBLFCabecalho_Acesso.WIRELESS = "S" And plAcaoID = 10 Then
+        strXml = strXml & "                      <estCliente><![CDATA[" & Trim("RJO") & "]]></estCliente> " & vbCrLf
+    Else
+        strXml = strXml & "                      <estCliente><![CDATA[" & Trim(objForm.TxtEstacaoCliente) & "]]></estCliente> " & vbCrLf
+    End If
+    '=================================================================
+    '''===FABIMENDONCA - 04/2021 - SO-SOLEN-28213JNU - Acesso 4G - Rede Wireless
+    '=================================================================
+    '''strXml = strXml & "                      <rede_wireless> ![CDATA[" & IIf(objForm.UsrBLFCabecalho_Acesso.WIRELESS = "", "N", objForm.UsrBLFCabecalho_Acesso.WIRELESS) & "]]</rede_wireless> " & vbCrLf
+    strXml = strXml & "                      <rede_wireless>" & IIf(Trim(objForm.UsrBLFCabecalho_Acesso.WIRELESS) = "", "N", objForm.UsrBLFCabecalho_Acesso.WIRELESS) & "</rede_wireless> " & vbCrLf
+    '=================================================================
+    strXml = strXml & "                    </order-entry>" & vbCrLf
+    strXml = strXml & "</servico>" & vbCrLf
+    strXml = strXml & "<acesso>" & vbCrLf
+    strXml = strXml & "<migracao>" & IIf(objForm.optFlagMigracao(0).Value = 1, "S", "N") & "</migracao>" & vbCrLf
+    
+    If objForm.optPropriedadeAcesso(1).Value = True Then
+    
+    '=================================================================
+    'CALLBAT - 21/05/2012 - BSoD Net Light
+    '=================================================================
+       'strXml = strXml & "<tipo-rede>" & IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 3, 5, IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 4, 4, "")) & "</tipo-rede>" & vbCrLf
+       
+        '=================================================================
+        'CALLBAT - 18/02/2014 - BSoD Unificado
+        'SO-ENGNQ-55327NEG
+        '=================================================================
+        'strXml = strXml & "<tipo-rede>" & IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 3, 5, IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 4, 4, IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 5, 10, ""))) & "</tipo-rede>" & vbCrLf
+        strXml = strXml & "<tipo-rede>" & IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 3, 5, IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 4, 4, IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 5, 10, IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 8, 13, "")))) & "</tipo-rede>" & vbCrLf
+        '=================================================================
+        '=================================================================
+    '=================================================================
+    '=================================================================
+        
+       strXml = strXml & "<tecnologia></tecnologia>" & vbCrLf
+    
+    ElseIf objForm.optPropriedadeAcesso(0).Value = True Then
+       
+       strXml = strXml & "<tipo-rede></tipo-rede>" & vbCrLf
+       
+       '=================================================================
+       'CALLBAT - 26/06/2013 - FO EDD
+       'SO-TVASS-56728SLA
+       '=================================================================
+       'strXml = strXml & "<tecnologia>" & IIf(objForm.CboTipoAcessoEmbratel.ListIndex = 4, 6, "") & "</tecnologia>" & vbCrLf
+       strXml = strXml & "<tecnologia>" & IIf(objForm.CboTipoAcessoEmbratel.ListIndex = 4, 6, IIf(objForm.CboTipoAcessoEmbratel.ListIndex = 5, 7, "")) & "</tecnologia>" & vbCrLf
+       '=================================================================
+       '=================================================================
+    Else
+       
+       strXml = strXml & "<tipo-rede></tipo-rede>" & vbCrLf
+       strXml = strXml & "<tecnologia></tecnologia>" & vbCrLf
+    
+    End If
+    
+    strXml = strXml & "<vel_voz><![CDATA[" & objBlfCabecalho.BandaVoz & "]]></vel_voz>" & vbCrLf
+    strXml = strXml & "<dados></dados>" & vbCrLf
+    strXml = strXml & "</acesso>" & vbCrLf
+    strXml = strXml & "                    <senha>A3590023DF66AC92AE35E35E33160</senha>" & vbCrLf
+    strXml = strXml & "</requisicao-cla>" & vbCrLf
+   
+    ObtemXmlEnvioAcao = strXml
+
+End Function
+
+'==================================================================================================
+'CALLBAT - 05/07/2012 - BSoD Light II
+'==================================================================================================
+'Private Function ObtemXmlCancelamento(psIdLogico As String, plServico_ID As Long, plservico_id_Canc As Long) As String
+Private Function ObtemXmlCancelamento(psIdLogico As String, plServico_ID As Long, plservico_id_Canc As Long, Optional plObservacao As String) As String
+'==================================================================================================
+'==================================================================================================
+    Dim strXml              As String
+    
+    strXml = ""
+'    strXml = "<?xml version = ''1.0'' encoding = ''iso-8859-1''?>" & vbCrLf
+    strXml = strXml & "<requisicao-cla>" & vbCrLf
+    strXml = strXml & "<acao>CAN</acao> " & vbCrLf
+    strXml = strXml & "<id-logico>" & psIdLogico & "</id-logico>" & vbCrLf
+    strXml = strXml & "<origem>SGAP</origem> " & vbCrLf
+    strXml = strXml & "<id-tarefa>" & plServico_ID & "</id-tarefa> " & vbCrLf
+    strXml = strXml & "<id-tarefa-can>" & plservico_id_Canc & "</id-tarefa-can>" & vbCrLf
+    strXml = strXml & "<servico>" & vbCrLf
+    strXml = strXml & "<order-entry>" & vbCrLf
+    strXml = strXml & "       <ano>" & objBlfCabecalho.AnoOE & "</ano> " & vbCrLf
+    strXml = strXml & "       <numero>" & objBlfCabecalho.NumeroOE & "</numero> " & vbCrLf
+    strXml = strXml & "       <item>" & objBlfCabecalho.ItemOE & "</item> " & vbCrLf
+    strXml = strXml & "</order-entry>" & vbCrLf
+    strXml = strXml & "</servico>" & vbCrLf
+    
+    strXml = strXml & "<observacao><![CDATA[" & plObservacao & "]]></observacao>" & vbCrLf
+    
+    strXml = strXml & "<senha>A3590023DF66AC92AE35E35E33160</senha>" & vbCrLf
+    strXml = strXml & "</requisicao-cla>" & vbCrLf
+    
+    ObtemXmlCancelamento = strXml
+
+End Function
+
+Private Function ObtemXmlDesativacao() As String
+
+    Dim strXml              As String
+    
+    strXml = ""
+    strXml = "<?xml version = '1.0' encoding = 'iso-8859-1'?>" & vbCrLf
+    strXml = strXml & "<requisicao-cla>" & vbCrLf
+    strXml = strXml & "<acao>DES</acao> " & vbCrLf
+    strXml = strXml & "<id-logico />" & vbCrLf
+    strXml = strXml & "<origem>SGAP</origem> " & vbCrLf
+    strXml = strXml & "<id-tarefa>" & Servico_ID & "</id-tarefa> " & vbCrLf
+    strXml = strXml & "<servico>" & vbCrLf
+    strXml = strXml & "<order-entry>" & vbCrLf
+    strXml = strXml & "       <ano>" & objBlfCabecalho.AnoOE & "</ano> " & vbCrLf
+    strXml = strXml & "       <numero>" & objBlfCabecalho.NumeroOE & "</numero> " & vbCrLf
+    strXml = strXml & "       <item>" & objBlfCabecalho.ItemOE & "</item> " & vbCrLf
+    strXml = strXml & "</order-entry>" & vbCrLf
+    strXml = strXml & "</servico>" & vbCrLf
+    strXml = strXml & "<observacao></observacao>"
+    strXml = strXml & "                    <senha>A3590023DF66AC92AE35E35E33160</senha>" & vbCrLf
+    strXml = strXml & "</requisicao-cla>" & vbCrLf
+    
+    ObtemXmlDesativacao = strXml
+
+End Function
+
+
+Public Function AcionaInterfaceCLA(psStrXml As String, psStrXmlRetorno As String, psMsgRetorno As String) As Boolean
+    
+    Dim strXml              As String
+    Dim oXML                As XMLHTTPRequest
+    Dim sUrl                As String
+    Dim msRespostaXml       As String
+    Dim objRoot             As IXMLDOMElement
+    Dim objElement          As IXMLDOMElement
+    Dim m_objDOM            As DOMDocument
+               
+    Dim objNameNode         As IXMLDOMNode
+    Dim objAttributes       As IXMLDOMNamedNodeMap
+    Dim objAttributeNode    As IXMLDOMNode
+    Dim objNodeElement      As IXMLDOMElement
+    Dim iIndice             As Integer
+    Dim bFlagRetornoOk      As Boolean
+    Dim sMsgRetorno         As String
+    Dim bRetorno            As Boolean
+    Dim objDadosParametros  As clsGenDadosParametros
+    
+    AcionaInterfaceCLA = False
+    
+    'Servidor novo hmg
+    'sUrl = "http://ntsponcla1/newcla/Asp/Aprov_Solicitar_Acesso.asp"
+
+    Set objDadosParametros = New clsGenDadosParametros
+        
+    objDadosParametros.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosParametros.InformaMensagem objMensagem
+
+    If objDadosParametros.RecuperarDados Then
+    
+        If InStr(1, UCase(Command), "TESTE", vbBinaryCompare) > 0 Then
+            
+            '==================================================================================================
+            'CALLBAT - 05/07/2012 - BSoD Light II
+            '==================================================================================================
+            sUrl = objDadosParametros.HostNameHMG & "/" & "Aprov_Solicitar_Acesso.asp"
+            'sUrl = "http://10.10.89.171/newcla/ACCESS_INTERF/Asp/Aprov_Solicitar_Acesso.asp"
+            '==================================================================================================
+            '==================================================================================================
+            
+        Else
+            sUrl = objDadosParametros.HostNamePRD & "/" & "Aprov_Solicitar_Acesso.asp"
+        
+        End If
+        
+    Else
+        
+        GoTo Finalizar
+        
+    End If
+    
+    Set objDadosParametros = Nothing
+
+    msRespostaXml = ""
+    
+    If sUrl = "" Then
+        
+        objMensagem.TipoMsg = "A"
+        objMensagem.Descricao = "Não foi possível encontrar a URL."
+        
+        objMensagem.ExibeMensagem
+        
+        GoTo Finalizar
+    
+    End If
+    
+    Set oXML = New XMLHTTPRequest
+    oXML.Open "POST", sUrl, False
+    
+    oXML.send psStrXml
+    msRespostaXml = oXML.responseText
+    
+    psStrXmlRetorno = TrataPlick(msRespostaXml)
+    
+    Set m_objDOM = New DOMDocument
+    
+    m_objDOM.resolveExternals = True
+    m_objDOM.validateOnParse = True
+    m_objDOM.async = False
+    
+    Call m_objDOM.loadXML(msRespostaXml)
+    
+    'verifica se a carga do XML foi feita com sucesso
+    If m_objDOM.parseError.reason <> "" Then
+
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+       
+       If InStr(1, msRespostaXml, "Timeout expired") > 0 Then
+               objMensagem.Descricao = "Houve um erro no acionamento da interface SGAP x CLA. Mensagem de erro: " & m_objDOM.parseError.reason & vbCrLf & msRespostaXml
+               objMensagem.ExibeMensagem
+       Else
+            objMensagem.Descricao = "Houve um erro no acionamento da interface SGAP x CLA. Mensagem de erro: " & m_objDOM.parseError.reason & vbCrLf & msRespostaXml
+            objMensagem.ExibeMensagem
+       End If
+       
+       GoTo ErrorHandler
+
+    End If
+        '========================================
+        '========================================
+    
+    'obtem o elemento raiz do XML
+    Set objRoot = m_objDOM.documentElement
+    
+    ' iteracao atraves de cada elemento que por sua vez interagem atraves
+    ' de cada childNode do element(objElement)
+    For Each objElement In objRoot.childNodes
+        If objElement.baseName <> "metodo" Then
+            ' Carregar o objretorno do confdb para saber se deu erro na operação
+            Select Case objElement.baseName
+                Case Is = "codigo"
+                     
+                     If objElement.nodeTypedValue = 0 Then
+                        
+                        AcionaInterfaceCLA = True
+                        Exit For
+                        
+                     End If
+                
+                Case Is = "mensagem"
+                     
+                     psMsgRetorno = objElement.nodeTypedValue
+                     
+            End Select
+        End If
+    Next
+
+Finalizar:
+    
+    On Error GoTo 0
+    Exit Function
+
+ErrorHandler:
+    
+    GoTo Finalizar
+
+End Function
+
+
+
+
+
+
+
+
+'''Public Function VerificaFinalizacaoAcessoOK(objDadosAcesso As clsGenAcesso) As Boolean
+'''
+'''    Dim bRetorno        As Boolean
+'''    Dim iDigitoVeloc    As Integer
+'''    Dim sLetraVeloc     As String
+'''    Dim bRetornoDadosOK As Boolean
+'''    Dim sRetAux         As String
+'''    Dim iAux            As Integer
+'''
+'''    iAux = 0
+'''
+'''    bRetornoDadosOK = False
+'''
+'''    VerificaFinalizacaoOK = False
+'''    Verifica o preenchimento dos campos da Pasta Dados Gerais
+'''
+'''    bRetorno = True
+'''
+'''
+'''    iAux = iAux + 1
+'''    ReDim vMensagemListaMsg(iAux)
+'''    vMensagemListaMsg(0) = "Os campos abaixo foram preenchidos incorretamente ou não foram preenchidos:"
+'''    iAux = iAux + 1
+'''
+'''    If objForm.CboPadraoInterfaceEBT.ListIndex <= 0 Then
+'''    If IsNull(objDadosAcesso.PadraoInterfaceEBT_ID) Or objDadosAcesso.PadraoInterfaceEBT_ID = 0 Then
+'''
+'''        bRetorno = False
+'''
+'''        iAux = iAux + 1
+'''
+'''        ReDim Preserve vMensagemListaMsg(iAux)
+'''        vMensagemListaMsg(iAux - 1) = "Padrão de Interface Embratel " & _
+'''        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                       " do Acesso Contingente") & _
+'''                                      " é obrigatório."
+'''
+'''    End If
+'''
+'''
+'''    If Produto_ID <> GbIDProdutoVIP Then
+'''        If objForm.OptResponsavelInfra(0).Value = False And _
+'''           objForm.OptResponsavelInfra(1).Value = False And objForm.optPropriedadeAcesso(0).Value = True Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            vMensagemListaMsg(iAux - 1) = "Responsabilidade da infraEstrutura " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                          " é obrigatório."
+'''
+'''        End If
+'''    End If
+'''
+'''    If objForm.optTipoRede(0).Value <> False Or objForm.optTipoRede(1).Value <> False Or objForm.optTipoRede(2).Value <> False Then
+'''
+'''        If Trim(objForm.TxtDescricaoRedeDeterministica.Text) = "" Then
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            vMensagemListaMsg(iAux - 1) = "Descrição de Rede Deterministica " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                          " é obrigatório."
+'''            bRetorno = False
+'''        End If
+'''
+'''        If Trim(objForm.txtTSI.Text) = "" Then
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            vMensagemListaMsg(iAux - 1) = "A informação de TSI de Rede Determinística " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                          " é obrigatório."
+'''
+'''            bRetorno = False
+'''
+'''        End If
+'''
+'''        If Trim(objForm.txtTSF.Text) = "" Then
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            vMensagemListaMsg(iAux - 1) = "A informação de TSF de Determinística " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                          " é obrigatório."
+'''
+'''            bRetorno = False
+'''        End If
+'''
+'''    End If
+'''
+'''    If objForm.TxtEMailGic.Text = "" Then
+'''
+'''        bRetorno = False
+'''
+'''        iAux = iAux + 1
+'''
+'''        ReDim Preserve vMensagemListaMsg(iAux)
+'''        vMensagemListaMsg(iAux - 1) = "E-mail " & _
+'''        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                       " do Acesso Contingente") & _
+'''                                                       " é obrigatório."
+'''
+'''    End If
+'''
+'''    If objForm.TxtRIT.Text = "" Then
+'''
+'''        bRetorno = False
+'''
+'''        iAux = iAux + 1
+'''
+'''        ReDim Preserve vMensagemListaMsg(iAux)
+'''        vMensagemListaMsg(iAux - 1) = "RIT " & _
+'''        IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                       " do Acesso Contingente") & _
+'''                                                       " é obrigatório."
+'''
+'''    End If
+'''
+'''    If objForm.optPropriedadeAcesso(0).Value = True Then  'Propriedade Embratel
+'''
+'''       If Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) = "" Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            vMensagemListaMsg(iAux - 1) = "Data de Ativação " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''       End If
+'''
+'''       If Trim(objForm.TxtEstacaoEntregaEbtConf) = "" And _
+'''          objForm.TxtEstacaoEntregaEbtConf.Visible = True Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            vMensagemListaMsg(iAux - 1) = "Estação de entrega Configuração " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If Trim(objForm.TxtEstacaoEntregaEbt) = "" Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            vMensagemListaMsg(iAux - 1) = "Estação de entrega Embratel " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If Trim(objForm.TxtEstacaoCliente.Text) = "" Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            vMensagemListaMsg(iAux - 1) = "Estação do Cliente " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If Trim(objForm.LblVelocidadeAcesso) <> "" Then
+'''
+'''          Call obtemDigitoVelocidade(objForm.LblVelocidadeAcesso, iDigitoVeloc, sLetraVeloc)
+'''
+'''          If sLetraVeloc = "M" And iDigitoVeloc >= 2 And _
+'''             objForm.CboTipoAcessoEmbratel.ListIndex <> 3 Then
+'''
+'''             If Trim(objForm.TxtNumeroOtsTx_EBT.Text) = "" Then
+'''
+'''                bRetorno = False
+'''
+'''                iAux = iAux + 1
+'''
+'''                ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''                vMensagemListaMsg(iAux - 1) = "Número OTS TX " & _
+'''                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                              " do Acesso Contingente") & _
+'''                                                              " é obrigatório."
+'''
+'''             End If
+'''
+'''             If Val(objForm.TxtItemOtsTxEBT.Text) = 0 Then
+'''
+'''                bRetorno = False
+'''
+'''                iAux = iAux + 1
+'''
+'''                ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''                vMensagemListaMsg(iAux - 1) = "Item OTS TX " & _
+'''                IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                            " do Acesso Contingente") & _
+'''                                                            " é obrigatório."
+'''
+'''             End If
+'''
+'''          End If
+'''
+'''       End If
+'''
+'''       If Trim(objForm.TxtDesignacaoAcessoEBT.Text) = "" Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Designação do Acesso Embratel " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''        Se tipo de acesso for Radio
+'''       If objForm.CboTipoAcessoEmbratel.ListIndex = 0 Then
+'''
+'''       End If
+'''
+'''       Se tipo de acesso for ADE
+'''       If objForm.CboTipoAcessoEmbratel.ListIndex = 2 Then
+'''
+'''          If objForm.optProprietarioModem(0).Value = False And _
+'''             objForm.optProprietarioModem(1).Value = False Then
+'''
+'''             bRetorno = False
+'''
+'''             iAux = iAux + 1
+'''
+'''             ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''             vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+'''             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''       End If
+'''
+'''       Se tipo de acesso for Cabo Interno
+'''       If objForm.CboTipoAcessoEmbratel.ListIndex = 3 Then
+'''
+'''          If objForm.optProprietarioModem(0).Value = False And _
+'''             objForm.optProprietarioModem(1).Value = False Then
+'''
+'''             bRetorno = False
+'''
+'''             iAux = iAux + 1
+'''
+'''             ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''             vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+'''             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''       End If
+'''    Else
+'''
+'''       Propriedade Acesso Terceiro
+'''        If objForm.optProprietarioModem(0).Value = False And _
+'''           objForm.optProprietarioModem(1).Value = False And _
+'''           objForm.CboTipoAcessoTerceiro.ListIndex <> 2 Then  'É obrigatório quando o
+'''                                                              tipo de acesso for <>
+'''                                                              de Rede Determinística
+'''           bRetorno = False
+'''
+'''           iAux = iAux + 1
+'''
+'''           ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''           vMensagemListaMsg(iAux - 1) = "Proprietário do Modem " & _
+'''           IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                         " do Acesso Contingente") & _
+'''                                                         " é obrigatório."
+'''
+'''        End If
+'''
+'''       If objForm.SpdDataAtivacaoAcessoTerc.Text = "" Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Data de Ativação " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If Trim(objForm.TxtDesignacaoAcessoTerceiro.Text) = "" Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Designação de acesso " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If Trim(objForm.TxtEstacaoEntregaTercConf.Text) = "" Then
+'''
+'''            bRetorno = False
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Estação de Entrega Configuração" & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If Trim(objForm.TxtEstacaoEntregaTerc.Text) = "" Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Estação de Entrega Embratel " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If objForm.CboProvedorUrbano.ListIndex <= 0 Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Provedor urbano " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If Trim(objForm.TxtCNLPontaA_Urbano.Text) = "" Then
+'''
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "CNL Ponta A do Provedor Urbano " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''       End If
+'''
+'''       If objForm.optExisteAcessoIU(0).Value = True Then
+'''
+'''          If objForm.CboProvedorInterurbano.ListIndex <= 0 Then
+'''
+'''             bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Provedor interurbano " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''          Numero do acesso provedor interurbano
+'''          If Trim(objForm.SpdNumeroAcessoInterurbano.Text) = "" Then
+'''
+'''            objmensagem.Descricao = "Nº acesso interurbano obrigatório."
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Número do acesso interurbano " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''          If Trim(objForm.TxtCNLPontaA.Text) = "" Then
+'''
+'''            objmensagem.Descricao = "CNL ponta A interurbano obrigatório."
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "CNL Ponta A interurbano " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''          If Trim(objForm.TxtCNLPontaB.Text) = "" Then
+'''
+'''            objmensagem.Descricao = "CNL ponta B interurbano obrigatório."
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "CNL Ponta B interurbano " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''          If Trim(objForm.SpdDataEntregaInterUrbano.Text) = "" Then
+'''
+'''            objmensagem.Descricao = "Data entrega interurbano obrigatório."
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Data de entrega do Provedor interurbano " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''
+'''       End If
+'''
+'''       If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+'''
+'''          If Val(objForm.TxtNumeroOTSTXTerc.Text) = 0 Then
+'''
+'''            objmensagem.Descricao = "Nº OTS TX obrigatório."
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Nº OTS TX obrigatório " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''          If Val(objForm.TxtItemOTSTxTerc.Text) = 0 Then
+'''
+'''            objmensagem.Descricao = "Item OTS TX obrigatório."
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Item OTS TX obrigatório " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''       End If
+'''
+'''       Tipo de acesso < 2M
+'''       If objForm.CboTipoAcessoTerceiro.ListIndex = 0 Then
+'''
+'''          If Trim(objForm.TxtNumeroCaboAcessoMenor.Text) = "" Then
+'''
+'''                objmensagem.Descricao = "Nº cabo obrigatório."
+'''
+'''                iAux = iAux + 1
+'''
+'''                ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''                vMensagemListaMsg(iAux - 1) = "Nº cabo obrigatório. "
+'''
+'''                bRetorno = False
+'''                GoTo Finalizar
+'''
+'''          End If
+'''
+'''          If Trim(objForm.TxtNumeroParAcessoMenor.Text) = "" Then
+'''
+'''                ======================================================
+'''                CALBAT - 27/05/2008 -
+'''                BO Nº - 526534
+'''                ======================================================
+'''                objmensagem.Descricao = "Nº par obrigatório."
+'''
+'''                iAux = iAux + 1
+'''
+'''                ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''                vMensagemListaMsg(iAux - 1) = "Nº par obrigatório. "
+'''
+'''                ======================================================
+'''
+'''                bRetorno = False
+'''                GoTo Finalizar
+'''
+'''          End If
+'''
+'''          If objForm.CboInterfaceClienteMenor.ListIndex <= 0 Then
+'''
+'''            objmensagem.Descricao = "Interface Cliente obrigatório."
+'''            bRetorno = False
+'''
+'''            ======================================================
+'''            CALBAT - 27/05/2008 -
+'''            BO Nº - 526534
+'''            ======================================================
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''            ======================================================
+'''
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Interface cliente " & _
+'''            IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''       End If
+'''
+'''       If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+'''
+'''          If Trim(objForm.TxtDIDFila_Rede.Text) = "" Then
+'''
+'''             bRetorno = False
+'''
+'''             iAux = iAux + 1
+'''
+'''             ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''             vMensagemListaMsg(iAux - 1) = "DID Fila" & _
+'''             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''          If Val(objForm.TxtDIDArmacao_Rede.Text) = 0 Then
+'''
+'''             bRetorno = False
+'''             iAux = iAux + 1
+'''
+'''             ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''             vMensagemListaMsg(iAux - 1) = "DID armação" & _
+'''             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''          Leonardo Ferreira - Trocando de numero para string - Inicio
+'''          If Val(objForm.TxtDIDRegua_Rede.Text) = 0 Then
+'''          If Trim(objForm.TxtDIDRegua_Rede.Text) = "" Then
+'''          Leonardo Ferreira - Fim
+'''             bRetorno = False
+'''
+'''             iAux = iAux + 1
+'''
+'''             ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''             vMensagemListaMsg(iAux - 1) = "DID Régua" & _
+'''             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''          If Val(objForm.TxtDIDPosicao_Rede.Text) = 0 Then
+'''
+'''             bRetorno = False
+'''             iAux = iAux + 1
+'''
+'''             ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''             vMensagemListaMsg(iAux - 1) = "DID Posição" & _
+'''             IIf(objForm.optCaracAcessoGen(0).Value = True, " do Acesso Principal", _
+'''                                                           " do Acesso Contingente") & _
+'''                                                           " é obrigatório."
+'''
+'''          End If
+'''
+'''       End If
+'''
+'''    End If
+'''
+'''
+'''    If objForm.ssTabAcesso.TabVisible(5) = True Then
+'''
+'''        =======================================================================
+'''        calbat -24 / 1 / 2008
+'''        =======================================================================
+'''        If objForm.CmdObterEnderecoIP.Caption <> "Dados de Switch - OK" Then
+'''        If objForm.UsrVIPDadosSwitch.VerificaComboObterEnderecoIP <> "Dados de Switch - OK" Then
+'''        =======================================================================
+'''        =======================================================================
+'''            bRetorno = False
+'''
+'''            iAux = iAux + 1
+'''
+'''            ReDim Preserve vMensagemListaMsg(iAux)
+'''
+'''            vMensagemListaMsg(iAux - 1) = "Os dados de Switch são obrigatórios para a finalização da fase!"
+'''
+'''        End If
+'''
+'''        If objForm.UsrVIPDadosSwitch.NomeEqpto = "" Then
+'''        End If
+'''    End If
+'''
+'''    If objForm.optSegurancaAcesso(0).Value = True Then   'Seguranca de Acesso igual a Sim
+'''
+'''           If objForm.optCaracAcessoEmbratel(1).Value = True Then  'Acesso Contingente
+'''
+'''              Caso os dados do Acesso Contingente estejam OK, verifica se os dados do
+'''              Acesso Principal foi gravado 100%
+'''
+'''              If bRetorno Then
+'''
+'''                 sRetAux = VerificaDadosOK("P")
+'''
+'''                 If sRetAux = "O" Then
+'''
+'''                    bRetornoDadosOK = True
+'''
+'''                 ElseIf sRetAux = "N" Then
+'''
+'''                    bRetornoDadosOK = False
+'''
+'''                 End If
+'''
+'''              End If
+'''
+'''           Else
+'''
+'''              Caso os dados do Acesso Principal estejam OK, verifica se os dados do
+'''              Acesso Contingente foi gravado 100%
+'''
+'''              If bRetorno Then
+'''
+'''                  sRetAux = VerificaDadosOK("C")
+'''
+'''                 If sRetAux = "O" Then
+'''
+'''                    bRetornoDadosOK = True
+'''
+'''                 ElseIf sRetAux = "N" Then
+'''
+'''                    bRetornoDadosOK = False
+'''
+'''                 ElseIf sRetAux = "I" Then
+'''
+'''                    bRetornoDadosOK = False
+'''
+'''                 End If
+'''
+'''           End If
+'''    Else
+'''
+'''        bRetornoDadosOK = True
+'''
+'''    End If
+'''
+'''
+'''    If bRetorno Then
+'''
+'''       bRetorno = bRetornoDadosOK
+'''
+'''    End If
+'''
+'''Finalizar:
+'''
+'''    If objForm.SpdDataAtivacaoAcessoEBT.Text = "" And objForm.SpdDataAtivacaoAcessoTerc.Text = "" Then
+'''
+'''       VerificaFinalizacaoOK = bRetorno
+'''
+'''       Exit Function
+'''
+'''    End If
+'''
+'''    If objmensagem.TipoMsg <> "" Then
+'''
+'''        objmensagem.ExibeMensagem
+'''
+'''    Else
+'''
+'''    If Not bRetorno Then
+'''
+'''        If sRetAux <> "I" Then
+'''
+'''           If objForm.optSegurancaAcesso(0).Value = True Then   'Seguranca de Acesso igual a Sim
+'''
+'''              If objForm.optCaracAcessoEmbratel(1).Value = True Then  'Acesso Contingente
+'''
+'''                 Call ExibeListaMensagem
+'''
+'''              End If
+'''
+'''           Else
+'''
+'''              Call ExibeListaMensagem
+'''
+'''           End If
+'''
+'''        End If
+'''
+'''    End If
+'''
+'''    End If
+'''
+'''    VerificaFinalizacaoOK = bRetorno
+'''
+'''    Exit Function
+'''
+'''End Function
+'''
+
+Public Function VerificaPreencAcessoOk() As Boolean
+
+    Dim iDigitoVeloc            As Integer
+    Dim sLetraVeloc             As String
+    Dim bRetornoDadosOK         As Boolean
+    Dim sRetAux                 As String
+    
+    Dim objDadosFase            As clsgenFase
+    Dim bRetorno                As Boolean
+    Dim sDataFim                As String
+    Dim sMaiorData              As String
+    Dim iAux                    As Integer
+    Dim bDataValida             As Boolean
+    Dim bCriticaData            As Boolean
+    Dim objDadosLogSGAP         As clsBLD_LogSGAPCLA
+    Dim objDadosLocalidade      As clsGenLocalidade
+    Dim sVelocAux               As String
+    Dim bFlagCriticaTipoRede    As Boolean
+    
+    VerificaPreencAcessoOk = False
+    
+    If objForm.SpdListaAcessos.DataRowCnt = 0 Then
+       
+       Exit Function
+    
+    End If
+    
+    If (objForm.optPropriedadeAcesso(0).Value = True And Trim(objForm.TxtEstacaoEntregaEbtConf.Text) = "" And objForm.TxtEstacaoEntregaEbtConf.Visible = True) Or _
+       (objForm.optPropriedadeAcesso(1).Value = True And Trim(objForm.TxtEstacaoEntregaTerc.Text) = "" And objForm.TxtEstacaoEntregaTerc.Visible = True) Or _
+       (objForm.optPropriedadeAcesso(0).Value = False And objForm.optPropriedadeAcesso(1).Value = False) Then
+       
+       Exit Function
+       
+    End If
+
+    If (objForm.TxtEstacaoEntregaEbtConf.Visible = True And Trim(objForm.TxtEstacaoEntregaEbtConf.Text) = "") And (objForm.TxtEstacaoEntregaTerc.Visible = True And Trim(objForm.TxtEstacaoEntregaTerc.Text) = "") Then
+       
+       Exit Function
+    
+    End If
+    
+        '========================================
+        'VAGNER - 21/09/2012
+        'Projeto Causa Raiz
+        '========================================
+    If Trim(objForm.TxtEstacaoConfiguracao.Text) = "" Then
+       
+       Exit Function
+    
+    End If
+    
+    If objForm.CboPadraoInterfaceEBT.ListIndex <= 0 Then
+       
+       Exit Function
+    
+    End If
+        '========================================
+        '========================================
+
+    bRetorno = True
+        
+    bCriticaData = True
+    
+    If (Sigla_Acao = "ATG" Or Sigla_Acao = "ALT" Or Sigla_Acao = "ALG") And objdadosServico.Origem = "SGA" Then
+       
+       bCriticaData = False
+       
+    End If
+    
+    If (Not VerificaDataOK(objForm.SpdDataPedidoAcesso.Text)) And _
+                      Trim(objForm.SpdDataPedidoAcesso.Text) <> "" Then
+        
+       Exit Function
+    
+    End If
+    
+    If objForm.optSegurancaAcesso(0).Value = False And _
+       objForm.optSegurancaAcesso(1).Value = False Then
+        
+       Exit Function
+    End If
+    
+    If objForm.optPropriedadeAcesso(0).Value = False And _
+       objForm.optPropriedadeAcesso(1).Value = False Then
+        
+       Exit Function
+    
+    End If
+    
+    Set objDadosFase = New clsgenFase
+    
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+    
+    sDataFim = objDadosFase.ObtemDataFimRealFaseAnterior(Servico_ID, _
+                                                         Sequencia_Acao, Familia_Produto)
+    
+    Set objDadosFase = Nothing
+    
+    If TipoOperacao = "I" And Grupo_ID = GbIDGrupoVLI And bFlagAcessoJaConstruido Then
+        
+        bCriticaData = False
+        
+    End If
+    
+    If objForm.optPropriedadeAcesso(0).Value = True Then 'Propriedade Embratel
+        
+        'If Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "" And _
+           Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "0" And _
+           (objForm.TxtNumeroOtsTx_EBT.Enabled = True) Then
+        
+        '    If Not MascaraOTSTX_OK(Trim(objForm.TxtNumeroOtsTx_EBT.Text)) Then
+                
+        '        Exit Function
+            
+        '    End If
+        
+        'End If
+    
+        If bFlagIndicaLegado Or bFlagLegadoEmAndamento Then
+           
+           sVelocAux = objForm.CboVelocidadeAcesso.Text
+        
+        Else
+           
+           sVelocAux = objForm.LblVelocidadeAcesso.Text
+        
+        End If
+        
+        If Trim(sVelocAux) <> "" Then
+
+'           Call obtemDigitoVelocidade(sVelocAux, iDigitoVeloc, sLetraVeloc)
+           
+           'Se a Velocidade do Circuito for >= 2M e não for cabo interno, numero ots obrigatorio
+
+'           If sLetraVeloc = "M" And iDigitoVeloc >= 2 And _
+              objForm.CboTipoAcessoEmbratel.ListIndex <> 3 Then
+
+'              If Trim(objForm.TxtNumeroOtsTx_EBT.Text) = "" Then
+
+'                 Exit Function
+              
+'              End If
+
+'              If Val(objForm.TxtItemOtsTxEBT.Text) = 0 Then
+
+'                  Exit Function
+
+'              End If
+
+'           End If
+
+        End If
+    
+'        If Trim(objForm.TxtNumeroOtsTx_EBT.Text) <> "" And Trim(objForm.TxtTroncoOTS.Text) = "" Then
+            
+'            Exit Function
+            
+'        End If
+        
+        If (Not VerificaDataOK(objForm.SpdDataAtivacaoAcessoEBT.Text)) And _
+                          Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) <> "" Then
+            
+           Exit Function
+            
+        End If
+
+'        Else
+                    
+'            If Trim(objForm.SpdDataAtivacaoAcessoEBT.Text) <> "" And sDataFim <> "" And _
+'               (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") Then
+'
+'                If CDate(sDataFim) > CDate(objForm.SpdDataAtivacaoAcessoEBT.Text) And _
+'                   bCriticaData Then
+'
+'                   Exit Function
+'
+'                Else
+'
+'                    If objForm.SpdDataAtivacaoAcessoEBT.Text <> "" Then
+'
+'                        If CDate(objForm.SpdDataAtivacaoAcessoEBT.Text) > Date Then
+'
+'                           Exit Function
+'
+'                        End If
+'
+'                    End If
+'
+'                End If
+'
+'            End If
+        
+'        End If
+'------.
+' Radio
+        If objForm.CboTipoAcessoEmbratel.ListIndex = 0 Then
+      
+'          If Trim(objForm.TxtDIDFila_Radio.Text) = "" Then
+'
+'             Exit Function
+'
+'          End If
+'
+'          If Val(objForm.TxtDIDArmacao_Radio.Text) = 0 Then
+'
+'             Exit Function
+'
+'          End If
+'
+'          If Trim(objForm.TxtDIDRegua_Radio.Text) = "" Then
+'
+'             Exit Function
+'
+'          End If
+'
+'          If Val(objForm.TxtDIDPosicao_Radio.Text) = 0 Then
+'
+'             Exit Function
+'
+'          End If
+
+       End If
+
+       'Se tipo de acesso for Fibra
+       If objForm.CboTipoAcessoEmbratel.ListIndex = 1 Then
+    
+          If Trim(objForm.TxtDIDFila_Fibra.Text) = "" Then
+    
+             Exit Function
+          
+          End If
+    
+          If Val(objForm.TxtDIDArmacao_Fibra.Text) = 0 Then
+    
+             Exit Function
+          
+          End If
+          
+          If Trim(objForm.TxtDidRegua_Fibra.Text) = "" Then
+    
+             Exit Function
+    
+          End If
+    
+          If Val(objForm.TxtDIDPosicao_Fibra.Text) = 0 Then
+    
+             Exit Function
+    
+          End If
+        
+       End If
+
+    Else
+        
+        If objForm.CboTipoAcessoTerceiro.ListIndex = -1 Then
+        
+           Exit Function
+        
+        End If
+    
+'        If Trim(objForm.TxtNumeroOTSTXTerc) <> "" And _
+'           Trim(objForm.TxtNumeroOTSTXTerc) <> "0" Then
+        
+'            If Not MascaraOTSTX_OK(Trim(objForm.TxtNumeroOTSTXTerc.Text)) Then
+            
+'               Exit Function
+            
+'            End If
+        
+'        End If
+        
+'        If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+        
+'              If Trim(objForm.TxtNumeroOTSTXTerc.Text) = "" Then
+
+'                 Exit Function
+
+'              End If
+
+'              If Val(objForm.TxtItemOTSTxTerc.Text) = 0 Then
+
+'               Exit Function
+
+'              End If
+        
+'        End If
+        
+'        If Trim(objForm.TxtNumeroOTSTXTerc.Text) <> "" And Trim(objForm.TxtTroncoOTS.Text) = "" Then
+            
+'            Exit Function
+            
+'        End If
+            
+        If objForm.optExisteAcessoIU(1).Value = True Then
+
+            If Trim(objForm.TxtCNLPontaA_Urbano.Text) <> "" Then
+                
+                Set objDadosLocalidade = New clsGenLocalidade
+                
+                objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+                objDadosLocalidade.InformaMensagem objMensagem
+                
+                If Not objDadosLocalidade.VerificaExistenciaCNL( _
+                                          TrataPlick(objForm.TxtCNLPontaA_Urbano.Text)) Then
+                
+                   Set objDadosLocalidade = Nothing
+                   
+                   Exit Function
+                   
+                End If
+            
+                Set objDadosLocalidade = Nothing
+            
+            End If
+            
+            If objForm.SpdDataEntregaUrbano.Text = "" Then
+            
+                Exit Function
+                
+            End If
+                
+            If objForm.SpdDataEntregaUrbano.Text <> "" Then
+               
+               sMaiorData = objForm.SpdDataEntregaUrbano.Text
+            
+            End If
+            
+            If sMaiorData <> "" And objForm.SpdDataEntregaInterUrbano.Text <> "" Then
+                
+                If CDate(objForm.SpdDataEntregaInterUrbano.Text) > CDate(sMaiorData) Then
+                   
+                   sMaiorData = objForm.SpdDataEntregaInterUrbano.Text
+                
+                End If
+            
+            End If
+        
+            If (Not VerificaDataOK(objForm.SpdDataEntregaUrbano.Text)) And _
+                              Trim(objForm.SpdDataEntregaUrbano.Text) <> "" Then
+               
+               Exit Function
+                
+            Else
+            
+                If objForm.SpdDataEntregaUrbano.Text <> "" Then
+                    
+                   If CDate(objForm.SpdDataEntregaUrbano.Text) > Date Then
+                        
+                       Exit Function
+                        
+                   End If
+                
+                End If
+                
+            End If
+            
+        Else
+            
+            If Trim(objForm.TxtCNLPontaA.Text) <> "" Then
+                
+                Set objDadosLocalidade = New clsGenLocalidade
+                
+                objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+                objDadosLocalidade.InformaMensagem objMensagem
+                
+                If Not objDadosLocalidade.VerificaExistenciaCNL( _
+                                          TrataPlick(objForm.TxtCNLPontaA.Text)) Then
+                
+                   Exit Function
+                   
+                End If
+                
+                Set objDadosLocalidade = Nothing
+            
+            End If
+        
+            If Trim(objForm.TxtCNLPontaB.Text) <> "" Then
+                
+                Set objDadosLocalidade = New clsGenLocalidade
+                
+                objDadosLocalidade.InformaBanco frmgenMDI_SGAPlus.objBanco
+                objDadosLocalidade.InformaMensagem objMensagem
+                    
+                If Not objDadosLocalidade.VerificaExistenciaCNL( _
+                                          TrataPlick(objForm.TxtCNLPontaB.Text)) Then
+                
+                   Set objDadosLocalidade = Nothing
+                   Exit Function
+                   
+                End If
+                
+                Set objDadosLocalidade = Nothing
+            
+            End If
+        
+            If (Not VerificaDataOK(objForm.SpdDataEntregaInterUrbano.Text)) And _
+                              Trim(objForm.SpdDataEntregaInterUrbano.Text) <> "" Then
+            
+               Exit Function
+                
+            Else
+                If objForm.SpdDataEntregaInterUrbano.Text <> "" Then
+                    
+                    If CDate(objForm.SpdDataEntregaInterUrbano.Text) > Date Then
+                    
+                       Exit Function
+                          
+                    End If
+                
+                End If
+                
+            End If
+                
+        End If
+            
+        If (Not VerificaDataOK(objForm.SpdDataAtivacaoAcessoTerc.Text)) And _
+                          Trim(objForm.SpdDataAtivacaoAcessoTerc.Text) <> "" Then
+        
+            
+            Exit Function
+        
+        Else
+        
+            bDataValida = True
+
+        End If
+
+'        If objForm.SpdDataAtivacaoAcessoTerc.Text <> "" And sMaiorData <> "" And _
+'           bDataValida Then
+'
+'            If CDate(objForm.SpdDataAtivacaoAcessoTerc.Text) < CDate(sMaiorData) Then
+'
+'               Exit Function
+'
+'           End If
+'
+'        End If
+'
+'        If Trim(objForm.SpdDataAtivacaoAcessoTerc.Text) <> "" And sDataFim <> "" And _
+'           (Sigla_Acao <> "DES" And Sigla_Acao <> "CAN") And bDataValida Then
+'
+'            If CDate(sDataFim) > CDate(objForm.SpdDataAtivacaoAcessoTerc.Text) And _
+'               bCriticaData Then
+'               Exit Function
+'
+'            End If
+'
+'        End If
+    
+    End If
+    
+    If objForm.FrameClassificacaoEndereco.Visible = True Then
+        If objForm.CboClassificacaoEndereco.ListIndex = -1 Then
+        
+            Exit Function
+        
+        End If
+    End If
+    
+    If Produto_ID <> GbIDProdutoVIP Then
+        
+        If objForm.OptResponsavelInfra(0).Value = False And _
+           objForm.OptResponsavelInfra(1).Value = False And objForm.optPropriedadeAcesso(0).Value = True Then
+
+            Exit Function
+
+        End If
+    
+    End If
+    
+    If objForm.optPropriedadeAcesso(1).Value = True Then
+        
+        bFlagCriticaTipoRede = True
+        
+    Else
+        
+        bFlagCriticaTipoRede = False
+    
+    End If
+    
+    If bFlagCriticaTipoRede Then
+        
+        'If objForm.optTipoRede(0).Value <> False Or objForm.optTipoRede(1).Value <> False Or objForm.optTipoRede(2).Value <> False Then
+        If objForm.CboPlataformas.ListIndex > 0 Then
+            
+'            If Trim(objForm.TxtDescricaoRedeDeterministica.Text) = "" Then
+'                Exit Function
+'            End If
+        
+'            If Trim(objForm.txtTSI.Text) = "" Then
+'
+'                Exit Function
+'
+'            End If
+'
+'            If Trim(objForm.txtTSF.Text) = "" Then
+'
+'                Exit Function
+'
+'            End If
+        
+        End If
+        
+    End If
+    
+    If objForm.TxtEMailGic.Text = "" Then
+    
+        Exit Function
+                                                       
+    End If
+     
+    If objForm.TxtRIT.Text = "" Then
+    
+        Exit Function
+       
+    End If
+    
+    If objForm.optPropriedadeAcesso(0).Value = True Then  'Propriedade Embratel
+    
+       If Trim(objForm.TxtEstacaoEntregaEbtConf) = "" And _
+          objForm.TxtEstacaoEntregaEbtConf.Visible = True Then
+       
+          Exit Function
+       
+       End If
+       
+       If Trim(objForm.TxtEstacaoEntregaEbt) = "" Then
+       
+           Exit Function
+       
+       End If
+        
+'       If Trim(objForm.TxtDesignacaoAcessoEBT.Text) = "" And objForm.CboTipoAcessoEmbratel.ListIndex <> 1 And _
+'                                                             objForm.CboTipoAcessoEmbratel.ListIndex <> 3 Then
+'
+'           Exit Function
+'
+'       End If
+
+       'Se tipo de acesso for ADE
+       If objForm.CboTipoAcessoEmbratel.ListIndex = 2 Then
+       
+          If objForm.optProprietarioModem(0).Value = False And _
+             objForm.optProprietarioModem(1).Value = False Then
+          
+             Exit Function
+          
+          End If
+       
+       End If
+    
+       'Se tipo de acesso for Cabo Interno
+       If objForm.CboTipoAcessoEmbratel.ListIndex = 3 Then
+    
+          If objForm.optProprietarioModem(0).Value = False And _
+             objForm.optProprietarioModem(1).Value = False Then
+          
+              Exit Function
+          
+          End If
+       
+       End If
+    Else
+       
+       'Propriedade Acesso Terceiro
+        If objForm.optProprietarioModem(0).Value = False And _
+           objForm.optProprietarioModem(1).Value = False And _
+           objForm.CboTipoAcessoTerceiro.ListIndex <> 2 Then  'É obrigatório quando o
+                                                              'tipo de acesso for <>
+                                                              'de Rede Determinística
+           Exit Function
+        
+        End If
+       
+       If objForm.SpdDataAtivacaoAcessoTerc.Text = "" Then
+          
+           Exit Function
+
+       End If
+
+       If Trim(objForm.TxtDesignacaoAcessoTerceiro.Text) = "" Then
+
+           Exit Function
+
+       End If
+        
+       '==================================================================================================
+       'CALLBAT - 05/07/2012 - BSoD Light II
+       '==================================================================================================
+       If Trim(objForm.UsrBLFCabecalho_Acesso.BandaLarga) <> "S" Then
+        
+            If Trim(objForm.TxtEstacaoEntregaTercConf.Text) = "" Then
+                 
+                Exit Function
+            
+            End If
+       
+        End If
+       '==================================================================================================
+       '==================================================================================================
+       
+       If Trim(objForm.TxtEstacaoEntregaTerc.Text) = "" Then
+       
+           Exit Function
+       
+       End If
+       
+       If objForm.optExisteAcessoIU(0).Value = True Then
+       
+          If objForm.CboProvedorInterurbano.ListIndex <= 0 Then
+           
+             Exit Function
+            
+          End If
+          
+          
+          'Numero do acesso provedor interurbano
+'          If Trim(objForm.SpdNumeroAcessoInterurbano.Text) = "" Then
+'
+'             Exit Function
+'
+'          End If
+          
+'          If Trim(objForm.txtCNLPontaA.Text) = "" Then
+'
+'             Exit Function
+'
+'          End If
+'
+'          If Trim(objForm.txtCnlPontaB.Text) = "" Then
+'
+'             Exit Function
+'
+'          End If
+          
+          If Trim(objForm.SpdDataEntregaInterUrbano.Text) = "" Then
+           
+             Exit Function
+        
+          End If
+         
+       Else
+            If objForm.CboProvedorUrbano.ListIndex <= 0 Then
+                Exit Function
+            End If
+                     
+            If Trim(objForm.TxtCNLPontaA_Urbano.Text) = "" Then
+            
+                Exit Function
+            
+            End If
+       
+       End If
+        
+       'Tipo de acesso < 2M
+       If objForm.CboTipoAcessoTerceiro.ListIndex = 0 Then
+
+          If Trim(objForm.TxtNumeroCaboAcessoMenor.Text) = "" Then
+
+             Exit Function
+
+          End If
+
+          If Trim(objForm.TxtNumeroParAcessoMenor.Text) = "" Then
+             
+             Exit Function
+
+          End If
+       
+          If objForm.CboInterfaceClienteMenor.ListIndex <= 0 Then
+             
+             Exit Function
+            
+          End If
+       
+       End If
+    
+       'Tipo de acesso Rede Deterministica
+       If objForm.CboTipoAcessoTerceiro.ListIndex = 2 Then
+       
+          If Trim(objForm.TxtDIDFila_Rede.Text) = "" Then
+            
+             Exit Function
+            
+          End If
+    
+          If Val(objForm.TxtDIDArmacao_Rede.Text) = 0 And (bFlagIndicaLegado Or bFlagLegadoEmAndamento) Then
+            
+             Exit Function
+            
+          End If
+          
+          If Trim(objForm.TxtDIDRegua_Rede.Text) = "" Then
+             
+             Exit Function
+            
+          End If
+    
+          If objForm.TxtDIDPosicao_Rede.Text = "" Then
+             
+             Exit Function
+          
+          End If
+       
+       End If
+    
+    End If
+ 
+    If objForm.ssTabAcesso.TabVisible(5) = True Then
+        
+        If objForm.UsrVIPDadosSwitch.VerificaComboObterEnderecoIP <> "Dados de Switch - OK" Then
+            
+            Exit Function
+            
+        End If
+        
+    End If
+    
+    VerificaPreencAcessoOk = True
+        
+End Function
+Public Function FinalizarCancelamento() As Boolean
+
+    Dim objDadosFase                As New clsgenFase
+    Dim ObjEqpto                    As clsGenEqptoComplementar
+    Dim objDadosPropriedadeTerc     As clsGenPropriedadeTerceiros
+    Dim objWEBIP                    As clsInterOC_TrataWebIP
+    Dim objDadosAtivacaoFinal       As clsblf_AtivacaoFinalizacao
+    Dim objDadosAnalisarOE          As clsDNI_DadosAnalisarOE
+    Dim objOc_TrataEqptoCompl       As clsInterOC_TratarEqptoCompl
+    Dim sSituacaoOTS                As String
+    Dim bRetorno                    As Boolean
+    Dim FlagIniciouTransacao        As Boolean
+    Dim numUltimaFaseRealizada      As Long
+    Dim bTemAcessoRedundante        As Boolean
+    Dim lIdContingencia             As Long
+    Dim lID_Fase_Seguinte           As Long
+    Dim lSeqUltimaFaseOTS           As Long
+    Dim iQtEquipamento              As Integer
+    Dim lIDEquip                    As Long
+    Dim lIDNGN                      As Long
+    Dim iSequenciaAcaoAux           As Integer
+    Dim FlagTemPendenciaEmAberto    As Boolean
+    Dim FlagFaseFinalizadaOK        As Boolean
+    Dim FlagTemPendenciaCliente     As Boolean
+    Dim FlagManterPeriodo           As Boolean
+    Dim bFlagIniciaFaseConf         As Boolean
+    
+    Dim lIdFaseCentroLocal          As Long
+    Dim lIDCentroFuncional          As Long
+    Dim iSeqAux                     As Integer
+    
+    Dim lIdFaseAlocacaoConfiguracao As Long
+    
+    Dim sCodigoCFCentroLocal        As String
+    Dim sDesignacaoSOE              As String
+    Dim bRetornoCriticaOk           As Boolean
+    Dim bFlagNaoExecutaCentroLocal  As Boolean
+    Dim objDadosDuracaoFase         As clsgenDuracaoFase
+    Dim lCodigoFase                 As Long
+    
+    sReplicaInformações = False
+    
+    On Error GoTo ErrorHandler
+    
+    FlagIniciouTransacao = False
+    
+    FinalizarCancelamento = False
+    
+    bRetornoCriticaOk = True
+    
+    bFlagNaoExecutaCentroLocal = False
+    
+    bRetorno = objdadosServico.RecuperarDados(Servico_ID)
+    
+    If (objMensagem.TipoMsg <> "") Then
+       
+       GoTo ErrorHandler
+       
+    End If
+    
+    sSituacaoOTS = objdadosServico.StatusServico
+    
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+
+    'Checa se o produto pode alocar vários CFs para a fase Tratar Centro Local
+    Set objDadosDuracaoFase = New clsgenDuracaoFase
+    objDadosDuracaoFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosDuracaoFase.InformaMensagem objMensagem
+
+    'Obtem o número da última fase realizada
+    numUltimaFaseRealizada = objDadosFase.ObtemSequenciaUltimaFaseRealizada(Servico_ID, _
+                                         GbCodigoFaseProgramarCPE, Familia_Produto)
+
+    If (objMensagem.TipoMsg <> "") Then
+       
+       objMensagem.ExibeMensagem
+       GoTo Finalizar
+    
+    End If
+    
+    'Inicia a Transacao
+    bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+        
+    If Not bRetorno Then
+        
+        GoTo ErrorHandler
+    
+    End If
+    
+    FlagIniciouTransacao = True
+    
+    'Verifica se Existe pendencia a ser incluida
+    If (Familia_Produto = "I") Then
+        
+        If (objDadosPendencia.ColecaoPendencia.Count <> 0) Then
+           
+           bRetorno = objDadosPendencia.AtualizarDados(Fase_ID, Servico_ID, _
+                                                       Produto_ID, FlagTemPendenciaEmAberto, _
+                                                       objdadosServico.DiretorRegional, _
+                                                       objdadosServico.NumOE, _
+                                                       objdadosServico.AnoOE, _
+                                                       objdadosServico.ItemOE)
+           
+           If (Not bRetorno) Then
+              
+              GoTo ErrorHandler
+           
+           End If
+           
+        End If
+    
+    End If
+    
+    'Grava Anotacao da fase
+    If Trim(TextoAnotacao) <> "" Then
+       
+       bRetorno = objblfOC_SelecionarOTS.GravarAnotacaoGen(False)
+         
+       If (objMensagem.TipoMsg <> "") Then
+       
+          GoTo ErrorHandler
+          
+       End If
+    
+    End If
+     
+    If (TipoOperacao = "I" And objDadosAcesso.CaracteristicaAcesso = "P") Then 'Indica que a fase está sendo gravada pela 1a vez
+       objDadosFase.Usuario_ID = GbID_Usuario
+       bRetorno = objDadosFase.IniciaFase(Fase_ID, GbID_Usuario)
+       
+       If (objMensagem.TipoMsg <> "") Then
+       
+          GoTo ErrorHandler
+          
+       End If
+       
+    End If
+    
+    FlagFaseFinalizadaOK = False
+    
+    If FlagTemPendenciaEmAberto = False Then
+    
+    '================================================================
+    'Vagner Brandão - VAGNERR- 23/06/2008
+    'Implementação para contemplar a tela de monitoração
+    '================================================================
+        If Produto_ID = GbIDProdutoVIP Then
+           
+           Call TratarFechamentoporPacote
+        
+        End If
+    '================================================================
+    '================================================================
+
+        '=================================================================
+        'CALLBAT - 21/05/2012 - CH-43184DVM
+        'Inclusão do usuário que efetuou a ação.
+        '=================================================================
+         objDadosFase.Usuario_ID = GbID_Usuario
+        '=================================================================
+        '=================================================================
+
+       If (DataFinalizacao = "") Then
+       
+       
+        '=================================================================
+        'AGRC - 15/01/2015 - CH-58474KFY
+        'Chamado CH-35920CGP implantado em 15/01/2015 de forma incorreta. Retornado o codigo anterior.Necessario refazer chamado CH-35920CGP.
+        '=================================================================
+        bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+
+        If (objMensagem.TipoMsg <> "") Then
+
+           GoTo ErrorHandler
+
+        End If
+        '=================================================================
+        '=================================================================
+          
+          
+        ''=================================================================
+        ''CALLBAT - 21/05/2012 - CH-35920CGP
+        ''Causa raiz implementada para impedir que seja finalizada a OTS, em
+        ''caso de rejeição do CLA
+        ''=================================================================
+''            bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+''
+''            If (objMensagem.TipoMsg <> "") Then
+''               GoTo ErrorHandler
+''            End If
+
+          'If FlagStatusAcessoCLA <> "6" Then
+          
+              'bRetorno = objDadosFase.FinalizaFase(Fase_ID)
+    
+              'If (objMensagem.TipoMsg <> "") Then
+                 'GoTo ErrorHandler
+              'End If
+              
+          'End If
+        ''=================================================================
+        ''=================================================================
+          
+       End If
+       
+       FlagFaseFinalizadaOK = True
+       
+    Else
+       
+       'Caso a fase já tenha sido finalizada e uma pendencia tenha sido incluida,
+       'A fase deverá ser considerada como Em Andamento
+       If (DataFinalizacao <> "") Then
+
+          objDadosFase.ID_Servico = Servico_ID
+          objDadosFase.Id_Fase = Fase_ID
+                 
+          'Quando for OTS de Desativacao ou Cancelamento, o periodo previsto para a fase seguinte
+          'deverá ser mantido já que as fases para estas ações serão executadas em paralelo.
+         
+          If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+         
+             FlagManterPeriodo = True
+             
+          Else
+         
+             FlagManterPeriodo = False
+         
+         End If
+        
+         bRetorno = objDadosFase.RetirarFinalizacaoFase(Servico_ID, Fase_ID, _
+                                       Sequencia_Acao, FlagManterPeriodo, Familia_Produto)
+             
+         If objMensagem.TipoMsg <> "" Then
+               
+            Set objDadosFase = Nothing
+            
+            GoTo ErrorHandler
+             
+         End If
+       
+       End If
+    
+       DataFinalizacao = ""
+       
+    End If
+        
+       If (Sigla_Acao = "CAN" Or Sigla_Acao = "DES") And Familia_Produto = "I" And sReplicaInformações = False Then
+           
+           bRetorno = objdadosServico.RecuperarDados(Servico_ID)
+          
+           If (Not bRetorno) Then
+              
+              GoTo ErrorHandler
+           
+           End If
+
+           bRetorno = VerificaFinalizacaoDesativacao(objDadosFase, _
+                                                     objdadosServico, _
+                                                     Servico_ID, Fase_ID, _
+                                                     Sigla_Acao, _
+                                                     objMensagem)
+            If (objMensagem.TipoMsg <> "") Then
+             
+               GoTo ErrorHandler
+               
+            End If
+       
+       End If
+    
+    If (Produto_ID <> GbIDProdutoVIP) Then
+    
+        'Obtem ID_fase da Alocacao Configuraçao
+        lIdFaseAlocacaoConfiguracao = objDadosFase.ObtemIDFase(objdadosServico.ID_Servico, _
+                                                               GbCodigoFaseConfiguracao)
+            
+        If objMensagem.TipoMsg <> "" Then
+          
+             GoTo Finalizar
+        
+        End If
+    
+        If lIdFaseAlocacaoConfiguracao <> 0 Then
+            
+            bFlagIniciaFaseConf = False
+        
+            If objForm.optPropriedadeAcesso(0).Value = True Then
+                
+                '-- DIF 15/10/2012 -- VCBDIF -- FALTOU ACERTAR A CONDIÇÃO <> -1 PARA > 0
+        '        If Trim(objForm.TxtEstacaoEntregaEbtConf.Text) <> "" And _
+        '           objForm.CboPadraoInterfaceEBT.ListIndex <> -1 And _
+        '           Trim(objForm.UsrBLFCabecalho_Acesso.Velocidade) <> "" Then
+        '-------------------------------------------------
+                If Trim(objForm.TxtEstacaoEntregaEbtConf.Text) <> "" And _
+                   objForm.CboPadraoInterfaceEBT.ListIndex > 0 And _
+                   Trim(objForm.UsrBLFCabecalho_Acesso.Velocidade) <> "" Then
+
+                   bFlagIniciaFaseConf = True
+                
+                End If
+                
+            ElseIf objForm.optPropriedadeAcesso(1).Value = True Then
+            '-- DIF 15/10/2012 -- VCBDIF -- FALTOU ACERTAR A CONDIÇÃO <> -1 PARA > 0
+            '    If Trim(objForm.TxtEstacaoEntregaTercConf.Text) <> "" And _
+            '       objForm.CboPadraoInterfaceEBT.ListIndex <> -1 And _
+            '       Trim(objForm.UsrBLFCabecalho_Acesso.Velocidade) <> "" Then
+                If Trim(objForm.TxtEstacaoEntregaTercConf.Text) <> "" And _
+                   objForm.CboPadraoInterfaceEBT.ListIndex > 0 And _
+                   Trim(objForm.UsrBLFCabecalho_Acesso.Velocidade) <> "" Then
+                '-------------------------------------------------
+                   
+                   bFlagIniciaFaseConf = True
+                
+                End If
+            
+            End If
+            
+            If bFlagIniciaFaseConf Then
+                
+                'Caso não tenha calculado o periodo previsto da fase de configuracao, o mesmo deve ser calculado
+                If objDadosFase.ObtemDataFimPrevisto(lIdFaseAlocacaoConfiguracao) = "" Then
+                   
+                   bRetorno = objDadosFase.CalculaPeriodoProximaFase(Sequencia_Acao, Servico_ID)
+                
+                End If
+                
+                '==================================================================================================
+                'CALLBAT - 05/07/2012 - BSoD Light II
+                '==================================================================================================
+                If objForm.CboTipoAcessoTerceiro.ListIndex <> 5 Then
+            
+                        If (objWEBIP Is Nothing) Then
+                        
+                            Set objWEBIP = New clsInterOC_TrataWebIP
+                            
+                        End If
+                                  
+                         objWEBIP.Grupo_ID = lGrupo_ID
+                                  
+                                  
+                        '=================================================================
+                        'CALLBAT - 21/05/2012 - BSoD Net Light
+                        'Incluso o parametro de indicação de Banda Larga para a gravação na tabela
+                        'de interface junto ao SAIP
+                        '=================================================================
+                        'bRetorno = objWEBIP.GravaWEBIPIntegracao(Servico_ID, _
+                                        Fase_ID, _
+                                        "C", _
+                                        Produto_ID, _
+                                        objMensagem, _
+                                        Sigla_Acao)
+                                        
+                        'AGRC - 11/10/2016 - CH-21871NUR
+                        bRetorno = objWEBIP.GravaWEBIPIntegracao(Servico_ID, _
+                                                        Fase_ID, _
+                                                        "C", _
+                                                        Produto_ID, _
+                                                        objMensagem, _
+                                                        Sigla_Acao, _
+                                                        , _
+                                                        , _
+                                                        IIf(objForm.CboTipoAcessoTerceiro.ListIndex = 5, "S", ""))
+                         'FIM - AGRC
+                        '=================================================================
+                        '=================================================================
+        
+                        If (objMensagem.TipoMsg <> "") Then
+        
+                            GoTo ErrorHandler
+                            
+                        End If
+              End If
+              '==================================================================================================
+              '==================================================================================================
+            
+            End If
+            
+            'Caso a fase de acesso esteja sendo finalizada, verifica se fase de configuracao (SAIP) já se encontra
+            'finalizada, em caso afirmativo, calcula o periodo previsto da fase Centro Local
+            If FlagFaseFinalizadaOK Then
+            
+                If objDadosFase.ObtemDataFimReal(lIdFaseAlocacaoConfiguracao) <> "" Then
+                     
+                     iSeqAux = objDadosFase.ObtemSequenciadaFase(Servico_ID, GbCodigoFaseConfiguracao)
+                      
+                     lIdFaseCentroLocal = objDadosFase.ObtemIDFase(Servico_ID, GbCodigoFaseCentroLocal)
+
+                     If objDadosFase.ObtemDataFimPrevisto(lIdFaseCentroLocal) = "" Then
+                     
+                        bRetorno = objDadosFase.CalculaPeriodoProximaFase(iSeqAux, Servico_ID)
+                    
+                        If objMensagem.TipoMsg <> "" Then
+                        
+                             GoTo Finalizar
+                        
+                        End If
+                     
+                     End If
+                     
+                End If
+            
+            End If
+        
+        End If
+    
+    End If
+    
+    If (Produto_ID = GbIDProdutoVIP) And Sigla_Acao = "CAN" And sReplicaInformações = False Then
+     
+        'Finaliza confserv
+        bRetorno = ReplicaDadosAcesso(Servico_ID)
+        
+        If Not bRetorno Then
+        
+            GoTo ErrorHandler
+            
+        End If
+     
+    End If
+     
+    bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao
+    
+    If Not bRetorno Then
+    
+        GoTo ErrorHandler
+        
+    End If
+    
+    FinalizarCancelamento = True
+    
+    bFlagControlaAlteracao = False
+    objForm.FlControlaAlteracao = False
+    objForm.UsrVIPEquipComplementares.bFlagAlteracao = False
+    
+    If objDadosAcesso.SegurancaAcesso = "S" Then 'Seguranca de Acesso
+          
+          If objDadosAcesso.CaracteristicaAcesso = "P" Then 'Acesso Principal
+                          
+             
+             If FlagFaseFinalizadaOK = True Then
+
+                                 objMensagem.TipoMsg = "A"
+                 objMensagem.Descricao = "Os Dados do Acesso Principal foram " & _
+                                        "atualizados com Sucesso!"
+                
+                 FlagDescarregaForm = True
+            
+             ElseIf Not FlagFaseFinalizadaOK And Not FlagTemPendenciaEmAberto Then
+
+                objMensagem.TipoMsg = "A"
+                
+                objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                               " Porém a fase continua em Andamento," & vbCrLf & _
+                               " pois campos obrigatórios não foram preenchidos."
+    
+    
+                 FlagDescarregaForm = True
+                 
+                 If Not objForm.CmdAcessoPrincipal.Visible And (Produto_ID <> GbIDProdutoVIP) Then
+                 
+                    objForm.CmdAcessoContingente.Visible = True
+                    objForm.CmdAcessoPrincipal.Visible = True
+                 
+                 End If
+    
+    
+            ElseIf Not FlagFaseFinalizadaOK And FlagTemPendenciaEmAberto Then
+
+                objMensagem.TipoMsg = "A"
+
+                objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                               " Porém a fase continua em andamento, devido a existência de pendência!"
+                
+                 FlagDescarregaForm = True
+                 
+                 If (Not objForm.CmdAcessoPrincipal.Visible) And (Produto_ID <> GbIDProdutoVIP) Then
+                 
+                    objForm.CmdAcessoContingente.Visible = True
+                    objForm.CmdAcessoPrincipal.Visible = True
+                 
+                 End If
+             
+             End If
+             
+             objForm.ssTabAcesso.Tab = 0
+          
+          Else
+             
+             objMensagem.TipoMsg = "A"
+             
+             If (FlagFaseFinalizadaOK = True) Then
+             
+                FlagDescarregaForm = True
+                       
+                objMensagem.Descricao = "Os Dados do Acesso Contingente foram atualizados com Sucesso!"
+                       
+             Else
+             
+                objMensagem.Descricao = _
+                                   vbCrLf & vbCrLf & _
+                                   "Os Dados do Acesso Contingente foram atualizados " & _
+                                  "com Sucesso! " & vbCrLf & _
+                                  "Porém a fase continua em Andamento."
+             
+                FlagDescarregaForm = False
+                
+             End If
+          
+          End If
+          
+    Else
+            
+        'objMensagem.TipoMsg = "A"
+        
+        If FlagFaseFinalizadaOK = True Then
+        
+            '=================================================================
+            'CALLBAT - 26/06/2013 - Interface junto ao CFM
+            'SO-ENGNQ-83669III
+            '=================================================================
+            'objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+            
+            If Acao_ID <> 8 And Acao_ID <> 9 Then
+                objMensagem.TipoMsg = "A"
+                objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+                
+            ElseIf Acao_ID = 8 And objForm.UsrGenDadosAcessoTroncoTX.UsaTX = "S" Then
+                objMensagem.TipoMsg = "A"
+                objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!" & _
+                                Chr(13) & " Favor desativar o Tronco TX no CFM!"
+                                
+            ElseIf Acao_ID = 9 And objForm.UsrGenDadosAcessoTroncoTX.UsaTX = "S" Then
+                objMensagem.TipoMsg = "A"
+                objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!" & _
+                                Chr(13) & " Favor cancelar o Tronco TX no CFM!"
+            Else
+                objMensagem.TipoMsg = "A"
+                objMensagem.Descricao = "Os Dados do Acesso foram atualizados com Sucesso!"
+            End If
+            
+            '=================================================================
+            '=================================================================
+            
+            FlagDescarregaForm = True
+           
+        ElseIf Not FlagTemPendenciaEmAberto Then
+            
+            objMensagem.TipoMsg = "A"
+            
+            objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                           " Porém a fase continua em Andamento," & vbCrLf & _
+                           " pois campos obrigatórios não foram preenchidos."
+                           
+
+            If DataFinalizacao <> "" Then
+                FlagDescarregaForm = False
+            Else
+                FlagDescarregaForm = True
+            End If
+
+        ElseIf Not FlagFaseFinalizadaOK And FlagTemPendenciaEmAberto Then
+
+            objMensagem.TipoMsg = "A"
+
+            objMensagem.Descricao = "Os Dados do Acesso Principal foram atualizados com Sucesso. " & vbCrLf & _
+                           " Porém a fase continua em andamento, devido a existência de pendência!"
+                           
+            FlagDescarregaForm = True
+        
+        End If
+    
+    End If
+    
+    If Trim(objMensagem.TipoMsg) <> "" Then
+            
+        objMensagem.ExibeMensagem
+        objMensagem.TipoMsg = ""
+        objMensagem.Descricao = ""
+    
+    End If
+
+Finalizar:
+    Set objWEBIP = Nothing
+    Set objDadosDuracaoFase = Nothing
+    
+    Set objDadosFase = Nothing
+    Set ObjEqpto = Nothing
+    Set objDadosPropriedadeTerc = Nothing
+    Set objDadosAtivacaoFinal = Nothing
+    Set objDadosAnalisarOE = Nothing
+    
+    Exit Function
+    
+ErrorHandler:
+       
+    ' Cancelar Transação
+
+    If FlagIniciouTransacao Then
+       
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+    
+    End If
+    
+    If objMensagem.TipoMsg = "" Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "FinalizarCancelamento " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+       
+    objMensagem.ExibeMensagem
+
+    GoTo Finalizar
+       
+    
+End Function
+
+
+Private Sub TrataAjusteEndereco()
+
+Dim objFrmAjusteEnd         As FrmGenPreenchEndereco
+
+Set objFrmAjusteEnd = New FrmGenPreenchEndereco
+
+With objFrmAjusteEnd
+    
+    .TipoLogradouro = objForm.LblDadosComplementares(6).Caption
+    .Logradouro = objForm.LblLogradouro.Caption
+    .NumeroLograd = objForm.LblNumeroEndBR.Caption
+    .Complemento = objForm.LblComplementoEndBR.Caption
+    .Bairro = objForm.LblBairroEndBR.Caption
+    
+    .CEP = objForm.LblCEP.Caption
+    .UF = objForm.LBlUFEndBR.Caption
+    .Cidade = objForm.LblCidadeEndBR.Caption
+    
+    .Show vbModal
+    
+    objForm.LblDadosComplementares(6).Caption = .TipoLogradouro
+    objForm.LblLogradouro.Caption = .Logradouro
+    objForm.LblNumeroEndBR.Caption = .NumeroLograd
+    objForm.LblComplementoEndBR.Caption = .Complemento
+    objForm.LblBairroEndBR.Caption = .Bairro
+    objForm.LblCEP.Caption = .CEP
+    objForm.LBlUFEndBR.Caption = .UF
+    objForm.LblCidadeEndBR.Caption = .Cidade
+    
+End With
+
+End Sub
+
+
+Public Sub EnviarOTSSaip()
+    
+    Dim iIndice             As Integer
+    Dim objDadosFase        As clsgenFase
+    Dim sDataFimPrevisto    As String
+    Dim bFlagRetornoOk      As Boolean
+    Dim sMsgRetorno         As String
+    Dim bRetorno            As Boolean
+    Dim FlagIniciouTransacao As Boolean
+    Dim sDescrRespCLA        As String
+    
+    Dim lAcessoID                   As Long
+    Dim sVar                        As Variant
+    Dim bFlagRetornoCancelamentoOk  As Boolean
+    Dim objDadosLogSGAP     As clsBLD_LogSGAPCLA
+    
+    If Trim(objForm.TxtEstacaoConfiguracao.Text) = "" Or Trim(objForm.CboPadraoInterfaceEBT.Text) = "" Then
+        
+        objMensagem.TipoMsg = "A"
+        objMensagem.Descricao = "Os campos Estação Configuração e Padrão de Interface devem ser preenchidos!"
+        objMensagem.ExibeMensagem
+        
+        Exit Sub
+        
+    End If
+    
+    '=================================================================
+    'CALLBAT - 18/02/2014 - BSoD Unificado
+    'SO-ENGNQ-55327NEG
+    '=================================================================
+    
+    '=================================================================
+    'CALLBAT - 18/09/2014 - BSoD Unificado
+    'Correção efetuada para atendimento da Solicitação da Analista de
+    'Processo Aline Silva
+    'If Acao_ID <> 8 Or Acao_ID <> 9 Then
+    '=================================================================
+    'If objForm.CboTipoAcessoTerceiro.ListIndex = 4 And (Acao_ID <> 9 Or Acao_ID <> 8) Then
+    '    If Acao_ID <> 8 Or Acao_ID <> 9 Then
+    
+    If objForm.CboTipoAcessoTerceiro.ListIndex = 4 Then
+    
+        If Acao_ID <> 8 And Acao_ID <> 9 Then
+    '=================================================================
+    '=================================================================
+            
+            objMensagem.TipoMsg = "A"
+            
+            If Acao_ID = 7 Or Acao_ID = 14 Then
+            
+                objMensagem.Descricao = "Estão bloqueadas novas ativações para " & _
+                                    "acessos BSoD NET."
+                                    
+            ElseIf Acao_ID = 10 Or Acao_ID = 15 Then
+            
+                objMensagem.Descricao = "Estão bloqueadas novas alterações para " & _
+                        "acessos BSoD NET."
+            
+            End If
+            
+            objMensagem.ExibeMensagem
+            
+            GoTo Finalizar
+            
+        End If
+    
+    End If
+    '=================================================================
+    '=================================================================
+    
+    Set objDadosFase = New clsgenFase
+    
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+
+    Screen.MousePointer = vbArrowHourglass
+    
+    sDataFimPrevisto = objDadosFase.ObtemDataFimPrevisto(Fase_ID)
+    
+    bFlagRetornoCancelamentoOk = True
+    
+    If objForm.CboPadraoInterfaceEBT.ListIndex > 0 Then
+       
+       objDadosAcesso.PadraoInterfaceEBT_ID = objForm.CboPadraoInterfaceEBT.ItemData( _
+                                              objForm.CboPadraoInterfaceEBT.ListIndex)
+    Else
+       
+       objDadosAcesso.PadraoInterfaceEBT_ID = 0
+    
+    End If
+    
+    Set objDadosLogSGAP = New clsBLD_LogSGAPCLA
+        
+    objDadosLogSGAP.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosLogSGAP.InformaMensagem objMensagem
+    
+    objDadosLogSGAP.ServicoID = Servico_ID
+    
+    objDadosLogSGAP.ServicoAnteriorID = Servico_ID_Anterior
+    objDadosLogSGAP.estacaoCliente = objForm.TxtEstacaoCliente.Text
+    objDadosLogSGAP.InterfaceEbtId = objDadosAcesso.PadraoInterfaceEBT_ID
+    objDadosLogSGAP.EstacaoConfiguracao = TrataPlick(objForm.TxtEstacaoConfiguracao.Text)
+       
+    objForm.CmdEnviarSAIP.Enabled = False
+    objForm.TxtEstacaoCliente.Enabled = False
+    objForm.TxtEstacaoConfiguracao.Enabled = False
+    objForm.CboPadraoInterfaceEBT.Enabled = False
+    objForm.optPropriedadeAcesso(0).Enabled = False
+    objForm.optPropriedadeAcesso(1).Enabled = False
+    objForm.CboTipoAcessoEmbratel.Enabled = False
+    objForm.CboTipoAcessoTerceiro.Enabled = False
+    
+    If Produto_ID <> 13 Then
+       objForm.UsrBLFCabecalho_Acesso.StatusCla = "OTS enviada ao SAIP"
+    Else
+       objForm.UsrVozBandaCabecalho.StatusCla = "OTS enviada ao SAIP"
+    End If
+    
+    objDadosAcesso.eMailUsuario = TrataPlick(objForm.TxtEMailGic.Text)
+    objDadosAcesso.RIT = objForm.TxtRIT.Text
+    objDadosAcesso.UsuarioAtualizacao_ID = frmgenMDI_SGAPlus.objAutenticacao.IDUsuario
+    objDadosAcesso.EstacaoConfiguracao = TrataPlick(objForm.TxtEstacaoConfiguracao.Text)
+
+    objDadosAcesso.CaracteristicaAcesso = "P"
+    objDadosAcesso.SegurancaAcesso = "N"
+    objDadosAcesso.estacaoCliente = objForm.TxtEstacaoCliente.Text
+    objDadosAcesso.IDLogico = objBlfCabecalho.IDLogico
+    
+    'Gravar dados do acesso anterior na OTS atual quando for uma desativação ou um cancelamento
+
+    FlagIniciouTransacao = True
+       
+    bRetorno = GravarDados(False, True, True)
+    
+    If bRetorno Then
+    
+        bRetorno = objDadosLogSGAP.RecuperarDados(Servico_ID)
+        
+        If Not bRetorno Then
+            
+            'Inicia a Transacao
+            bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+                
+            If Not bRetorno Then
+                
+                GoTo ErrorHandler
+            
+            End If
+        
+            FlagIniciouTransacao = True
+            
+            objDadosLogSGAP.StatusAcesso = "7"  '--- status solicitação finalizada no SAIP
+            
+            FlagStatusAcessoCLA = objDadosLogSGAP.StatusAcesso
+            
+            
+            bRetorno = objDadosLogSGAP.IncluirDados(Servico_ID)
+            
+            If objMensagem.TipoMsg <> "" Then GoTo ErrorHandler
+            
+            'fecha a Transacao
+            bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao()
+            
+            FlagIniciouTransacao = False
+        Else
+            'Inicia a Transacao
+            bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+    
+            If Not bRetorno Then
+    
+                GoTo ErrorHandler
+    
+            End If
+    
+            bRetorno = objDadosLogSGAP.AtualizarDados(Servico_ID)
+    
+            If objMensagem.TipoMsg <> "" Then GoTo ErrorHandler
+            
+            'fecha a Transacao
+            bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao()
+    
+            FlagIniciouTransacao = False
+        
+        End If
+    
+       SalvarDados = True
+
+       FlControlaAlteracao = False
+       
+       Flag_Atualiza_Pendencia = False
+       
+       If FlagDescarregaForm Then
+          
+          Unload Me
+       
+       End If
+       
+       If (objMensagem.TipoMsg <> "") Then
+           
+           GoTo ErrorHandler
+           
+       End If
+        
+       FlagIniciouTransacao = False
+       bFlagControlaAlteracao = False
+       objForm.FlControlaAlteracao = False
+       
+       Screen.MousePointer = vbDefault
+        
+       objMensagem.TipoMsg = "A"
+       objMensagem.Descricao = "Solicitação enviada ao SAIP com sucesso!"
+       objMensagem.ExibeMensagem
+        
+    Else
+           Screen.MousePointer = vbDefault
+           
+           objMensagem.TipoMsg = "A"
+           objMensagem.Descricao = "Solicitação enviada ao SAIP com sucesso!"
+           objMensagem.ExibeMensagem
+    
+    End If
+    
+ '   End If
+
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    Set oXML = Nothing
+  
+    Set objRoot = Nothing
+    Set objElement = Nothing
+    Set m_objDOM = Nothing
+    Set oXML = Nothing
+    
+    On Error GoTo 0
+    Exit Sub
+
+ErrorHandler:
+    ' Cancelar Transação
+    Screen.MousePointer = vbDefault
+
+    If FlagIniciouTransacao Then
+       
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+    
+    End If
+    
+    If objMensagem.TipoMsg = "" And Err.Number <> 0 Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "EnviarOTSSaip " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+       
+    If Err.Number <> 0 Or objMensagem.TipoMsg <> "" Then
+       
+       objMensagem.ExibeMensagem
+    
+    End If
+    
+    GoTo Finalizar
+       
+
+End Sub
+'Caso seja OTS de correção para alteração de dados de configuração onde o circuito já tenha passado pela interface, o sistema deve
+' verificar o status da OTS que foi corrigida
+Function EnviaCancelamentoLegadoCLA() As Boolean
+
+    Dim strXml              As String
+    Dim oXML                As XMLHTTPRequest
+    Dim sUrl                As String
+    Dim msRespostaXml       As String
+    Dim objRoot             As IXMLDOMElement
+    Dim objElement          As IXMLDOMElement
+    Dim m_objDOM            As DOMDocument
+
+    Dim objNameNode         As IXMLDOMNode
+    Dim objAttributes       As IXMLDOMNamedNodeMap
+    Dim objAttributeNode    As IXMLDOMNode
+    Dim objNodeElement      As IXMLDOMElement
+    Dim iIndice             As Integer
+    Dim objDadosFase        As clsgenFase
+    Dim sDataFimPrevisto    As String
+    Dim bFlagRetornoOk      As Boolean
+    Dim sMsgRetorno         As String
+    Dim objDadosLogSGAP     As clsBLD_LogSGAPCLA
+    Dim bRetorno            As Boolean
+    Dim FlagIniciouTransacao As Boolean
+    Dim sDescrRespCLA        As String
+
+    Dim lAcessoID                   As Long
+    Dim sVar                        As Variant
+    Dim bFlagRetornoCancelamentoOk  As Boolean
+    Dim lServicoIdCla               As Long
+    Dim lCircuitoID                 As Long
+
+    lCircuitoID = objdadosServico.ObtemIDCircuito(Servico_ID)
+
+    Set objDadosLogSGAP = New clsBLD_LogSGAPCLA
+    
+    objDadosLogSGAP.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosLogSGAP.InformaMensagem objMensagem
+    
+    lServicoIdCla = objDadosLogSGAP.ObtemServicoEnviadoAoCLA(lCircuitoID)
+
+    bRetorno = objDadosLogSGAP.RecuperarDados(lServicoIdCla)
+
+    EnviaCancelamentoLegadoCLA = False
+    
+    If bRetorno Then
+
+        strXml = ObtemXmlCancelamento(sIdLogico, Servico_ID, lServicoIdCla)
+        
+        objDadosLogSGAP.XMLCancelSinc = strXml
+        objDadosLogSGAP.StatusAcesso = "4" 'Aguardando cancelamento solicitação anterior
+        bFlagRetornoCancelamentoOk = AcionaInterfaceCLA(strXml, msRespostaXml, sMsgRetorno)
+        objDadosLogSGAP.XMLRetornoCancSinc = msRespostaXml
+        objDadosLogSGAP.ServicoID = Servico_ID
+        sDescrRespCLA = ""
+        
+        If Trim(msRespostaXml) <> "" And InStr(1, msRespostaXml, "<mensagem>") > 0 And InStr(1, msRespostaXml, "</mensagem>") > 0 Then
+           
+           sDescrRespCLA = Mid(msRespostaXml, InStr(1, msRespostaXml, "<mensagem>") + 10, InStr(1, msRespostaXml, "</mensagem>") - 10 - InStr(1, msRespostaXml, "<mensagem>"))
+        
+        End If
+            
+        If InStr(1, sDescrRespCLA, "ucesso") > 0 Then
+        
+            objDadosLogSGAP.StatusAcesso = "9"  '--- status Cancelamento retornado com sucesso do CLA
+           
+        Else
+           
+            objDadosLogSGAP.StatusAcesso = "10"  '--- status Cancelamento rejeitado ou com erro
+           
+        End If
+        
+        FlagStatusAcessoCLA = objDadosLogSGAP.StatusAcesso
+        
+        objDadosLogSGAP.XMLCancelSinc = TrataPlick(strXml)
+        objDadosLogSGAP.ServicoAnteriorID = Servico_ID_Anterior
+        objDadosLogSGAP.ServicoID = Servico_ID
+        objDadosLogSGAP.XMLRetornoSinc = TrataPlick(Mid(msRespostaXml, 1, 500))
+            
+        If Not bRetorno Then
+            
+            'Inicia a Transacao
+            bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+                
+            If Not bRetorno Then
+                
+                GoTo ErrorHandler
+            
+            End If
+        
+            FlagIniciouTransacao = True
+            
+            bRetorno = objDadosLogSGAP.IncluirDados(Servico_ID)
+            
+            If objMensagem.TipoMsg <> "" Then GoTo ErrorHandler
+            
+            'fecha a Transacao
+            bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao()
+            
+            FlagIniciouTransacao = False
+        Else
+            'Inicia a Transacao
+            bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+    
+            If Not bRetorno Then
+    
+                GoTo ErrorHandler
+    
+            End If
+    
+            bRetorno = objDadosLogSGAP.AtualizarDados(Servico_ID)
+    
+            If objMensagem.TipoMsg <> "" Then GoTo ErrorHandler
+            
+            'fecha a Transacao
+            bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao()
+    
+            FlagIniciouTransacao = False
+        End If
+    
+    End If
+    
+        EnviaCancelamentoLegadoCLA = True
+
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    Set oXML = Nothing
+  
+    Set objRoot = Nothing
+    Set objElement = Nothing
+    Set m_objDOM = Nothing
+    Set oXML = Nothing
+    
+    On Error GoTo 0
+    
+    Exit Function
+
+ErrorHandler:
+    ' Cancelar Transação
+    Screen.MousePointer = vbDefault
+
+    If FlagIniciouTransacao Then
+       
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+    
+    End If
+    
+    If objMensagem.TipoMsg = "" And Err.Number <> 0 Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "EnviaCancelamentoLegadoCLA " & _
+                   "da classe clsGenOC_TratarAcessoEmbratel"
+    End If
+       
+    If Err.Number <> 0 Or objMensagem.TipoMsg <> "" Then
+       
+       objMensagem.ExibeMensagem
+    
+    End If
+    
+    GoTo Finalizar
+
+End Function
+'
+'=================================================================
+'CALLBAT - 26/06/2013 - Interface junto ao CFM
+'SO-ENGNQ-83669III
+'=================================================================
+Public Function RecuperaDadosTroncoTX(plCircuito_ID As Long, objMensagem As clsgenMensagem) As Boolean
+
+    On Error GoTo ErrorHandler
+
+    Dim objDadosCFM As New CFMSP18X
+    Dim objdadosCircuito As New clsgenCircuito
+    
+    Dim sDesignacao As String
+    'Dim psTroncoTX As String
+    'Dim psOTSTX As String
+    'Dim psItemTX As String
+    Dim psCodigoRetorno As String
+    Dim psMensagemRetorno As String
+    
+    Dim objDadosParametros  As clsGenDadosParametros
+    
+    
+    Set objDadosParametros = New clsGenDadosParametros
+        
+    objDadosParametros.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosParametros.InformaMensagem objMensagem
+
+    If objDadosParametros.RecuperarDados Then
+    
+    
+            ReDim psRetornoCFM(99) As String
+        
+            
+            RecuperaDadosTroncoTX = False
+            
+            
+            objdadosCircuito.InformaMensagem objMensagem
+            objdadosCircuito.InformaBanco frmgenMDI_SGAPlus.objBanco
+            
+            psDesignacao = objdadosCircuito.ObtemDesigancao(plCircuito_ID)
+            
+            objDadosCFM.ServerAddress = objDadosParametros.ServerAddressCFM  '"10.2.4.83:5024@RPC/SRVCFM/CALLNAT"
+            objDadosCFM.Logon
+            
+            
+            Call objDadosCFM.CFMSP188(psDesignacao, psRetornoCFM, psCodigoRetorno, psMensagemRetorno)
+            
+            If Err.Number <> 0 Then
+                   
+                   If Err.Number = -2147352567 Then
+                   
+                      objMensagem.TipoMsg = "A"
+                      objMensagem.Descricao = "O serviço EntireX está fora do ar " & Chr(13) _
+                                 & " Favor tentar novamente em alguns segundos."
+                    
+                      GoTo ErrorHandler
+                   Else
+                      objMensagem.TipoMsg = "E"
+                      objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & _
+                                            vbCrLf & vbCrLf & vbCrLf & _
+                                            "Houve um erro de execução no método: " & _
+                                            vbCrLf & vbCrLf & _
+                                            "RecuperaDadosTroncoTX da classe clsGenOC_TratarAcessoEmbratel"
+                      GoTo ErrorHandler
+                   End If
+            End If
+            
+            objMensagem.TipoMsg = psCodigoRetorno
+            objMensagem.Descricao = psMensagemRetorno
+            
+            If objMensagem.TipoMsg = "" Then
+                GoTo ErrorHandler
+            End If
+                        
+            If psCodigoRetorno = "00" Then
+            
+                sTroncoTX = Mid(psRetornoCFM(0), 1, 30)
+                sOTSTX = Mid(psRetornoCFM(0), 87, 9)
+                sItemOTSTX = Mid(psRetornoCFM(0), 96, 4)
+                
+                RecuperaDadosTroncoTX = True
+            
+            End If
+            
+            If psCodigoRetorno = "02" Then
+            
+                sTroncoTX = Mid(psRetornoCFM(0), 1, 30)
+                sOTSTX = Mid(psRetornoCFM(0), 87, 9)
+                sItemOTSTX = Mid(psRetornoCFM(0), 96, 4)
+            
+            End If
+        
+            'objMensagem.TipoMsg = psCodigoRetorno
+            'objMensagem.Descricao = psMensagemRetorno
+            
+    End If
+    
+    Set objDadosCFM = Nothing
+    
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+    
+ErrorHandler:
+       
+       If objMensagem.TipoMsg = "" Then
+          'AGRC - CH-16385SER - 31/05/2016
+          If Err.Number = -2147352567 Then
+                   
+                    objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "O serviço EntireX está fora do ar " & Chr(13) _
+                                 & " Favor tentar novamente em alguns segundos."
+                    
+          Else
+                    objMensagem.TipoMsg = "E"
+                    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & _
+                                            vbCrLf & vbCrLf & vbCrLf & _
+                                            "Houve um erro de execução no método: " & _
+                                            vbCrLf & vbCrLf & _
+                                            "RecuperaDadosTroncoTX da classe clsGenOC_TratarAcessoEmbratel"
+          End If
+       End If
+       
+       objMensagem.ExibeMensagem
+       
+       GoTo Finalizar
+
+End Function
+

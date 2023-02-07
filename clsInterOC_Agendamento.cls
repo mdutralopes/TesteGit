@@ -1,0 +1,3341 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+  Persistable = 0  'NotPersistable
+  DataBindingBehavior = 0  'vbNone
+  DataSourceBehavior  = 0  'vbNone
+  MTSTransactionMode  = 0  'NotAnMTSObject
+END
+Attribute VB_Name = "clsInterOC_Agendamento"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = True
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Public objForm                  As frmPortAgendamentoeEstorno
+
+Public objDadosPendencia        As New clsblf_Pendencia
+
+
+Public objOCSelecionarOTS       As clsgenOC_SelecionarOTS
+
+Dim objMensagem                 As New clsgenMensagem
+Dim sStatus_Fase                As String
+Dim lServico_ID                 As Long
+Dim lFase_Id                    As Long
+Dim lProduto_ID                 As Long
+Dim sDataFinalizacao            As String
+Dim lSequencia_Acao             As Long
+Dim sTextoAnotacao              As String
+Dim sPermiteExecucao            As String
+Dim lCentroFuncionalID          As Long
+Dim sStatusTelefone              As String
+Dim sAcao                         As String
+Dim sDoadoraOrigPort    As String
+
+Dim lGrupo_ID              As Long
+
+Dim sSgap_pub_BW_ID   As String
+Dim sInd_Quarentena   As String
+Dim sDDD                    As Long
+Dim sTelefone             As Long
+Dim sDataFinalizacaoOTS As String
+Dim sPendencia_ID     As Long
+
+Dim objAtenPortab               As New VIP_Aten_Portabilidade
+
+Public bFlagControlaAlteracao   As Boolean
+
+
+Dim objServico                  As New clsGenServico
+Dim objAtenItemServico    As VIP_Aten_Item_Servico
+Dim objAtenContrato          As VIP_Aten_Contrato
+Dim objAtenTecVoz            As VIP_Aten_Tec_Voz
+Dim dNumeroProtocolo      As Double
+
+Dim objSGAP_PUB_BW    As New clsGenPubBW
+
+Dim objSGAP_SUB_BW    As New clsGenSubBW
+
+Dim objJanelaMigracao    As New clsGenJanelaMigracao
+
+Dim objAtenEndereco      As New VIP_Aten_Endereco
+Dim objCircuito               As New clsgenCircuito
+Dim sDataHrPrevistaPort  As String
+Dim lNumDiasDuracao      As Long
+Dim sCentro_Funcional_ID As Long
+
+Dim objUsuario              As New clsgenUsuario
+
+Private Const sPortabilidade         As String = "S"
+
+Const GbCodigoFaseCentroLocal     As Long = 8
+
+Private sCodigoFase           As String
+
+Dim sReagendamento          As String
+Dim sCancelamento             As String
+'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+Dim sSuspensao          As String
+'Fim - Release BDR - 14/12/2009 - Joao Carlos
+Dim sStatus_OTS               As String
+
+
+Dim sCod_Elemento_Rede As String
+
+'Dim sLogin_Usuario         As String
+'Dim sMatricula_Usuario As String
+
+'BIP VPN 16/06/2003
+Private bPermiteAtualizar       As Boolean
+
+'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+Private cLista As New Collection
+Private objBanco        As SGAPLUSBanco.clsBanco
+Private sIndPortab      As Integer
+Private lContratoID     As Long
+'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+
+'Public Property Get Matricula_Usuario() As String
+'
+'    Login_Usuario = sMatricula_Usuario
+'
+'End Property
+'
+'Public Property Let Matricula_Usuario(ByVal sNewValue As String)
+'
+'    sMatricula_Usuario = sNewValue
+'
+'End Property
+'Public Property Get Login_Usuario() As String
+'
+'    Login_Usuario = sLogin_Usuario
+'
+'End Property
+'
+'Public Property Let Login_Usuario(ByVal sNewValue As String)
+'
+'    sLogin_Usuario = sNewValue
+'
+'End Property
+Public Property Get Status_OTS() As String
+
+    Status_OTS = sStatus_OTS
+
+End Property
+Public Property Let Status_OTS(ByVal sNewValue As String)
+
+    Status_OTS = sNewValue
+
+End Property
+
+
+Public Property Get Portabilidade() As String
+
+    Portabilidade = sPortabilidade
+
+End Property
+Public Property Get Pendencia_ID() As Long
+
+    Pendencia_ID = sPendencia_ID
+
+End Property
+Public Property Let Pendencia_ID(ByVal sNewValue As Long)
+
+    sPendencia_ID = sNewValue
+
+End Property
+
+Public Property Get Cancelamento() As String
+
+    Cancelamento = sCancelamento
+
+End Property
+Public Property Let Cancelamento(ByVal sNewValue As String)
+
+    sCancelamento = sNewValue
+
+End Property
+
+
+Public Property Get Reagendamento() As String
+
+    Reagendamento = sReagendamento
+
+End Property
+Public Property Let Reagendamento(ByVal sNewValue As String)
+
+    sReagendamento = sNewValue
+
+End Property
+
+'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+Public Property Get Suspensao() As String
+
+    Suspensao = sSuspensao
+
+End Property
+Public Property Let Suspensao(ByVal sNewValue As String)
+
+    sSuspensao = sNewValue
+
+End Property
+'Fim - Release BDR - 14/12/2009 - Joao Carlos
+
+Public Property Get Cod_Elemento_Rede() As String
+
+    Cod_Elemento_Rede = sCod_Elemento_Rede
+
+End Property
+Public Property Let Centro_Funcional_ID(ByVal sNewValue As Long)
+
+    sCentro_Funcional_ID = sNewValue
+
+End Property
+
+Public Property Get Centro_Funcional_ID() As Long
+
+    Centro_Funcional_ID = sCentro_Funcional_ID
+
+End Property
+
+Public Property Let Cod_Elemento_Rede(ByVal sNewValue As String)
+
+    sCod_Elemento_Rede = sNewValue
+
+End Property
+
+Public Property Get CodigoFase() As Long
+
+    CodigoFase = sCodigoFase
+
+End Property
+
+Public Property Let CodigoFase(ByVal sNewValue As Long)
+
+    sCodigoFase = sNewValue
+
+End Property
+Public Property Get DDD() As Long
+
+    DDD = sDDD
+
+End Property
+
+Public Property Let DDD(ByVal sNewValue As Long)
+
+    sDDD = sNewValue
+
+End Property
+Public Property Get NumDiasDuracao() As Long
+
+    NumDiasDuração = lNumDiasDuracao
+
+End Property
+
+Public Property Let NumDiasDuracao(ByVal sNewValue As Long)
+
+    lNumDiasDuracao = sNewValue
+
+End Property
+
+Public Property Get DataHrPrevistaPort() As String
+
+    DataHrPrevistaPort = sDataHrPrevistaPort
+
+End Property
+
+Public Property Let DataHrPrevistaPort(ByVal sNewValue As String)
+
+    sDataHrPrevistaPort = sNewValue
+
+End Property
+
+Public Property Get Telefone() As Long
+
+    Telefone = sTelefone
+
+End Property
+
+Public Property Let Telefone(ByVal sNewValue As Long)
+
+    sTelefone = sNewValue
+
+End Property
+
+Public Property Get Ind_Quarentena() As String
+
+    Ind_Quarentena = sInd_Quarentena
+
+End Property
+
+Public Property Let Ind_Quarentena(ByVal sNewValue As String)
+
+    sInd_Quarentena = sNewValue
+
+End Property
+
+Public Property Get Sgap_pub_BW_ID() As String
+
+    Sgap_pub_BW_ID = sSgap_pub_BW_ID
+
+End Property
+
+Public Property Let Sgap_pub_BW_ID(ByVal sNewValue As String)
+
+    sSgap_pub_BW_ID = sNewValue
+
+End Property
+Public Property Get Acao() As String
+
+    Acao = sAcao
+
+End Property
+
+Public Property Let Acao(ByVal sNewValue As String)
+
+    sAcao = sNewValue
+
+End Property
+
+Public Property Get DataFinalizacaoOTS() As String
+
+    DataFinalizacaoOTS = sAcao
+
+End Property
+
+Public Property Let DataFinalizacaoOTS(ByVal sNewValue As String)
+
+    sDataFinalizacaoOTS = sNewValue
+
+End Property
+
+Public Property Get StatusTelefone() As String
+
+    StatusTelefone = sStatusTelefone
+
+End Property
+
+Public Property Let StatusTelefone(ByVal sNewValue As String)
+
+    sStatusTelefone = sNewValue
+
+End Property
+
+Public Property Get ContratoID() As Long
+
+    ContratoID = lContratoID
+
+End Property
+
+Public Property Let ContratoID(ByVal lNewValue As Long)
+
+    lContratoID = lNewValue
+
+End Property
+
+Public Property Get NrLocalInsta() As Long
+
+NrLocalInsta = lNrLocalInsta
+
+End Property
+
+Public Property Let NrLocalInsta(ByVal lNewValue As Long)
+
+lNrLocalInsta = lNewValue
+
+End Property
+
+Public Property Get CentroFuncionalID() As Long
+
+    CentroFuncionalID = lCentroFuncionalID
+
+End Property
+
+Public Property Let CentroFuncionalID(ByVal lNewValue As Long)
+
+    lCentroFuncionalID = lNewValue
+
+End Property
+
+Public Property Get DescricaoCF() As String
+
+DescricaoCF = sDescricaoCF
+
+End Property
+
+Public Property Let DescricaoCF(ByVal sNewValue As String)
+
+sDescricaoCF = sNewValue
+
+End Property
+
+Public Property Get TextoAnotacao() As String
+
+TextoAnotacao = sTextoAnotacao
+
+End Property
+
+Public Property Let TextoAnotacao(ByVal sNewValue As String)
+
+sTextoAnotacao = sNewValue
+
+End Property
+
+Public Property Get Sequencia_Acao() As Long
+
+Sequencia_Acao = lSequencia_Acao
+
+End Property
+
+Public Property Let Sequencia_Acao(ByVal lNewValue As Long)
+
+lSequencia_Acao = lNewValue
+
+End Property
+
+Public Property Get Produto_ID() As Long
+
+Produto_ID = lProduto_ID
+
+End Property
+
+Public Property Let Produto_ID(ByVal lNewValue As Long)
+
+lProduto_ID = lNewValue
+
+End Property
+
+Public Property Get Grupo_ID() As Long
+
+Grupo_ID = lGrupo_ID
+
+End Property
+
+Public Property Let Grupo_ID(ByVal lNewValue As Long)
+
+lGrupo_ID = lNewValue
+
+End Property
+
+Public Property Get Servico_ID() As Long
+
+Servico_ID = lServico_ID
+
+End Property
+
+Public Property Let Servico_ID(ByVal vNewValue As Long)
+
+lServico_ID = vNewValue
+
+End Property
+
+Public Property Get Servico_ID_Anterior() As Long
+
+Servico_ID_Anterior = lServico_ID_Anterior
+
+End Property
+
+Public Property Let Servico_ID_Anterior(ByVal vNewValue As Long)
+
+lServico_ID_Anterior = vNewValue
+
+End Property
+
+Public Property Get Fase_ID() As Long
+
+Fase_ID = lFase_Id
+
+End Property
+
+Public Property Let Fase_ID(ByVal vNewValue As Long)
+
+lFase_Id = vNewValue
+
+End Property
+
+'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+Public Property Get lista() As Collection
+
+    Set lista = cLista
+
+End Property
+
+Public Property Let lista(ByVal cNewValue As Collection)
+
+    Set cLista = cNewValue
+
+End Property
+
+Public Property Get IndPortab() As Long
+
+IndPortab = sIndPortab
+
+End Property
+
+Public Property Let IndPortab(ByVal vNewValue As Long)
+
+sIndPortab = vNewValue
+
+End Property
+'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+
+ Public Sub CapturaRetorno()
+ 
+ 
+    If objForm.txtNumeroBilhete.Text = "" Then
+ 
+           Set objSGAP_SUB_BW = New clsGenSubBW
+        
+           objSGAP_SUB_BW.InformaBanco frmgenMDI_SGAPlus.objBanco
+           objSGAP_SUB_BW.InformaMensagem objMensagem
+           
+           bRetorno = objSGAP_SUB_BW.RecuperarDtHrPrevistaPort(Sgap_pub_BW_ID)
+           
+           objForm.txtNumeroBilhete.Text = Format(objSGAP_SUB_BW.Numero_Bilhete, "0000000000")
+           objForm.txtDtAgendamento.Text = Left(objSGAP_SUB_BW.DataHrPrevista, 10)
+           objForm.txtHrAgendamento.Text = Mid(objSGAP_SUB_BW.DataHrPrevista, 12, 5)
+        
+            If objForm.txtNumeroBilhete.Text <> "" Then
+                objForm.bAguardando = False
+                objForm.bRespDoadora = False
+                objForm.SSTab.TabEnabled(2) = True
+            End If
+
+           Set objSGAP_SUB_BW = Nothing
+            
+    End If
+    
+    '===================================================================
+            
+            'bRetorno = objAtenPortab.RecuperarDadosDoadora(Servico_ID)
+            
+'            If (objMensagem.TipoMsg <> "") Then
+'                'GoTo ErrorHandler
+'            End If
+            
+            'Verifica se há autorização da doadora
+            
+    If objForm.bRespDoadora = False Then
+            
+            objForm.bRespDoadora = objAtenPortab.RecuperarDadosDoadora(Servico_ID)
+            
+            If objForm.bRespDoadora = True Then
+                
+                If objAtenPortab.IndicAutorizacao = "S" Then
+                
+                    objForm.OptRespDoadoraSim.Value = True
+                    objForm.OptRespDoadoraNao.Value = False
+                
+                    objForm.TxtMotivoRejeicao = objAtenPortab.MotivoAutorizacao
+                
+                Else
+                
+                    objForm.OptRespDoadoraSim.Value = False
+                    objForm.OptRespDoadoraNao.Value = True
+                
+                End If
+            '===================================================================
+            
+            '===================================================================
+                'Verifica se há fraude
+                If objAtenPortab.IndicFraude = "S" Then
+                
+                    objForm.OptRespFraudeSim.Value = True
+                    objForm.OptRespFraudeNao.Value = False
+                    
+                    objForm.txtMotivoFraude = objAtenPortab.MotivoFraude
+                
+                Else
+                
+                    objForm.OptRespFraudeSim.Value = False
+                    objForm.OptRespFraudeNao.Value = True
+                
+                End If
+                '===================================================================
+            End If
+            
+    End If
+ 
+ End Sub
+Public Function CapturaJanelas() As Boolean
+ 
+Dim sSql  As String
+Dim lDiaSemana As Long
+Dim lDia             As Long
+Dim sDiaFinal      As Long
+Dim lHora           As String
+    
+    objForm.cboJanelaInicio.Clear
+    
+    Set objJanelaMigracao = New clsGenJanelaMigracao
+    
+    objJanelaMigracao.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objJanelaMigracao.InformaMensagem objMensagem
+    
+    'Verifica se a data digitada é menor que 2 dias e 3 horas
+    If CDate(objForm.spdDtInicial.Text) < CDate(Format(DateAdd("d", 3, Date), "dd/mm/yyyy")) Then
+    
+'       bRetorno = objJanelaMigracao.RecuperaDados(objForm.spdDtInicial.Text, objForm.ChkJanelaEspecial.Value)
+    
+'        For Each objJanelaMigracao In objJanelaMigracao.ListaJanela
+'            lHora = objJanelaMigracao.HoraInicio
+'            Exit For
+'        Next
+    
+        objMensagem.TipoMsg = "E"
+        objMensagem.Descricao = "Data inicial não pode ser menor que " & _
+                                                Chr(10) & " dia " & Format(DateAdd("d", 3, Date), "dd/mm/yyyy") '& _
+                                                "A partir das " & lHora
+                                                 
+        objMensagem.ExibeMensagem
+        
+        objForm.spdDtInicial.Text = CDate(Format(DateAdd("d", 3, Date), "dd/mm/yyyy"))
+        
+        objForm.spdDtInicial.SetFocus
+    
+    End If
+    
+    'Se o dia da semana for 1 ou 7 ( Domingo ou Sábado ) envia 0 para a função que retorna as janelas
+    bRetorno = objJanelaMigracao.RecuperaDados(objForm.spdDtInicial.Text, objForm.ChkJanelaEspecial.Value)
+    
+    For Each objJanelaMigracao In objJanelaMigracao.ListaJanela
+        objForm.cboJanelaInicio.AddItem objJanelaMigracao.HoraInicio
+    Next
+    
+    If objForm.cboJanelaInicio.ListCount > 0 Then
+        objForm.cboJanelaInicio.ListIndex = 0
+    End If
+   
+    Set objJanelaMigracao = Nothing
+
+Finalizar:
+        
+    Screen.MousePointer = vbDefault
+    
+    Exit Function
+    
+ErrorHandler:
+    Screen.MousePointer = vbDefault
+
+    ' Cancelar Transação
+    If FlagIniciouTransacao Then
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+       FlagIniciouTransacao = False
+    End If
+    
+    If Err.Number <> 0 Then
+       objMensagem.TipoMsg = "E"
+       
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "CapturaJanelas " & _
+                   "da classe clsInterOC_Agendamento"
+    End If
+       
+    objMensagem.ExibeMensagem
+    
+    GoTo Finalizar
+ 
+ End Function
+Public Function CarregarForm() As Boolean
+
+    
+    Dim objAutenticacao        As New clsgenAutenticacao
+    Dim objDadosFase           As New clsgenFase
+    Dim objDadosProduto        As New clsGenProduto
+    Dim paPermissoes()         As Variant
+    Dim sSituacaoOTS           As String
+    Dim cColecao               As Collection
+    Dim flUsuarioDoCF          As Boolean
+    
+    Dim objPubBW                     As New clsGenPubBW
+ 
+ '   Dim sDiretoria                 As String
+ 
+    'Inicio - Release BDR - 10/12/2009 - Joao Carlos
+    Dim dDataEstorno            As String
+    Dim sSemana                 As String
+    Dim sHoraJanela             As String
+    'Fim - Release BDR - 10/12/2009 - Joao Carlos
+ 
+    On Error GoTo ErrorHandler
+    
+    CarregarForm = False
+    
+    'Este campo após crítica pode ser desabilitado. IP VPN
+    bPermiteAtualizar = True
+    
+    
+    'Checa se o produto pode alocar vários CFs para a fase Tratar Centro Local.
+    'É instanciado e recebe os objetos Banco e Mensagem apenas neste método
+    Set objDadosDuracaoFase = New clsgenDuracaoFase
+    objDadosDuracaoFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosDuracaoFase.InformaMensagem objMensagem
+    
+            Set objAutenticacao = Nothing
+          
+    objDadosProduto.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosProduto.InformaMensagem objMensagem
+    
+    bRetorno = objDadosProduto.RecuperarDados(Produto_ID)
+    
+    '=====================================================================
+    'CALBAT - 01/07/2009
+    'Alterado para acertar um problema de produção
+    '=====================================================================
+    Set objSGAP_PUB_BW = New clsGenPubBW
+    
+    objSGAP_PUB_BW.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objSGAP_PUB_BW.InformaMensagem objMensagem
+    '=====================================================================
+    '=====================================================================
+    
+    Set objForm = New frmPortAgendamentoeEstorno
+
+    
+    Set objAutenticacao = New clsgenAutenticacao
+    
+    'Verifica as permissoes do usuario
+    objAutenticacao.IDUsuario = frmgenMDI_SGAPlus.objAutenticacao.IDUsuario
+    objAutenticacao.Login = frmgenMDI_SGAPlus.objAutenticacao.Login
+    
+    objAutenticacao.InformaMensagem objMensagem
+    
+    Call objAutenticacao.InformaBanco(frmgenMDI_SGAPlus.objBanco)
+    
+    
+    objUsuario.InformaMensagem objMensagem
+    
+    Call objUsuario.InformaBanco(frmgenMDI_SGAPlus.objBanco)
+    
+    bRetorno = objUsuario.RecuperarDados(frmgenMDI_SGAPlus.objAutenticacao.IDUsuario)
+    
+    If bRetorno = False Then
+        GoTo ErrorHandler
+    End If
+    
+    'Verifica se a Fase ainda continua Em Andamento
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+    
+    If CodigoFase <> GbCodigoFasePortabilidadeEstorno And CodigoFase <> GbCodigoFasePortabilidadeAgendamento Then
+        
+        If Not objDadosFase.RecuperarSituacaoFase(Fase_ID) And DataFinalizacao = "" Then
+        
+           objMensagem.ExibeMensagem
+        
+           GoTo Finalizar
+        Else
+        
+           objMensagem.TipoMsg = ""
+           objMensagem.Descricao = ""
+        
+        End If
+        
+        
+    End If
+
+    Set objAtenItemServico = New VIP_Aten_Item_Servico
+     
+    objAtenPortab.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objAtenPortab.InformaMensagem objMensagem
+    
+    objAtenItemServico.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objAtenItemServico.InformaMensagem objMensagem
+    
+    bRetorno = objAtenItemServico.RecuperarDados(lServico_ID)
+
+    If (objMensagem.TipoMsg <> "") Then
+
+       GoTo ErrorHandler
+
+    End If
+    
+    Set objAtenContrato = New VIP_Aten_Contrato
+    
+    objAtenContrato.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objAtenContrato.InformaMensagem objMensagem
+    
+    
+    bRetorno = objAtenContrato.RecuperarDados(objAtenItemServico.ContratoID)
+
+    If (objMensagem.TipoMsg <> "") Then
+
+       GoTo ErrorHandler
+
+    End If
+    
+    
+    If CodigoFase <> GbCodigoFasePortabilidadeJanelaMigracao Then
+    
+        'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+        If objAtenItemServico.IndPortab = 1 Then
+        'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+        
+            Set AtenPortab = New VIP_Aten_Portabilidade
+            
+            objAtenPortab.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objAtenPortab.InformaMensagem objMensagem
+            
+            'Obtem dados servico e verifica se a OTS selecionada ainda encontra-se em andamento
+            bRetorno = objAtenPortab.RecuperarDados(Servico_ID)
+            
+            If objMensagem.TipoMsg <> "" Then
+               
+               objMensagem.ExibeMensagem
+               
+               Set objAtenPortab = Nothing
+               
+               GoTo Finalizar
+               
+            End If
+        'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+        End If
+        'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+        
+    End If
+
+    Set objAtenTecVoz = New VIP_Aten_Tec_Voz
+    
+    objAtenTecVoz.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objAtenTecVoz.InformaMensagem objMensagem
+    
+    'bRetorno = objAtenTecVoz.RecuperarDados(objAtenItemServico.ItemAtenID)
+    bRetorno = objAtenTecVoz.RecuperarDados(objAtenItemServico.iD)
+    
+    If objMensagem.TipoMsg <> "" Then
+       
+       objMensagem.ExibeMensagem
+       
+       Set objAtenTecVoz = Nothing
+       
+       GoTo Finalizar
+       
+    End If
+    
+    
+    Cod_Elemento_Rede = Trim(objAtenTecVoz.Sigla_Localidade & Space(5 - Len(objAtenTecVoz.Sigla_Localidade)) & _
+                                       objAtenTecVoz.Tipo_Elemento_Rede & Space(4 - Len(objAtenTecVoz.Tipo_Elemento_Rede)) & _
+                                       objAtenTecVoz.Identif_Endereco_Elem_Rede & Space(2 - Len(objAtenTecVoz.Identif_Endereco_Elem_Rede)) & _
+                                       objAtenTecVoz.Identif_Cluster & Space(2 - Len(objAtenTecVoz.Identif_Cluster)))
+   
+   '======================================================================================
+   'Instancia o formulario, obtem os dados da fase e carrega os campos da tela
+   '======================================================================================
+
+    If CodigoFase <> GbCodigoFasePortabilidadeEstorno Then
+
+            Set objAtenEndereco = New VIP_Aten_Endereco
+            
+            objAtenEndereco.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objAtenEndereco.InformaMensagem objMensagem
+        
+            bRetorno = objAtenEndereco.RecuperarDados(objAtenItemServico.EnderecoID)
+        
+            If (objMensagem.TipoMsg <> "") Then
+        
+               GoTo ErrorHandler
+        
+            End If
+            
+            
+            'Carrega informações do contrato
+            objForm.LblRazaoSocial.Caption = TrataPlick(objAtenContrato.RazaoSocialCliente)
+            objForm.lblNomeFantasia.Caption = TrataPlick(objAtenContrato.Nm_Fantasia)
+            objForm.lblEndCliente.Caption = TrataPlick(objAtenEndereco.Logradouro)
+            objForm.LblBairro.Caption = TrataPlick(objAtenEndereco.Bairro)
+            objForm.LblCidade.Caption = TrataPlick(objAtenEndereco.Cidade)
+            objForm.LBlUF = TrataPlick(objAtenEndereco.UF)
+            objForm.lblInsEstadual = TrataPlick(objAtenContrato.InscricaoEstadual)
+            objForm.lblInscMunicipal = TrataPlick(objAtenContrato.InscricaoMunicipal)
+            objForm.lblContatoTecPriNome = TrataPlick(objAtenContrato.ResponsavelTecnicoNome)
+            objForm.lblContatoTecPriEmail = TrataPlick(objAtenContrato.ResponsavelTecnicoEmail)
+            objForm.lblContatoTecPriTelefone = TrataPlick(objAtenContrato.ResponsavelTecnicoTelefone)
+    
+    End If
+    
+    'Inicio - Release BDR - 21/12/2009 - Renato Moraes
+    objForm.lblEmailGc.Visible = False
+    objForm.lblEmailGev.Visible = False
+    objForm.lblEmailPvt.Visible = False
+    objForm.txtEmail_gc.Visible = False
+    objForm.txtEmail_gev.Visible = False
+    objForm.txtEmail_pvt.Visible = False
+    'Fim - Release BDR - 21/12/2009 - Renato Moraes
+    
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+    If objAtenItemServico.IndPortab = 1 Then
+    'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+        objForm.txtNumeroBilhete.Text = IIf(objAtenPortab.NumBilheteAtual = 0, "", Format(objAtenPortab.NumBilheteAtual, "0000000000"))
+        objForm.txtDtAgendamento.Text = Left(objAtenPortab.DtHrPrevPortabilidade, 10)
+        objForm.txtHrAgendamento.Text = Mid(objAtenPortab.DtHrPrevPortabilidade, 12, 5)
+        
+        If objAtenPortab.IndicAutorizacao = "S" Then
+            objForm.OptRespDoadoraSim.Value = True
+            objForm.OptRespDoadoraNao.Value = False
+        Else
+            objForm.OptRespDoadoraSim.Value = False
+            objForm.OptRespDoadoraNao.Value = True
+            If (objAtenPortab.IndicAutorizacao = "N" Or objAtenPortab.IndicAutorizacao = "S") Or objForm.txtNumeroBilhete.Text = "" Then
+                objForm.bRespDoadora = True
+            End If
+            
+        End If
+        
+        objForm.TxtMotivoRejeicao.Text = objAtenPortab.MotivoAutorizacao
+        
+        If objAtenPortab.IndicFraude = "S" Then
+            objForm.OptRespFraudeSim.Value = True
+            objForm.OptRespFraudeNao.Value = False
+        Else
+            objForm.OptRespFraudeSim.Value = False
+            objForm.OptRespFraudeNao.Value = True
+            
+        End If
+        
+        objForm.txtMotivoFraude.Text = objAtenPortab.MotivoFraude
+        
+        'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+        If objAtenPortab.Numero_Protocolo <> "" And (Reagendamento <> "S" And Cancelamento <> "S" And Suspensao <> "S") Then
+        'If objAtenPortab.Numero_Protocolo <> "" And (Reagendamento <> "S" And Cancelamento <> "S") Then
+        'Fim - Release BDR - 14/12/2009 - Joao Carlos
+        'If objAtenPortab.NumBilheteAtual <> "" And (Reagendamento <> "S" And Cancelamento <> "S") Then
+                'Sgap_pub_BW_ID = gbIdentInvock_ID & objAtenPortab.Numero_Protocolo
+                Sgap_pub_BW_ID = objAtenPortab.Numero_Protocolo
+            
+                'Desabilita os objetos da tela
+                objForm.ChkJanelaEspecial.Enabled = False
+                objForm.optProxJanelaDisponivel.Enabled = False
+                objForm.optDataApartir.Enabled = False
+                objForm.optProxJanelaDisponivel.Enabled = False
+                objForm.optPeriodo.Enabled = False
+                objForm.spdDtInicial.Visible = False
+                objForm.spdDtInFim.Visible = False
+                objForm.cboJanelaFim.Visible = False
+                objForm.cboJanelaInicio.Visible = False
+                objForm.lblInicial.Visible = False
+                objForm.lblFim.Visible = False
+                objForm.cboJanelaFim.Visible = False
+                
+                objForm.cmdSolicitar.Enabled = False
+                
+                'Inicio - Release BDR - 21/12/2009 - Renato Moraes e Bernardo Fontes
+                objForm.lblEmailGc.Visible = False
+                objForm.lblEmailGev.Visible = False
+                objForm.lblEmailPvt.Visible = False
+                objForm.txtEmail_gc.Visible = False
+                objForm.txtEmail_gev.Visible = False
+                objForm.txtEmail_pvt.Visible = False
+                'Fim - Release BDR - 21/12/2009 - Renato Moraes e Bernardo Fontes
+                
+                
+        
+        Else
+            'Se já tiver Numero do Protocolo, porque já foi solicitada o Agendamento
+            'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+            'If objAtenPortab.NumProtocoloAtual <> "" And (Cancelamento <> "S" And Reagendamento <> "S") Then
+            If objAtenPortab.NumProtocoloAtual <> "" And (Cancelamento <> "S" And Reagendamento <> "S" And Suspensao <> "S") Then
+            'Fim - Release BDR - 14/12/2009 - Joao Carlos
+            
+                dNumeroProtocolo = Right(objAtenPortab.NumProtocoloAtual, Len(objAtenPortab.NumProtocoloAtual) - 1)
+                
+                '================================================================
+                'CALLBAT - 27/03/2009
+                'Altaração efetuada a pedido da analista Aline Nascimento - ALINENA
+                '================================================================
+                'objForm.cmdSolicitar.Enabled = False
+                'Inicio - Tratamento Causa Raiz - PTS 721 - 21/07/2009 - Joao Carlos
+                'If objPubBW.DAT_HRA_PREVISTA_PORTAB <> "" Then
+                If CLng(objAtenPortab.NumBilheteAtual) > 0 And Me.StatusTelefone <> "Cancelado" Then
+                'Fim - Tratamento Causa Raiz - PTS 721 - 21/07/2009 - Joao Carlos
+                '================================================================
+                    objForm.cmdSolicitar.Enabled = False
+                End If
+                '================================================================
+                '================================================================
+                
+                objForm.bAguardando = True
+                
+                'Verifica se é um reagendamento
+                '================================================================
+                'CALLBAT - 27/03/2009
+                'Altaração efetuada a pedido da analista Aline Nascimento - ALINENA
+                '================================================================
+                'If Reagendamento <> "S" And Cancelamento <> "S" Then
+                'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+                'If (Reagendamento <> "S" And Cancelamento <> "S") And objPubBW.DAT_HRA_PREVISTA_PORTAB <> "" Then
+                If (Reagendamento <> "S" And Cancelamento <> "S" And Suspensao <> "S") And objPubBW.DAT_HRA_PREVISTA_PORTAB <> "" Then
+                'Fim - Release BDR - 14/12/2009 - Joao Carlos
+                '================================================================
+                '================================================================
+                    'Desabilita os objetos da tela
+                    objForm.optProxJanelaDisponivel.Value = False
+                    objForm.optDataApartir.Value = False
+                    objForm.optProxJanelaDisponivel.Value = False
+                    objForm.optPeriodo.Value = False
+                    
+                    objForm.ChkJanelaEspecial.Enabled = False
+                    objForm.optProxJanelaDisponivel.Enabled = False
+                    objForm.optDataApartir.Enabled = False
+                    objForm.optPeriodo.Enabled = False
+                    objForm.spdDtInicial.Visible = False
+                    objForm.spdDtInFim.Visible = False
+                    objForm.cboJanelaFim.Visible = False
+                    objForm.cboJanelaInicio.Visible = False
+                    objForm.lblInicial.Visible = False
+                    objForm.lblFim.Visible = False
+                    objForm.cboJanelaFim.Visible = False
+                    'Inicio - Release BDR - 21/12/2009 - Renato Moraes e Bernardo Fontes
+                    objForm.lblEmailGc.Visible = False
+                    objForm.lblEmailGev.Visible = False
+                    objForm.lblEmailPvt.Visible = False
+                    objForm.txtEmail_gc.Visible = False
+                    objForm.txtEmail_gev.Visible = False
+                    objForm.txtEmail_pvt.Visible = False
+                    'Fim - Release BDR - 21/12/2009 - Renato Moraes e Bernardo Fontes
+                    
+                    'CALBAT -
+                    If objPubBW.DAT_HRA_PREVISTA_PORTAB <> "" Then
+                        objForm.cmdSolicitar.Enabled = False
+                    End If
+                    
+                    
+                    objForm.FraOpcoesAgendamento.Caption = "Opções para Agendamento"
+                    
+                    objForm.cmdSolicitar.Caption = "Solicitar Agendamento"
+                
+                'Inicio - Release BDR - 18/12/2009 - Bernardo Botelho Fontes
+                'Se tudo é diferente de "S" significa que é agendamento
+                ElseIf Reagendamento <> "S" And Cancelamento <> "S" And Suspensao <> "S" Then
+                    'Inicio - Release BDR - 22/12/2009 - Renato Moraes
+                    objForm.lblInicial.Caption = "Data de Agendamento:"
+'''                    objForm.lblInicial.Top = 320
+'''                    objForm.spdDtInicial.Top = 400
+'''                    objForm.spdDtInicial.Left = 1200
+'''                    objForm.lblHrInicio.Top = 400
+'''                    objForm.lblHrInicio.Left = 2400
+'''                    objForm.cboJanelaInicio.Top = 400
+'''                    objForm.cboJanelaInicio.Left = 3800
+'''                    'Fim - Release BDR - 22/12/2009 - Renato Moraes
+'''                    objForm.lblFim.Visible = False
+'''                    objForm.spdDtInFim.Visible = False
+'''                    objForm.cboJanelaFim.Visible = False
+'''                    objForm.lblHrFim.Visible = False
+'''                    objForm.cboJanelaFim.Visible = False
+'''                    objForm.lblHrFim.Visible = False
+'''                    objForm.optDataApartir.Visible = False
+'''                    objForm.optPeriodo.Visible = False
+'''                    objForm.optProxJanelaDisponivel.Visible = False
+'''                    objForm.ChkJanelaEspecial.Visible = False
+                    objForm.txtDtSolicitacao.Visible = False
+                    objForm.spdDtSolicitacao.Visible = False
+                    'Inicio - Release BDR - 21/12/2009 - Renato Moraes e Bernardo Fontes
+                    objForm.lblEmailPvt.Visible = True
+                    objForm.txtEmail_pvt.Visible = True
+                    objForm.txtEmail_pvt.Enabled = True
+                    objForm.txtEmail_pvt.Text = objAtenPortab.Email_PVT
+                    If (lProduto_ID = GbIDProdutoAAC) Then
+                        objForm.txtEmail_gev.Visible = False
+                        objForm.txtEmail_gev.Enabled = False
+                        objForm.lblEmailGev.Visible = False
+                        objForm.txtEmail_gc.Visible = True
+                        objForm.txtEmail_gc.Enabled = True
+                        objForm.lblEmailGc.Visible = True
+                        'objForm.txtEmail_gev.Text = objAtenPortab.Email_GEV
+                        objForm.txtEmail_gc.Text = objAtenPortab.Email_GC
+                    End If
+                    'Fim - Release BDR - 21/12/2009 - Renato Moraes e Bernardo Fontes
+                'Fim - Release BDR - 18/12/2009 - Bernardo Botelho Fontes
+                
+                ElseIf Reagendamento = "S" Then
+                
+                    objForm.ChkJanelaEspecial.Enabled = True
+                    
+                    objForm.optProxJanelaDisponivel.Enabled = True
+                    'objForm.optProxJanelaDisponivel.Enabled = False
+
+                    objForm.cmdSolicitar.Caption = "Solicitar Reagendamento"
+                    
+                    objForm.FraOpcoesAgendamento.Caption = "Opções para Reagendamento"
+                    
+                    'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                    'objForm.optProxJanelaDisponivel.Value = True
+                    objForm.optProxJanelaDisponivel.Value = False
+                    objForm.optDataApartir.Value = True
+                    objForm.lblInicial.Caption = "Data de Reagendamento:"
+                    objForm.lblEmailPvt.Visible = True
+                    objForm.txtEmail_pvt.Visible = True
+                    objForm.txtEmail_pvt.Text = objAtenPortab.Email_PVT
+                    If (lProduto_ID = GbIDProdutoAAC) Then
+                        objForm.txtEmail_gev.Visible = False
+                        objForm.lblEmailGev.Visible = False
+                        objForm.txtEmail_gc.Visible = True
+                        objForm.lblEmailGc.Visible = True
+                        'objForm.txtEmail_gev.Text = objAtenPortab.Email_GEV
+                        objForm.txtEmail_gc.Text = objAtenPortab.Email_GC
+                    End If
+                    'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                    
+                    objForm.cmdSolicitar.Enabled = True
+                    
+                ElseIf Cancelamento = "S" Then
+                
+                    objForm.ChkJanelaEspecial.Enabled = True
+                    objForm.optProxJanelaDisponivel.Enabled = True
+                    'Inicio - Release BDR - 18/12/2009 - Renato Moraes
+                    'objForm.optDataApartir.Enabled = True
+                    'objForm.optPeriodo.Enabled = True
+                    'Fim - Release BDR - 18/12/2009 - Renato Moraes
+                    objForm.cmdSolicitar.Caption = "Solicitar Cancelamento"
+                    
+                    objForm.FraDadosFraude.Caption = "Dados de Cancelamento"
+                    objForm.sprDataFraude.Text = Format(Now, "DD/MM/YYYY")
+                    objForm.sprDataFraude.Enabled = False
+                    
+                    objForm.cmdSolicitar.Enabled = True
+                                
+                'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+                ElseIf Suspensao = "S" Then
+                
+                    objForm.ChkJanelaEspecial.Enabled = True
+                    objForm.optProxJanelaDisponivel.Enabled = True
+                    'Inicio - Release BDR - 18/12/2009 - Renato Moraes
+                    'objForm.optDataApartir.Enabled = True
+                    'objForm.optPeriodo.Enabled = True
+                    'Fim - Release BDR - 18/12/2009 - Renato Moraes
+                    objForm.cmdSolicitar.Caption = "Solicitar Suspensão"
+                    
+                    objForm.FraDadosFraude.Caption = "Dados de Suspensão"
+                    objForm.sprDataFraude.Text = Format(Now, "DD/MM/YYYY")
+                    objForm.sprDataFraude.Enabled = False
+                    
+                    objForm.cmdSolicitar.Enabled = True
+                
+                'Fim - Release BDR - 14/12/2009 - Joao Carlos
+                End If
+                
+            Else
+                
+                'Captura a sequency para o numero do protocolo e é acrescentado '03 para o número do protocolo
+                dNumeroProtocolo = objSGAP_PUB_BW.CapturaSequencydaTabela
+                
+                'Habilita os objetos da tela
+                objForm.ChkJanelaEspecial.Enabled = True
+                objForm.optProxJanelaDisponivel.Enabled = True
+                'Inicio - Release BDR - 18/12/2009 - Renato Moraes
+                'objForm.optDataApartir.Enabled = True
+                objForm.optProxJanelaDisponivel.Enabled = True
+                'objForm.optPeriodo.Enabled = True
+                'Fim - Release BDR - 18/12/2009 - Renato Moraes
+                objForm.cmdSolicitar.Enabled = True
+                
+                objForm.cboJanelaInicio.Visible = False
+                objForm.cboJanelaFim.Visible = False
+                
+                'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                'objForm.optProxJanelaDisponivel.Value = True
+                objForm.optProxJanelaDisponivel.Value = False
+                'Inicio - Release BDR - 18/12/2009 - Renato Moraes
+                'objForm.optDataApartir.Value = True
+                'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                
+                'objForm.txtDtSolicitacao.Visible = False
+                'objForm.spdDtSolicitacao.Visible = False
+                'Fim - Release BDR - 18/12/2009 - Renato Moraes
+                
+                'Inicio - Release BDR - 18/12/2009 - Bernardo Botelho Fontes
+                'Se tudo é diferente de "S" significa que é agendamento
+                If Reagendamento <> "S" And Cancelamento <> "S" And Suspensao <> "S" Then
+                    'Inicio - Release BDR - 22/12/2009 - Renato Moraes
+                    objForm.lblInicial.Caption = "Data de Agendamento:"
+'''                    objForm.lblInicial.Top = 320
+'''                    objForm.spdDtInicial.Top = 400
+'''                    objForm.spdDtInicial.Left = 1200
+'''                    objForm.lblHrInicio.Top = 400
+'''                    objForm.lblHrInicio.Left = 2400
+'''                    objForm.cboJanelaInicio.Top = 400
+'''                    objForm.cboJanelaInicio.Left = 3800
+'''                    'Fim - Release BDR - 22/12/2009 - Renato Moraes
+'''                    objForm.lblFim.Visible = False
+'''                    objForm.spdDtInFim.Visible = False
+'''                    objForm.cboJanelaFim.Visible = False
+'''                    objForm.lblHrFim.Visible = False
+'''                    objForm.cboJanelaFim.Visible = False
+'''                    objForm.lblHrFim.Visible = False
+'''                    objForm.optDataApartir.Visible = False
+'''                    objForm.optPeriodo.Visible = False
+'''                    objForm.optProxJanelaDisponivel.Visible = False
+'''                    objForm.ChkJanelaEspecial.Visible = False
+                    objForm.txtDtSolicitacao.Visible = False
+                    objForm.spdDtSolicitacao.Visible = False
+                    'Inicio - Release BDR - 21/12/2009 - Renato Moraes e Bernardo Fontes
+                    objForm.lblEmailPvt.Visible = True
+                    objForm.txtEmail_pvt.Visible = True
+                    objForm.txtEmail_pvt.Enabled = True
+                    If (lProduto_ID = GbIDProdutoAAC) Then
+                        objForm.txtEmail_gev.Visible = False
+                        objForm.txtEmail_gev.Enabled = False
+                        objForm.lblEmailGev.Visible = False
+                        objForm.txtEmail_gc.Visible = True
+                        objForm.txtEmail_gc.Enabled = True
+                        objForm.lblEmailGc.Visible = True
+                    End If
+                    'Fim - Release BDR - 21/12/2009 - Renato Moraes e Bernardo Fontes
+                End If
+                'Fim - Release BDR - 18/12/2009 - Bernardo Botelho Fontes
+                
+                If Cancelamento = "S" Then
+                    objForm.cmdSolicitar.Caption = "Solicitar Cancelamento"
+                    objForm.FraDadosFraude.Caption = "Dados de Cancelamento"
+                    objForm.sprDataFraude.Text = Format(Now, "DD/MM/YYYY")
+                End If
+                
+                If Reagendamento = "S" Then
+                    objForm.cmdSolicitar.Caption = "Solicitar Reagendamento"
+                    objForm.FraOpcoesAgendamento.Caption = "Opções para Reagendamento"
+                    
+                    'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                    'objForm.optProxJanelaDisponivel.Value = True
+                    objForm.optProxJanelaDisponivel.Enabled = False
+                    objForm.optDataApartir.Value = True
+                    objForm.lblInicial.Caption = "Data de Reagendamento:"
+                    objForm.lblEmailPvt.Visible = True
+                    objForm.txtEmail_pvt.Visible = True
+                    objForm.txtEmail_pvt.Enabled = True
+                    objForm.txtEmail_pvt.Text = objAtenPortab.Email_PVT
+                    objForm.txtEmail_pvt.Enabled = True
+                    If (lProduto_ID = GbIDProdutoAAC) Then
+                        objForm.txtEmail_gev.Visible = False
+                        objForm.txtEmail_gev.Enabled = False
+                        objForm.lblEmailGev.Visible = False
+                        'objForm.txtEmail_gev.Text = objAtenPortab.Email_GEV
+                        objForm.txtEmail_gc.Visible = True
+                        objForm.txtEmail_gc.Enabled = True
+                        objForm.lblEmailGc.Visible = True
+                        objForm.txtEmail_gc.Text = objAtenPortab.Email_GC
+                    End If
+                    'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                End If
+                
+                'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+                If Suspensao = "S" Then
+                    objForm.cmdSolicitar.Caption = "Solicitar Suspensão"
+                    objForm.FraDadosFraude.Caption = "Dados de Suspensão"
+                    objForm.sprDataFraude.Text = Format(Now, "DD/MM/YYYY")
+                End If
+                'Fim - Release BDR - 14/12/2009 - Joao Carlos
+            
+            End If
+            
+                'Captura o ID da Sequence
+                Sgap_pub_BW_ID = gbIdentInvock_ID & dNumeroProtocolo
+                
+                objAtenPortab.Numero_Protocolo = Sgap_pub_BW_ID
+                
+                objForm.txtBilheteProvisorio.Text = Format(CStr(dNumeroProtocolo), "00000000")
+                
+            
+        End If
+        
+        Ind_Quarentena = objAtenPortab.IndicaQuarentena
+        
+        'Início - Release BDR - 02/12/2009 - Renato Moraes
+        objForm.OptAutorizadoEA.Value = IIf(IsNull(objAtenPortab.IndAusenRespDoador), False, IIf(objAtenPortab.IndAusenRespDoador = "S", True, False))
+        'Fim - Release BDR - 02/12/2009 - Renato Moraes
+    
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+    End If
+    'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+    
+    Set objServico = New clsGenServico
+    
+    objServico.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objServico.InformaMensagem objMensagem
+    
+    Set objCircuito = New clsgenCircuito
+    
+    objCircuito.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objCircuito.InformaMensagem objMensagem
+    
+    
+    bRetorno = objCircuito.RecuperarDados(Servico_ID)
+    
+    If (objMensagem.TipoMsg <> "") Then
+
+       GoTo ErrorHandler
+
+    End If
+    
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+    If objAtenItemServico.IndPortab = 1 Then
+        DDD = objAtenPortab.CodigoArea
+        Telefone = objAtenPortab.NumeroInstancia
+    Else
+        DDD = objAtenTecVoz.CodigoAreaTerminal
+        Telefone = objAtenTecVoz.NumeroTerminal
+    End If
+    'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+    
+    bRetorno = objServico.RecuperarDados(Servico_ID)
+    
+    If (objMensagem.TipoMsg <> "") Then
+
+       GoTo ErrorHandler
+
+    End If
+    
+    bRetorno = objCircuito.RecuperarDados(objServico.ID_Servico)
+    
+    If (objMensagem.TipoMsg <> "") Then
+
+       GoTo ErrorHandler
+
+    End If
+    
+    
+    Set objPortVipCabecalho = New VIP_Cabecalho_Port
+    
+    
+    objPortVipCabecalho.NomeCliente = objAtenContrato.RazaoSocialCliente
+    objPortVipCabecalho.SubConta = objAtenContrato.ContaCorrente
+    
+    
+    'Se o produto for um NetPhone, mostra o código NET
+    'AGRC - SO-TIEMP-49824BGM - 15/11/2017
+    'If lProduto_ID = GbIDProdutoNetPhone Then
+    If lProduto_ID = GbIDProdutoNetPhone Or lProduto_ID = GbIDProdutoClaroFone Then
+        objForm.UsrPortabilidadeCabecalho.MostraCodigoNET (True)
+        objPortVipCabecalho.Contrato = Format(objAtenContrato.ClienteID, "000000000000")
+    Else
+        objForm.UsrPortabilidadeCabecalho.MostraCodigoNET (False)
+        objPortVipCabecalho.Contrato = objAtenContrato.CdDiretoriaRegional & "  " & objAtenContrato.SiglaProduto & "  " & objAtenContrato.NumeroContrato & "/" & objAtenContrato.AnoContrato
+    End If
+    
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+    If objAtenItemServico.IndPortab = 1 Then
+    'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+
+        objPortVipCabecalho.DataJanela = objAtenPortab.DtHrPrevPortabilidade
+        objPortVipCabecalho.DDDTelefone = " ( " & objAtenPortab.CodigoArea & " )  " & Left(objAtenPortab.NumeroInstancia, 4) & "-" & Right(objAtenPortab.NumeroInstancia, 4)
+        objPortVipCabecalho.NumeroBilhete = objAtenPortab.NumBilheteAtual
+        objPortVipCabecalho.EmpresaReceptora = objAtenPortab.NomeEmpresaReceptora
+        objPortVipCabecalho.EmpresaDoadora = objAtenPortab.NomeEmpresaDoadora
+        objPortVipCabecalho.CNL = objCircuito.CNL_Ponta_A
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+        objPortVipCabecalho.IndPortab = "SIM"
+    Else
+        objPortVipCabecalho.DDDTelefone = " ( " & DDD & " )  " & Left(Telefone, 4) & "-" & Right(Telefone, 4)
+        objPortVipCabecalho.IndPortab = "NÃO"
+    End If
+    'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+
+    'Login_Usuario = objUsuario.ID_USUARIO
+    'Matricula_Usuario = objUsuario.Matricula
+    objForm.lblInstrucao.Visible = True
+    
+    If CodigoFase = GbCodigoFasePortabilidadeJanelaMigracao Then
+        objForm.Caption = objDadosProduto.Descricao & " - Janela de Migração"
+    'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+    'ElseIf CodigoFase = GbCodigoFasePortabilidadeAgendamento And Reagendamento <> "S" And Cancelamento <> "S" Then
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeAgendamento And Reagendamento <> "S" And Cancelamento <> "S" And Suspensao <> "S" Then
+    'Fim - Release BDR - 14/12/2009 - Joao Carlos
+        objForm.Caption = objDadosProduto.Descricao & " - Agendamento"
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeAgendamento And Reagendamento = "S" Then
+        objForm.Caption = objDadosProduto.Descricao & " - Reagendamento"
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeAgendamento And Cancelamento = "S" Then
+        objForm.Caption = objDadosProduto.Descricao & " - Cancelar Portabilidade"
+        objForm.txtDtCancelamento.Caption = "Data do Cancelamento: "
+    'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeAgendamento And Suspensao = "S" Then
+        objForm.Caption = objDadosProduto.Descricao & " - Suspender Portabilidade"
+        objForm.txtDtCancelamento.Caption = "Data da Suspensão: "
+    'Fim - Release BDR - 14/12/2009 - Joao Carlos
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeEstorno Then
+        objForm.Caption = objDadosProduto.Descricao & " - Estorno por Fraude Portabilidade"
+        'Inicio - Release BDR - 11/12/2009 - Joao Carlos
+        'objForm.txtDtCancelamento.Caption = "Data do Estorno: "
+        objForm.txtDtCancelamento.Caption = "Data Agendada para o Estorno: "
+        'Fim - Release BDR - 11/12/2009 - Joao Carlos
+        objForm.lblInstrucao.Visible = False
+    End If
+    
+    objPortVipCabecalho.Produto_ID = lProduto_ID
+    
+    Call CarregaCabecalho_Portabilidade(objForm.UsrPortabilidadeCabecalho, objPortVipCabecalho)
+
+    
+    'objForm.Informa_Servico (objServico)
+    
+    '==================================================================
+    'Habilita os objetos da tela
+    '==================================================================
+    'objForm.lblInstrucao.Visible = True
+    
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+    'If CodigoFase = GbCodigoFasePortabilidadeAgendamento Then
+    If objAtenItemServico.IndPortab = 0 Then
+        objForm.SSTab.TabVisible(1) = False
+        objForm.SSTab.TabVisible(2) = False
+        
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeAgendamento And objAtenItemServico.IndPortab = 1 Then
+    'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+    
+        'Desabilita a
+         objForm.SSTab.TabVisible(0) = True
+    
+        If Cancelamento = "S" Then
+            objForm.FraDadosFraude.Visible = True
+            objForm.FraOpcoesAgendamento.Visible = False
+            
+            objForm.lblCapFraudeCancelamento.Caption = "Descrição do Pedido de Cancelamento:"
+            
+            objForm.lblInstrucao.Visible = False
+
+        'Inicio - Release BDR - 14/12/2009 - Joao Carlos
+        ElseIf Suspensao = "S" Then
+            objForm.FraDadosFraude.Visible = True
+            objForm.FraOpcoesAgendamento.Visible = False
+            objForm.lblCapFraudeCancelamento.Caption = "Descrição do Pedido de Suspensão:"
+            objForm.lblInstrucao.Visible = False
+        'Fim - Release BDR - 14/12/2009 - Joao Carlos
+        
+        Else
+            objForm.FraDadosFraude.Visible = False
+            objForm.FraOpcoesAgendamento.Visible = True
+        End If
+        
+            '=======================================================
+            'Captura a data de solicitação da Janela
+            '=======================================================
+            Set objPubBW = New clsGenPubBW
+
+            objPubBW.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objPubBW.InformaMensagem objMensagem
+
+            bRetorno = objPubBW.CapturaDataJanela(Sgap_pub_BW_ID)
+
+            If objMensagem.Descricao <> "" Then
+                GoTo ErrorHandler
+            End If
+
+            'Janela a partir e Periodo
+            If objPubBW.DAT_HRA_PREVISTA_PORTAB <> "" Then
+
+                'Popula as informações
+                objForm.optDataApartir.Value = True
+                objForm.spdDtInicial.Text = Left(objPubBW.DAT_HRA_PREVISTA_PORTAB, 10)
+
+                objForm.cboJanelaInicio.AddItem (Mid(objPubBW.DAT_HRA_PREVISTA_PORTAB, 12, 5))
+                objForm.cboJanelaInicio.ListIndex = 0
+
+                'Torna Visivel
+                objForm.spdDtInicial.Visible = True
+                objForm.cboJanelaInicio.Visible = True
+                objForm.lblInicial.Visible = True
+                'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                objForm.cboJanelaFim.Visible = False
+                'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                
+                'Inicio - Release BDR - 28/01/2010 - Joao Carlos
+                objForm.txtEmail_gev.Enabled = True
+                objForm.txtEmail_gc.Enabled = True
+                'Fim - Release BDR - 28/01/2010 - Joao Carlos
+                
+                'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                If CLng(objAtenPortab.NumBilheteAtual) > 0 And Me.StatusTelefone <> "Cancelado" Then
+                    'Não permite editar
+                    objForm.spdDtInicial.Enabled = False
+                    objForm.cboJanelaInicio.Enabled = False
+                    objForm.txtEmail_pvt.Enabled = False
+                    objForm.txtEmail_gc.Enabled = False
+                    objForm.txtEmail_gev.Enabled = False
+                    'objForm.lblInicial.Enabled = False
+                End If
+                'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                
+                '===========================================================
+                'CALBAT - 20/08/2008
+                If CLng(0 & objPubBW.NUM_DIAS_DURACAO_JANELA_PORTAB) > 0 Then
+                '===========================================================
+
+                    'Inicio - Release BDR - 18/12/2009 - Renato Moraes
+                    'objForm.optPeriodo.Value = True
+                    'objForm.spdDtInFim.Text = DateAdd("d", objPubBW.NUM_DIAS_DURACAO_JANELA_PORTAB, CDate(Left(objPubBW.NUM_DIAS_DURACAO_JANELA_PORTAB, 10)))
+                    'objForm.spdDtInFim.Visible = True
+                    'objForm.spdDtInFim.Enabled = False
+                    'Fim - Release BDR - 18/12/2009 - Renato Moraes
+
+                End If
+
+            Else
+
+                'Inicio - Release BDR - 28/01/2010 - Joao Carlos
+                'If Reagendamento <> "S" Then
+                'Fim - Release BDR - 28/01/2010 - Joao Carlos
+                    'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                    'Proxima Janela
+                    'objForm.optProxJanelaDisponivel.Value = True
+                    objForm.optProxJanelaDisponivel.Value = False
+                    objForm.optDataApartir.Value = True
+                    objForm.cboJanelaFim.Visible = False
+                    Me.CapturaJanelas
+                    'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+                'Inicio - Release BDR - 28/01/2010 - Joao Carlos
+                'End If
+                'Fim - Release BDR - 28/01/2010 - Joao Carlos
+            End If
+
+            objForm.ChkJanelaEspecial.Enabled = False
+            
+            objForm.txtDtCancelamento.Visible = True
+            objForm.txtDtCancelamento.Enabled = False
+            
+            'Inicio - Release BDR - 28/01/2010 - Joao Carlos
+            'objForm.spdDtSolicitacao.Text = Format(objPubBW.STRTIMESTAMP, "dd/mm/yyyy")
+            If IsNull(objPubBW.STRTIMESTAMP) Or objPubBW.STRTIMESTAMP = "" Then
+                objForm.spdDtSolicitacao.Text = Format(objAtenPortab.DataSolicitacao, "dd/mm/yyyy")
+            Else
+                objForm.spdDtSolicitacao.Text = Format(objPubBW.STRTIMESTAMP, "dd/mm/yyyy")
+            End If
+            'Fim - Release BDR - 28/01/2010 - Joao Carlos
+            
+            objForm.spdDtSolicitacao.Enabled = False
+
+            '=======================================================
+            '=======================================================
+    
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeEstorno Then
+    
+        objForm.SSTab.TabVisible(0) = False
+        objForm.SSTab.TabEnabled(2) = False
+        
+        objForm.FraDadosFraude.Visible = True
+        objForm.FraOpcoesAgendamento.Visible = False
+        
+        'Início - Release BDR - 08/12/2009 - Renato Moraes
+        'objForm.sprDataFraude.Text = sDataFinalizacaoOTS
+        dDataEstorno = DateAdd("d", 2, Now)
+        sSemana = Weekday(dDataEstorno)
+        If sSemana = 7 Then
+            dDataEstorno = DateAdd("d", 2, dDataEstorno)
+        ElseIf sSemana = 1 Then
+            dDataEstorno = DateAdd("d", 2, dDataEstorno)
+        Else
+            dDataEstorno = Format(dDataEstorno, "dd/mm/yyyy")
+        End If
+        
+        Set objJanelaMigracao = New clsGenJanelaMigracao
+        objJanelaMigracao.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objJanelaMigracao.InformaMensagem objMensagem
+    
+        sHoraJanela = objJanelaMigracao.RecuperaPrimeiraJanela(dDataEstorno, False)
+        If sHoraJanela = "" Then
+            sHoraJanela = "08:00"
+        End If
+        
+        objForm.sprDataFraude.Text = Format(Format(dDataEstorno, "DD/MM/YYYY") & " " & Format(sHoraJanela, "HH:MM"), "DD/MM/YYYY HH:MM")
+        'Fim - Release BDR - 08/12/2009 - Renato Moraes
+        
+        objForm.sprDataFraude.Enabled = False
+        
+        objForm.TxtFraudeDescricao.Enabled = True
+        
+        objForm.cmdSolicitar.Caption = "&Estorno por Fraude"
+    End If
+    
+    'If sStatusTelefone = "Agendamento Confirmado" Or sStatusTelefone = "Realizado" Then
+    
+         'Verifica se a Portabilidade já foi efetuada
+    If objSGAP_PUB_BW.RecuperarDtHrRealPort(objAtenPortab.CodigoArea, objAtenPortab.NumeroInstancia) <> "" And _
+         sStatusTelefone = "Realizado" Then
+            
+            'Desabilita os objetos da tela
+            objForm.ChkJanelaEspecial.Enabled = False
+            objForm.optProxJanelaDisponivel.Enabled = False
+            objForm.optDataApartir.Enabled = False
+            objForm.optProxJanelaDisponivel.Enabled = False
+            objForm.optPeriodo.Enabled = False
+            objForm.spdDtInicial.Visible = False
+            objForm.spdDtInFim.Visible = False
+            objForm.cboJanelaFim.Visible = False
+            objForm.cboJanelaInicio.Visible = False
+            objForm.lblInicial.Visible = False
+            objForm.lblFim.Visible = False
+            objForm.cboJanelaFim.Visible = False
+            objForm.cmdSolicitar.Enabled = False
+            'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+            objForm.lblHrInicio.Visible = False
+            'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+            'Inicio - Release BDR - 22/12/2009 - Bernardo Fontes
+            objForm.lblEmailGc.Visible = False
+            objForm.lblEmailGev.Visible = False
+            objForm.lblEmailPvt.Visible = False
+            objForm.txtEmail_gc.Visible = False
+            objForm.txtEmail_gev.Visible = False
+            objForm.txtEmail_pvt.Visible = False
+            'Fim - Release BDR - 22/12/2009 - Bernardo Fontes
+    End If
+    
+    '==================================================================
+    '==================================================================
+    
+    Grupo_ID = objServico.ID_Grupo
+    Produto_ID = objServico.ID_PRODUTO
+    
+    
+    objDadosPendencia.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosPendencia.InformaMensagem objMensagem
+    
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 20/07/2009 - Joao Carlos
+    If Not objDadosPendencia.RecuperarDados(Fase_ID) Then
+        If objMensagem.TipoMsg <> "" Then
+            objMensagem.ExibeMensagem
+            Set objForm = Nothing
+            GoTo Finalizar
+        End If
+        
+        'Caso não exista pendencia, cria uma colecao  vazia no objeto pendencia
+        Set cColecao = New Collection
+        objDadosPendencia.ColecaoPendencia = cColecao
+    End If
+    
+    'Set cColecao = New Collection
+    'objDadosPendencia.ColecaoPendencia = cColecao
+    'Fim - Tratamento Causa Raiz - PTS 721 - 20/07/2009 - Joao Carlos
+    
+    objForm.informa_OC Me
+    objForm.Informa_Servico objServico
+    
+    objForm.Show
+    
+    'Executa método para popular os campos do Controle Cabecalho
+    CarregarForm = True
+
+Finalizar:
+    
+    Set objdadosServico = Nothing
+    Set objAutenticacao = Nothing
+    Set objDadosFase = Nothing
+    Set objDadosProduto = Nothing
+    
+    Set objCentrosLocais = Nothing
+    Set objPubBW = Nothing
+    
+    Set objUsuario = Nothing
+    
+    
+    Exit Function
+    
+ErrorHandler:
+
+    If Err.Number <> 0 Then
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "CarregarForm " & _
+                   "da classe clsblfOC_TratarCentroLocal"
+    End If
+       
+    objMensagem.ExibeMensagem
+       
+    GoTo Finalizar
+       
+End Function
+
+Public Function GravarDados(pbFlagDescarregaFormulario As Boolean) As Boolean
+
+    
+    Dim objDadosFase                As New clsgenFase
+    Dim sSituacaoOTS                As String
+    Dim bRetorno                    As Boolean
+    Dim FlagIniciouTransacao        As Boolean
+    Dim numUltimaFaseRealizada      As Long
+    Dim FlagTemPendenciaEmAberto    As Boolean
+    Dim FlagFaseFinalizadaOK        As Boolean
+    Dim FlagTemPendenciaCliente     As Boolean
+    Dim lSequenciaAcao              As Long
+    Dim FlagManterPeriodo           As Boolean
+    Dim lIdFaseSeguinte             As Long
+    Dim sInd_Origem_Embratel        As String
+    Dim dDataSolicitacao            As Date
+    
+    Dim objPendencia                As New clsblf_Pendencia
+    Dim objRetiraPendencia          As New clsBlf_DetalhePendencia
+    
+    Dim objProduto                  As clsGenProduto
+    Dim objAtenPortModificacao      As New VIP_ATEN_PORTAB_MODIFICACAO
+    
+    
+    Dim objDuracaoFase              As New clsgenDuracaoFase
+    Dim sCodigoDuracaoFase          As String
+    
+    Set objDadosFase = New clsgenFase
+    
+    Set objDuracaoFase = New clsgenDuracaoFase
+    'Set objFase = New clsgenFase
+    Set objCircuito = New clsgenCircuito
+        
+    GravarDados = False
+    
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+    
+    objDuracaoFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDuracaoFase.InformaMensagem objMensagem
+    
+    Set objCircuito = New clsgenCircuito
+    
+    objCircuito.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objCircuito.InformaMensagem objMensagem
+    
+    bRetorno = objCircuito.RecuperarDados(Servico_ID)
+    
+    If (objMensagem.TipoMsg <> "") Then
+       GoTo ErrorHandler
+    End If
+
+    Set objProduto = New clsGenProduto
+    
+    objProduto.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objProduto.InformaMensagem objMensagem
+    
+    bRetorno = objProduto.RecuperarDados(Produto_ID)
+       
+    If (objMensagem.TipoMsg <> "") Then
+       GoTo ErrorHandler
+    End If
+    
+    
+    If CodigoFase = GbCodigoFasePortabilidadeEstorno Then
+        
+        bRetorno = objDuracaoFase.RecuperaIDDuracao(Produto_ID, GbAcao_Bloqueio, GbCodigoFasePortabilidadeEstorno)
+        
+        If objMensagem.TipoMsg <> "" Then
+            GoTo ErrorHandler
+        End If
+        
+    End If
+    
+    'Inicia a fase de Agendamento
+    If FlagIniciouTransacao = False Then
+        bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+        FlagIniciouTransacao = True
+    End If
+    
+    If bRetorno = False Then
+        GoTo ErrorHandler
+    End If
+    
+    '============================================================================
+    'Verifica se há pendencia para a fase. Caso tenha, retirar e enviar
+    '============================================================================
+    Set objPendencia = New clsblf_Pendencia
+    
+    objPendencia.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objPendencia.InformaMensagem objMensagem
+    
+    bRetorno = objPendencia.VerificaPendenciaEmAbertoFase(Fase_ID)
+    
+    If bRetorno = True Then
+    
+        'Instancia este objeto direto porque não tenho algumas inforamçãos para utilizar o metodo da ObjPendencia
+        Set objRetiraPendencia = New clsBlf_DetalhePendencia
+        
+            objRetiraPendencia.InformaBanco frmgenMDI_SGAPlus.objBanco
+            objRetiraPendencia.InformaMensagem objMensagem
+            
+            objRetiraPendencia.Status = "F"
+            objRetiraPendencia.DataRetirada = Format(Now, "dd/mm/yyyy")
+            
+            bRetorno = objRetiraPendencia.AtualizarDados(Pendencia_ID)
+        
+            If bRetorno <> True Then
+                GoTo ErrorHandler
+            End If
+        
+        Set objRetiraPendencia = Nothing
+        
+    End If
+    
+    
+    Set objPendencia = Nothing
+    '============================================================================
+    '============================================================================
+    
+    'If (TipoOperacao = "I" And _
+        objDadosAcesso.CaracteristicaAcesso = "P") Then 'Indica que a fase está sendo gravada pela 1a vez
+    'End If
+
+    objAtenPortab.ServicoID = lServico_ID
+    
+    'Se for Estorno
+    If CodigoFase = GbCodigoFasePortabilidadeEstorno Then
+        
+        'Inicio - Release BDR - 18/11/2010 - Joao Carlos
+        Fase_ID = objDadosFase.ObtemIDFase(Servico_ID, CodigoFase)
+        
+        If Fase_ID <= 0 Then
+            'Cria a fase de estorno
+            bRetorno = objDadosFase.GeraFaseEstorno(Servico_ID, Centro_Funcional_ID, objDuracaoFase.ID_DURACAO_FASE, objDuracaoFase.Sequencia_Acao, 1)
+            
+            If objMensagem.TipoMsg <> "" Then
+                GoTo ErrorHandler
+            End If
+            
+            Fase_ID = objDadosFase.ObtemIDFase(Servico_ID, CodigoFase)
+        End If
+        'Fim - Release BDR - 05/11/2010 - Joao Carlos
+        
+    End If
+    
+    
+    bRetorno = objDadosFase.IniciaFase(Fase_ID)
+    
+    If (objMensagem.TipoMsg <> "") Then
+    
+       GoTo ErrorHandler
+       
+    End If
+    
+    bRetorno = objCircuito.RecuperarDados(Servico_ID)
+    
+    '=========================================================================
+    'Atualiza a tabela Aten Portabilidade  com o numero do protocolo interno
+    '=========================================================================
+    'AtualizaNumeroProtocoloInterno
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 20/07/2009 - Joao Carlos
+    If objAtenPortab.Numero_Protocolo = "" Then
+        objAtenPortab.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objAtenPortab.InformaMensagem objMensagem
+        
+        bRetorno = objAtenPortab.RecuperarDados(Servico_ID)
+        
+        If bRetorno <> True Then
+            FlagIniciouTransacao = True
+        End If
+            
+        objAtenPortab.Numero_Protocolo = Sgap_pub_BW_ID
+    End If
+    'Fim - Tratamento Causa Raiz - PTS 721 - 20/07/2009 - Joao Carlos
+    
+    bRetorno = objAtenPortab.AtualizaNumeroProtocoloInterno()
+    
+    
+    If bRetorno <> True Then
+    
+        FlagIniciouTransacao = True
+        
+    End If
+    '=========================================================================
+    
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 21/07/2009 - Joao Carlos
+    If Cod_Elemento_Rede = "" Then
+        Set objAtenTecVoz = New VIP_Aten_Tec_Voz
+        
+        objAtenTecVoz.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objAtenTecVoz.InformaMensagem objMensagem
+        
+        bRetorno = objAtenTecVoz.RecuperarDados(objAtenPortab.ItemServicoID)
+    
+        If bRetorno <> True Then
+            FlagIniciouTransacao = True
+        End If
+        
+        Cod_Elemento_Rede = objAtenTecVoz.Sigla_Localidade & Space(5 - Len(objAtenTecVoz.Sigla_Localidade)) & _
+                                           objAtenTecVoz.Tipo_Elemento_Rede & Space(4 - Len(objAtenTecVoz.Tipo_Elemento_Rede)) & _
+                                           objAtenTecVoz.Identif_Endereco_Elem_Rede & Space(2 - Len(objAtenTecVoz.Identif_Endereco_Elem_Rede)) & _
+                                           objAtenTecVoz.Identif_Cluster & Space(2 - Len(objAtenTecVoz.Identif_Cluster))
+        
+        Set objAtenTecVoz = Nothing
+    End If
+    
+    If objAtenContrato Is Nothing Then
+        Set objAtenContrato = New VIP_Aten_Contrato
+        
+        objAtenContrato.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objAtenContrato.InformaMensagem objMensagem
+        
+        bRetorno = objAtenContrato.RecuperarDados(ContratoID)
+        
+        If bRetorno <> True Then
+            FlagIniciouTransacao = True
+        End If
+    End If
+    
+    If objAtenItemServico Is Nothing Then
+        Set objAtenItemServico = New VIP_Aten_Item_Servico
+        
+        objAtenItemServico.InformaBanco frmgenMDI_SGAPlus.objBanco
+        objAtenItemServico.InformaMensagem objMensagem
+        
+        bRetorno = objAtenItemServico.RecuperarDados(Servico_ID)
+        
+        If bRetorno <> True Then
+            FlagIniciouTransacao = True
+        End If
+    End If
+    'Fim - Tratamento Causa Raiz - PTS 721 - 21/07/2009 - Joao Carlos
+    
+    
+    '=========================================================================
+    'Carrega os campos para a carga na Tabela SGAP_PUB_BW
+    '=========================================================================
+    
+    Set objSGAP_PUB_BW = New clsGenPubBW
+    
+    objSGAP_PUB_BW.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objSGAP_PUB_BW.InformaMensagem objMensagem
+    
+    objSGAP_PUB_BW.STRTRACK_ID_SOURCE = Sgap_pub_BW_ID
+    objSGAP_PUB_BW.STRSYSTEMTRACKINGID = Sgap_pub_BW_ID '& "_" & "SGAP"
+     objSGAP_PUB_BW.STRSYSTEM = "SGAP"
+     objSGAP_PUB_BW.STRFLAGSA = "A"
+     
+     
+     objSGAP_PUB_BW.IND_TIPO_PORTAB = 1
+     
+     'Inicio - Release BDR - 01/02/2010 - Joao Carlos
+     'objSGAP_PUB_BW.IND_TIPO_INSTANCIA = 1
+     If Suspensao = "N" Then
+        objSGAP_PUB_BW.IND_TIPO_INSTANCIA = 1
+        objSGAP_PUB_BW.IND_TIPO_ACESSO = 2
+     Else
+        objSGAP_PUB_BW.IND_TIPO_INSTANCIA = ""
+        objSGAP_PUB_BW.IND_TIPO_ACESSO = ""
+     End If
+     'Fim - Release BDR - 01/02/2010 - Joao Carlos
+     
+     objSGAP_PUB_BW.STRORIGINALTRACKINGID = CDbl(Sgap_pub_BW_ID)
+
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 21/07/2009 - Joao Carlos
+    'If Ind_Quarentena = "" And Reagendamento <> "S" And Cancelamento <> "S" Then
+    If (Ind_Quarentena = "" Or Ind_Quarentena = "N") And Reagendamento <> "S" And Cancelamento <> "S" And Suspensao <> "S" Then
+    'Fim - Tratamento Causa Raiz - PTS 721 - 21/07/2009 - Joao Carlos
+         objSGAP_PUB_BW.STREVENTTYPE = 10
+    'Inicio - Release BDR - 17/12/2009 - Renato Moraes
+    ElseIf Reagendamento = "S" Or Suspensao = "S" Then
+         objSGAP_PUB_BW.STREVENTTYPE = 4
+    'Fim - Release BDR - 17/12/2009 - Renato Moraes
+    ElseIf Cancelamento = "S" Then
+        objSGAP_PUB_BW.STREVENTTYPE = 18
+    Else
+         objSGAP_PUB_BW.STREVENTTYPE = 22
+    End If
+    
+    'Inicio - Release BDR - 01/02/2010 - Joao Carlos
+    'objSGAP_PUB_BW.IND_TIPO_ACESSO = 2
+    'Fim - Release BDR - 01/02/2010 - Joao Carlos
+    
+    objSGAP_PUB_BW.COD_AREA = objAtenPortab.CodigoArea
+    objSGAP_PUB_BW.NUM_INSTANCIA = objAtenPortab.NumeroInstancia
+    objSGAP_PUB_BW.STRTIMESTAMP = Format(Now, "DD/MM/YYYY hh:mm:ss")
+
+    
+    '===============================================================
+    'Callbat - 14/01/2014
+    'Alterado para ajustar a necessidade do EOT fiscal
+    '===============================================================
+    'objSGAP_PUB_BW.Cod_Elemento_Rede = Cod_Elemento_Rede
+    objSGAP_PUB_BW.Cod_Elemento_Rede = Trim(Cod_Elemento_Rede)
+    '===============================================================
+    '===============================================================
+        
+    If Reagendamento <> "S" And Cancelamento <> "S" And Suspensao <> "S" Then
+        objSGAP_PUB_BW.DAT_HRA_SOLIC_PORTAB_RECEPTOR = CStr(Format(Date, "DD/MM/YYYY"))
+        objSGAP_PUB_BW.NUM_PROTOC_INTERNO = objAtenPortab.Numero_Protocolo
+        objSGAP_PUB_BW.IND_AGRUPADOR_PORTAB = "N"
+        objSGAP_PUB_BW.IND_DOADOR_ORIG_PORTAB = objAtenPortab.Ind_Origem_Embratel
+    Else
+        objSGAP_PUB_BW.IND_STATUS_PORTAB = "3"
+        objSGAP_PUB_BW.NUM_BILHETE_PORTAB_ATUAL = objAtenPortab.NumBilheteAtual
+        objSGAP_PUB_BW.IND_DOADOR_ORIG_PORTAB = ""
+        objSGAP_PUB_BW.DAT_HRA_SOLIC_PORTAB_RECEPTOR = ""
+        objSGAP_PUB_BW.IND_AGRUPADOR_PORTAB = ""
+        objSGAP_PUB_BW.COD_MOTIVO_CANCEL_PORTAB = ""
+        objSGAP_PUB_BW.IND_MODIFICA_STATUS = ""
+        objSGAP_PUB_BW.DTA_HRA_DESATIVA_PORTAB = ""
+        objSGAP_PUB_BW.DAT_HRA_DESCONEX_PORTAB = ""
+        objSGAP_PUB_BW.DTA_HRA_ATIVA_PORTAB = ""
+        objSGAP_PUB_BW.NUM_PROTOC_INTERNO = ""
+        objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = ""
+        
+        'Se o campo o valor do campo objAtenPortab.StatusPort for igual a 1, então devemos
+        'encaminhar no campo ind_modificacao_status com o valor 3 ( Remover Conflito )
+        If CLng(objAtenPortab.StatusPort) = 1 Then
+            objSGAP_PUB_BW.IND_MODIFICA_STATUS = "3"
+            objSGAP_PUB_BW.IND_STATUS_PORTAB = "1"
+            'ALTERADO - ALINE - INICIO - 09/02/2010
+            'PARA LIMPAR DADOS DA ATEN_PORTABILIDADE, POIS AO REAGENDAR
+            'UM NÚMERO COM CONFLITO , PRECISA QUE A DOADORA REAUTORIZE!
+            If objAtenPortab.IndicAutorizacao = "N" Then
+               objAtenPortab.IndicAutorizacao = ""
+               objAtenPortab.IndAusenRespDoador = ""
+            End If
+            'ALTERAD0 - ALINE - FIM - 09/02/2010
+            
+        Else
+            objSGAP_PUB_BW.IND_MODIFICA_STATUS = ""
+        End If
+        
+    End If
+    
+    'Inicio - Release BDR - 01/02/2010 - Joao Carlos
+    'objSGAP_PUB_BW.COD_LOGIN_RECEPTOR_PORTAB = GbID_Usuario
+    'objSGAP_PUB_BW.NUM_MATRIC_LOGIN_RECEPTOR = GbUsuario_Matricula
+    If Suspensao = "N" Then
+        objSGAP_PUB_BW.COD_LOGIN_RECEPTOR_PORTAB = GbID_Usuario
+        objSGAP_PUB_BW.NUM_MATRIC_LOGIN_RECEPTOR = GbUsuario_Matricula
+    Else
+        objSGAP_PUB_BW.COD_LOGIN_RECEPTOR_PORTAB = ""
+        objSGAP_PUB_BW.NUM_MATRIC_LOGIN_RECEPTOR = ""
+    End If
+    'Fim - Release BDR - 01/02/2010 - Joao Carlos
+    
+    If Cancelamento = "S" Then
+        objSGAP_PUB_BW.COD_CNL_ORIGEM_PORTAB = ""
+        objSGAP_PUB_BW.IND_MOTIVO_CANCEL_PORTAB = "1"
+        objSGAP_PUB_BW.COD_MOTIVO_CANCEL_PORTAB = "2301"
+        objSGAP_PUB_BW.COD_RN1_PORTAB = ""
+        objSGAP_PUB_BW.DAT_HRA_RECEP_ENV_CANCEL_PRT = Format(Now, "DD/MM/YYYY hh:mm:ss")
+        objSGAP_PUB_BW.IND_JANELA_ESPEC_PORTAB = ""
+        objSGAP_PUB_BW.IND_DOC_CLIENTE_OK_PORTAB = ""
+        objSGAP_PUB_BW.DAT_HRA_DESCONEX_PORTAB = ""
+        objSGAP_PUB_BW.COD_LOCALID = ""
+        objSGAP_PUB_BW.COD_EOT_DOADORA_PORTAB = ""
+        objSGAP_PUB_BW.COD_EOT_RECEPTORA_PORTAB = ""
+        objSGAP_PUB_BW.COD_EOT_FISCAL_RECEPTORA = ""
+        objSGAP_PUB_BW.NUM_DOC_CLIENTE = ""
+        objSGAP_PUB_BW.NOM_CLIENTE = ""
+        objSGAP_PUB_BW.IND_TIPO_DOC_CLIENTE = ""
+        objSGAP_PUB_BW.Cod_Elemento_Rede = ""
+        objSGAP_PUB_BW.IND_TIPO_ACESSO = ""
+        objSGAP_PUB_BW.IND_TIPO_INSTANCIA = ""
+        objSGAP_PUB_BW.NUM_BILHETE_PORTAB_ATUAL = objAtenPortab.NumBilheteAtual
+    
+    'Inicio - Release BDR - 01/02/2010 - Joao Carlos
+    ElseIf Suspensao = "S" Then
+        objSGAP_PUB_BW.COD_RN1_PORTAB = ""
+        objSGAP_PUB_BW.COD_CNL_ORIGEM_PORTAB = ""
+        objSGAP_PUB_BW.IND_MOTIVO_CANCEL_PORTAB = ""
+        objSGAP_PUB_BW.DES_FRAUDE_ERROR_PORTAB = ""
+        objSGAP_PUB_BW.DAT_HRA_RECEP_ENV_CANCEL_PRT = ""
+        objSGAP_PUB_BW.IND_JANELA_ESPEC_PORTAB = ""
+        objSGAP_PUB_BW.IND_DOC_CLIENTE_OK_PORTAB = ""
+        objSGAP_PUB_BW.COD_LOCALID = ""
+        objSGAP_PUB_BW.NUM_DOC_CLIENTE = ""
+        objSGAP_PUB_BW.NOM_CLIENTE = ""
+        objSGAP_PUB_BW.IND_TIPO_DOC_CLIENTE = ""
+
+    'Fim - Release BDR - 01/02/2010 - Joao Carlos
+    
+    Else
+        objSGAP_PUB_BW.COD_RN1_PORTAB = "55121"
+        objSGAP_PUB_BW.COD_CNL_ORIGEM_PORTAB = Format(objAtenPortab.CodCNLOrigem, "00000")
+        objSGAP_PUB_BW.IND_MOTIVO_CANCEL_PORTAB = ""
+        objSGAP_PUB_BW.DES_FRAUDE_ERROR_PORTAB = ""
+        objSGAP_PUB_BW.DAT_HRA_RECEP_ENV_CANCEL_PRT = ""
+        objSGAP_PUB_BW.IND_JANELA_ESPEC_PORTAB = IIf(objForm.ChkJanelaEspecial.Value = 0, "N", "S")
+        objSGAP_PUB_BW.IND_DOC_CLIENTE_OK_PORTAB = "S"
+        objSGAP_PUB_BW.COD_LOCALID = Format(objAtenPortab.CodCNLDestino, "00000")
+        
+        If objSGAP_PUB_BW.STREVENTTYPE = 10 Then
+            'comentado o campo de empresa doadora para atender a RDM686 01/03/2012
+            'objSGAP_PUB_BW.COD_EOT_DOADORA_PORTAB = Format(objAtenPortab.CodEmpresaDoadora, "0000")
+            objSGAP_PUB_BW.COD_EOT_RECEPTORA_PORTAB = Format(objAtenPortab.CodEmpresaReceptora, "0000")
+            
+            '================================================
+            'Callbat - Ajuste para adequar o Cod EOT Fiscal
+            'de numerico para alfanumerico
+            '================================================
+            'objSGAP_PUB_BW.COD_EOT_FISCAL_RECEPTORA = Format(objAtenPortab.CodFiscalReceptora, "000")
+            objSGAP_PUB_BW.COD_EOT_FISCAL_RECEPTORA = "" & objAtenPortab.CodFiscalReceptora
+            '================================================
+            '================================================
+        End If
+        
+        objSGAP_PUB_BW.NUM_DOC_CLIENTE = objAtenContrato.CNPJ
+        objSGAP_PUB_BW.NOM_CLIENTE = TrataPlick(objAtenContrato.RazaoSocialCliente)
+        objSGAP_PUB_BW.IND_TIPO_DOC_CLIENTE = 2
+
+    End If
+    
+    '=====================================================================
+    'CALBAT
+    '=====================================================================
+    '22/10/2008                                                                                                    =
+    'Implementado desta maneira para atender a um ajuste solicitado, e impactar    =
+    'da menor maneira possível o que já foi construiudo e testado.                           =
+    ' - Organizar essa carga da melhor maneira possível depois                                =
+    '=====================================================================
+    If Reagendamento = "S" Then
+    
+        objSGAP_PUB_BW.IND_TIPO_DOC_CLIENTE = ""
+        objSGAP_PUB_BW.NUM_DOC_CLIENTE = ""
+        objSGAP_PUB_BW.NOM_CLIENTE = ""
+        objSGAP_PUB_BW.IND_TIPO_INSTANCIA = ""
+        objSGAP_PUB_BW.IND_TIPO_ACESSO = ""
+        objSGAP_PUB_BW.Cod_Elemento_Rede = ""
+        objSGAP_PUB_BW.COD_LOCALID = ""
+        
+        'Inicio - Release BDR - 17/12/2009 - Bernardo Fontes
+        'caso seja um terminal no estado suspenso, fazemos IND_MODIFICA_STATUS = 2:
+        If objAtenPortab.StatusPort = 11 Then
+            objSGAP_PUB_BW.IND_MODIFICA_STATUS = "2"
+        End If
+        'Fim - Release BDR - 17/12/2009 - Bernardo Fontes
+        
+    End If
+    
+    'Inicio - Release BDR - 14/12/2009 - Renato Moraes
+    If Suspensao = "S" Then
+        objSGAP_PUB_BW.IND_MODIFICA_STATUS = "1"
+    End If
+    'Fim - Release BDR - 14/12/2009 - Renato Moraes
+    '==============================================================
+    '==============================================================
+    
+    objSGAP_PUB_BW.SGL_FATURAMT = objProduto.Sigla
+    
+    If CodigoFase = GbCodigoFasePortabilidadeAgendamento Then
+    
+            'Captura a data e a hora prevista para a portabilidade
+            '========================================================================
+            'Inicio - Release BDR - 17/12/2009 - Renato Moraes
+            If objForm.optProxJanelaDisponivel.Value = True Or Cancelamento = "S" Or Suspensao = "S" Then
+            'Fim - Release BDR - 17/12/2009 - Renato Moraes
+                objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB = ""
+                objSGAP_PUB_BW.NUM_DIAS_DURACAO_JANELA_PORTAB = ""
+            End If
+            
+            'Inicio - Release BDR - 01/02/2010 - Joao Carlos
+            'If objForm.optDataApartir.Value = True Then
+            If objForm.optDataApartir.Value = True And Suspensao = "N" Then
+            'Fim - Release BDR - 01/02/2010 - Joao Carlos
+                objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB = objForm.spdDtInicial.Text & " " & objForm.cboJanelaInicio.Text
+                objSGAP_PUB_BW.NUM_DIAS_DURACAO_JANELA_PORTAB = ""
+            End If
+                     
+            'Inicio - Release BDR - 10/02/2010 - Joao Carlos
+            'O objeto foi retirado do formulario
+'            If objForm.optPeriodo.Value = True Then
+'                objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB = objForm.spdDtInicial.Text & " " & objForm.cboJanelaInicio.Text
+'                objSGAP_PUB_BW.NUM_DIAS_DURACAO_JANELA_PORTAB = DateDiff("d", objForm.spdDtInicial.Text, objForm.spdDtInFim.Text)
+'
+'                'Se o período passar de 5 dias, essa marcação deve vir como "S"
+'                 If CInt(DateDiff("d", objForm.spdDtInicial.Text, objForm.spdDtInFim.Text)) > 5 Then
+'                    objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = "S"
+'                Else
+'                    objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = "N"
+'                 End If
+'
+'            End If
+            
+
+            '========================================================================
+            
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeEstorno Then
+    
+        'Inicio - Release BDR - 11/12/2009 - Joao Carlos
+        'objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB = ""
+        objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB = Format(objForm.sprDataFraude.Text, "DD/MM/YYYY HH:MM")
+        'Fim - Release BDR - 11/12/2009 - Joao Carlos
+        objSGAP_PUB_BW.NUM_DIAS_DURACAO_JANELA_PORTAB = ""
+        objSGAP_PUB_BW.IND_TIPO_FRAUDE_ERROR_PORTAB = 2
+        objSGAP_PUB_BW.DES_FRAUDE_ERROR_PORTAB = TrataPlick(objForm.TxtFraudeDescricao.Text)
+        objSGAP_PUB_BW.NUM_BILHETE_PORTAB_ANTERIOR = objAtenPortab.NumBilheteAnterior
+        objSGAP_PUB_BW.NUM_BILHETE_PORTAB_ATUAL = ""
+        objSGAP_PUB_BW.NUM_DOC_CLIENTE = objAtenContrato.CNPJ
+        objSGAP_PUB_BW.NOM_CLIENTE = TrataPlick(objAtenContrato.RazaoSocialCliente)
+        objSGAP_PUB_BW.IND_TIPO_DOC_CLIENTE = 2
+        objSGAP_PUB_BW.IND_DOADOR_ORIG_PORTAB = "S"
+        objSGAP_PUB_BW.IND_TIPO_ACESSO = 2
+        objSGAP_PUB_BW.COD_LOCALID = ""
+        objSGAP_PUB_BW.IND_DOC_CLIENTE_OK_PORTAB = "S"
+        objSGAP_PUB_BW.COD_EOT_DOADORA_PORTAB = Format(objAtenPortab.CodEmpresaReceptora, "0000")
+        objSGAP_PUB_BW.COD_EOT_RECEPTORA_PORTAB = Format(objAtenPortab.CodEmpresaDoadora, "0000")
+
+    End If
+    
+    'Inicio - Release BDR - 11/12/2009 - Bernardo Fontes
+    If Cancelamento = "N" And Reagendamento = "N" And Suspensao = "N" Then
+        'Inicio - Release BDR - 10/02/2010 - Joao Carlos
+        'If CInt(DateDiff("d", Now, objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB)) > 3 Then
+        If CInt(CalculaDiasUteis(Now, objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB)) > 3 Then
+        'Fim - Release BDR - 10/02/2010 - Joao Carlos
+            objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = "S"
+        Else
+            objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = "N"
+        End If
+        
+    ElseIf (Cancelamento = "N" And Reagendamento = "S") Or Suspensao = "S" Then
+        If IsDate(objAtenPortab.DataSolicitacao) And Not IsNull(objAtenPortab.DataSolicitacao) Then
+            dDataSolicitacao = CDate(objAtenPortab.DataSolicitacao)
+        Else
+            'Inicio - Release BDR - 16/12/2009 - Bernardo Fontes
+            objMensagem.Descricao = "Erro para realizar o reagendamento do terminal (" & objAtenPortab.CodigoArea & ") " & Left(objAtenPortab.NumeroInstancia, 4) & "-" & Right(objAtenPortab.NumeroInstancia, 4) & "! " & Chr(13) & "Valor da Data de Solicitação do primeiro agendamento nulo."
+            GoTo ErrorHandler
+            'Fim - Release BDR - 16/12/2009 - Bernardo Fontes
+        End If
+        
+        'Inicio - Release BDR - 01/02/2010 - Joao Carlos
+        If Suspensao = "N" Then
+            'Inicio - Release BDR - 10/02/2010 - Joao Carlos
+            'If CInt(DateDiff("d", dDataSolicitacao, objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB)) > 3 Then
+            If CInt(CalculaDiasUteis(dDataSolicitacao, objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB)) > 3 Then
+            'Fim - Release BDR - 10/02/2010 - Joao Carlos
+                objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = "S"
+            Else
+                objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = "N"
+            End If
+        Else
+            objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = ""
+        End If
+        'Fim - Release BDR - 01/02/2010 - Joao Carlos
+        
+    Else
+        objSGAP_PUB_BW.IND_AGENDA_CLIENTE_PORTAB = ""
+    End If
+    'Fim - Release BDR - 11/12/2009 - Bernardo Fontes
+    
+    bRetorno = objSGAP_PUB_BW.IncluirDados()
+    
+    If bRetorno <> True Then
+    
+        GoTo ErrorHandler
+        
+    End If
+    '=========================================================================
+    '=========================================================================
+    
+    
+    If CodigoFase = GbCodigoFasePortabilidadeEstorno Then
+        bRetorno = objServico.AtualizaStatus(Servico_ID, "AN", 1)
+'**        bRetorno = objServico.AtualizaStatusItemServico(Servico_ID, "AN", 1)
+'comparar com fonte de producao antes de fazer o merge - vcb
+        
+        If objMensagem.TipoMsg <> "" Then
+            GoTo ErrorHandler
+        End If
+        
+        'bRetorno = objCircuito.RetirarFinalizacao(objServico.Circuito_ID, GbAcao_Bloqueio)
+        
+        If objMensagem.TipoMsg <> "" Then
+            GoTo ErrorHandler
+        End If
+        
+    End If
+    
+    'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+    'Caso seja reagendamento gravar na tabela  Aten_Portabilidade_modificacao, se já não houver na tabela
+'    If Reagendamento = "S" Or Cancelamento = "S" Then
+'        Set objAtenPortModificacao = New VIP_ATEN_PORTAB_MODIFICACAO
+'
+'        objAtenPortModificacao.InformaBanco frmgenMDI_SGAPlus.objBanco
+'        objAtenPortModificacao.InformaMensagem objMensagem
+'
+'        bRetorno = objAtenPortModificacao.RecuperarDados(lServico_ID)
+'
+'        If objAtenPortModificacao.DataResposta = "" And objAtenPortModificacao.DataOcorrencia = "" Or _
+'             objAtenPortModificacao.DataResposta <> "" And (objAtenPortModificacao.DataOcorrencia <> "" Or objAtenPortModificacao.DataResposta <> "") Then
+'
+'            objAtenPortModificacao.ItemServicoID = objAtenItemServico.iD
+'            objAtenPortModificacao.DataSolicitacao = Format(Now, "DD/MM/YYYY hh:mm:ss")
+'            objAtenPortModificacao.DataResposta = ""
+'            objAtenPortModificacao.DataOcorrencia = ""
+'            objAtenPortModificacao.NumeroBilhete = objAtenPortab.NumBilheteAtual
+'            objAtenPortModificacao.ID_Donor_Action_ID = ""
+'            objAtenPortModificacao.Evento = objSGAP_PUB_BW.STREVENTTYPE
+'
+'            bRetorno = objAtenPortModificacao.IncluirDados(lServico_ID)
+'
+'                If objMensagem.TipoMsg <> "" Then
+'                    GoTo ErrorHandler
+'                End If
+'        Else
+'
+'            If Reagendamento = "S" Then
+'                objMensagem.TipoMsg = "A"
+'                objMensagem.Descricao = "Já existe uma Solicitação de Reagendamento em Andamento."
+'            End If
+'
+'            If Cancelamento = "S" Then
+'                objMensagem.TipoMsg = "A"
+'                objMensagem.Descricao = "Já existe uma Solicitação de Cancelamento em Andamento."
+'            End If
+'
+'            GoTo ErrorHandler
+'
+'        End If
+'
+'    End If
+    'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+    
+    'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+    'Atualizar a tabela ATEN_PORTABILIDADE com a Data/Hora solicitada para a Portabilidade
+    If CodigoFase = GbCodigoFasePortabilidadeAgendamento Then
+        'Inicio - Release BDR - 02/02/2010 - Joao Carlos
+        'objAtenPortab.DtHrPrevPortabilidade = objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB
+        If Suspensao = "N" Then
+            objAtenPortab.DtHrPrevPortabilidade = objSGAP_PUB_BW.DAT_HRA_PREVISTA_PORTAB
+        End If
+        'Fim - Release BDR - 02/02/2010 - Joao Carlos
+        'bRetorno = objAtenPortab.AtualizaDataPrevistaPortab(objAtenPortab.DtHrPrevPortabilidade, objAtenPortab.ServicoID)
+        'If Me.StatusTelefone = "Cancelado" Then
+        If objSGAP_PUB_BW.STREVENTTYPE = 10 Then
+            objAtenPortab.NumBilheteAtual = 0
+            objAtenPortab.StatusPort = 3
+            'Inicio - Release BDR - 22/12/2009 - Bernardo Fontes
+            objAtenPortab.Email_PVT = objForm.txtEmail_pvt.Text
+            objAtenPortab.Email_GC = objForm.txtEmail_gc.Text
+            objAtenPortab.Email_GEV = objForm.txtEmail_gev.Text
+            'Fim - Release BDR - 22/12/2009 - Bernardo Fontes
+            'Inicio - Release BDR - 11/12/2009 - Bernardo Fontes
+            objAtenPortab.DataSolicitacao = Format(Now, "General Date")
+        'Inicio - Release BDR - 28/01/2010 - Joao Carlos
+        ElseIf objSGAP_PUB_BW.STREVENTTYPE = 4 Then
+            objAtenPortab.Email_PVT = objForm.txtEmail_pvt.Text
+            objAtenPortab.Email_GC = objForm.txtEmail_gc.Text
+            objAtenPortab.Email_GEV = objForm.txtEmail_gev.Text
+        'Fim - Release BDR - 28/01/2010 - Joao Carlos
+        End If
+        'Inicio - Release BDR - 22/12/2009 - Renato Moraes
+        'bRetorno = objAtenPortab.AtualizaAtenPortab(objAtenPortab.ServicoID, objAtenPortab.DtHrPrevPortabilidade, objAtenPortab.NumBilheteAtual, objAtenPortab.StatusPort)
+        'bRetorno = objAtenPortab.AtualizaAtenPortab(objAtenPortab.ServicoID, objAtenPortab.DtHrPrevPortabilidade, objAtenPortab.NumBilheteAtual, objAtenPortab.StatusPort, objAtenPortab.DataSolicitacao)
+        'Fim - Release BDR - 11/12/2009 - Bernardo Fontes
+        bRetorno = objAtenPortab.AtualizaAtenPortab(objAtenPortab.ServicoID, objAtenPortab.DtHrPrevPortabilidade, objAtenPortab.NumBilheteAtual, objAtenPortab.StatusPort, objAtenPortab.DataSolicitacao, objAtenPortab.Email_PVT, objAtenPortab.Email_GC, objAtenPortab.Email_GEV, objAtenPortab.IndicAutorizacao)
+        'Fim - Release BDR - 22/12/2009 - Renato Moraes
+        
+        If bRetorno <> True Then
+            GoTo ErrorHandler
+        End If
+        
+    End If
+    'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+    
+
+    If FlagIniciouTransacao Then
+
+        bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao
+        GravarDados = True
+    
+    End If
+    
+    objMensagem.TipoMsg = "A"
+    'Inicio - Release BDR - 17/12/2009 - Renato Moraes
+    If CodigoFase = GbCodigoFasePortabilidadeAgendamento And Reagendamento = "N" And Cancelamento = "N" And Suspensao = "N" Then
+    'Fim - Release BDR - 17/12/2009 - Renato Moraes
+        'Inicio - Tratamento Causa Raiz - PTS 721 - 20/07/2009 - Joao Carlos
+        'objMensagem.Descricao = "Portabilidade Solicitada com Sucesso! " & Chr(13) & "Aguardar número do bilhete para informar ao cliente."
+        objMensagem.Descricao = "Portabilidade Solicitada com Sucesso para o terminal (" & objAtenPortab.CodigoArea & ") " & Left(objAtenPortab.NumeroInstancia, 4) & "-" & Right(objAtenPortab.NumeroInstancia, 4) & "! " & Chr(13) & "Aguardar número do bilhete para informar ao cliente."
+        'Fim - Tratamento Causa Raiz - PTS 721 - 20/07/2009 - Joao Carlos
+    'Inicio - Release BDR - 17/12/2009 - Renato Moraes
+    ElseIf CodigoFase = GbCodigoFasePortabilidadeEstorno And Reagendamento = "N" And Cancelamento = "N" And Suspensao = "N" Then
+    'Fim - Release BDR - 17/12/2009 - Renato Moraes
+        objMensagem.Descricao = "Estorno  Solicitado com Sucesso! " & Chr(13) & "Aguardar número do bilhete para informar ao cliente."
+        
+        'Início - Release BDR - 02/12/2009 - Renato Moraes
+        objSGAP_PUB_BW.IND_AJUS_JAN_FRAU_ERROR = "S"
+        'Fim - Release BDR - 02/12/2009 - Renato Moraes
+        
+    ElseIf Reagendamento = "S" Then
+        'Inicio - Tratamento Causa Raiz - PTS 761 - 30/07/2009 - Joao Carlos
+        'objMensagem.Descricao = "Reagendamento Solicitado com Sucesso! " & Chr(13)
+        objMensagem.Descricao = "Reagendamento do terminal (" & objAtenPortab.CodigoArea & ") " & Left(objAtenPortab.NumeroInstancia, 4) & "-" & Right(objAtenPortab.NumeroInstancia, 4) & " Solicitado com Sucesso! " & Chr(13)
+        'Fim - Tratamento Causa Raiz - PTS 761 - 30/07/2009 - Joao Carlos
+        
+        'Início - Release BDR - 02/12/2009 - Renato Moraes
+        objSGAP_PUB_BW.IND_AJUS_JAN_FRAU_ERROR = "S"
+        'Fim - Release BDR - 02/12/2009 - Renato Moraes
+    ElseIf Cancelamento = "S" Then
+        'Inicio - Tratamento Causa Raiz - PTS 761 - 30/07/2009 - Joao Carlos
+        'objMensagem.Descricao = "Cancelamento Solicitado com Sucesso! " & Chr(13)
+        objMensagem.Descricao = "Cancelamento do terminal (" & objAtenPortab.CodigoArea & ") " & Left(objAtenPortab.NumeroInstancia, 4) & "-" & Right(objAtenPortab.NumeroInstancia, 4) & " Solicitado com Sucesso! " & Chr(13)
+        'Fim - Tratamento Causa Raiz - PTS 761 - 30/07/2009 - Joao Carlos
+    'Inicio - Release BDR - 17/12/2009 - Renato Moraes
+    ElseIf Suspensao = "S" Then
+        objMensagem.Descricao = "Suspensão do terminal (" & objAtenPortab.CodigoArea & ") " & Left(objAtenPortab.NumeroInstancia, 4) & "-" & Right(objAtenPortab.NumeroInstancia, 4) & " Solicitado com Sucesso! " & Chr(13)
+    'Fim - Release BDR - 17/12/2009 - Renato Moraes
+    End If
+    
+    objMensagem.ExibeMensagem
+    
+
+    FlagIniciouTransacao = False
+    
+Finalizar:
+    
+    Set objMensagem = Nothing
+    Set objDadosTratarCentroLocal = Nothing
+    'Set objdadosServico = Nothing
+    Set objDadosFase = Nothing
+    Set objDadosProduto = Nothing
+    Set objProduto = Nothing
+    
+    Set objSGAP_PUB_BW = Nothing
+    
+    'Inicio - Tratamento Causa Raiz - PTS 721 - 20/07/2009 - Joao Carlos
+    Set objAtenPortab = Nothing
+    Set objAtenPortModificacao = Nothing
+    Set objAtenContrato = Nothing
+    Set objAtenItemServico = Nothing
+    'Fim - Tratamento Causa Raiz - PTS 721 - 20/07/2009 - Joao Carlos
+
+    
+    Screen.MousePointer = vbDefault
+    
+    Exit Function
+    
+ErrorHandler:
+    Screen.MousePointer = vbDefault
+
+    ' Cancelar Transação
+    If FlagIniciouTransacao Then
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+       FlagIniciouTransacao = False
+    End If
+    
+    If Err.Number <> 0 Then
+       objMensagem.TipoMsg = "E"
+       
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "GravarDados " & _
+                   "da classe clsInterOC_Agendamento"
+    End If
+       
+    objMensagem.ExibeMensagem
+    
+    GoTo Finalizar
+End Function
+
+Public Property Get TipoOperacao() As String
+
+TipoOperacao = sTipoOperacao
+
+End Property
+
+Public Property Let TipoOperacao(ByVal vNewValue As String)
+
+sTipoOperacao = vNewValue
+
+End Property
+
+Public Property Get IdCircuito() As Long
+
+IdCircuito = lIdCircuito
+
+End Property
+
+Public Property Let IdCircuito(ByVal lNewValue As Long)
+
+lIdCircuito = lNewValue
+
+End Property
+
+Public Property Get Sigla_Acao() As String
+
+Sigla_Acao = sSigla_Acao
+
+End Property
+
+Public Property Let Sigla_Acao(ByVal sNewValue As String)
+
+sSigla_Acao = sNewValue
+
+End Property
+
+Public Property Get PermiteExecucao() As String
+
+PermiteExecucao = sPermiteExecucao
+
+End Property
+
+Public Property Let PermiteExecucao(ByVal sNewValue As String)
+
+sPermiteExecucao = sNewValue
+
+End Property
+
+Public Property Get Status_Fase() As String
+
+Status_Fase = sStatus_Fase
+
+End Property
+
+Public Property Let Status_Fase(ByVal vNewValue As String)
+
+sStatus_Fase = vNewValue
+
+End Property
+
+Public Property Get Acao_ID() As Long
+
+Acao_ID = lAcao_ID
+
+End Property
+
+
+Public Property Let Acao_ID(ByVal lNewValue As Long)
+
+lAcao_ID = lNewValue
+
+
+End Property
+
+
+Public Property Get DataFinalizacao() As String
+
+DataFinalizacao = sDataFinalizacao
+
+End Property
+
+Public Property Let DataFinalizacao(ByVal sNewValue As String)
+
+sDataFinalizacao = sNewValue
+
+End Property
+
+Public Function VerificaFinalizacaoOK(Sigla_Acao As String) As Boolean
+
+    VerificaFinalizacaoOK = False
+    
+    If objDadosTratarCentroLocal.DtHoraConclusao <> "" Then
+                
+        VerificaFinalizacaoOK = True
+        
+    End If
+
+End Function
+
+
+Private Function DesabilitaObjetosTela()
+    Dim ilLinha     As Integer
+
+    objForm.cmdSolicitar.Enabled = False
+    'objForm.spdDataAtivacaoTecnica.Enabled = False
+    'objForm.spdHoraAtivacaoTecnica.Enabled = False
+    'objForm.spdDataAtivacaoTecnica.EditMode = False
+    'objForm.spdHoraAtivacaoTecnica.EditMode = False
+    'objForm.cmdImpOTS.Enabled = False
+
+    bPermiteAtualizar = False
+    
+    
+End Function
+
+Public Function LimpaTela()
+    Dim ilLinha     As Integer
+
+    'objForm.SpdDataConclusao.Text = ""
+    
+    'Checa se o produto pode alocar vários CFs para a fase Tratar Centro Local
+    
+    'Localiza o registro com o CF atual.
+'    If objDadosDuracaoFase.ChecaPermissaoMultiplosCF(Produto_ID, _
+'                GbCodigoFaseCentroLocal) Then
+'
+'        For ilLinha = 1 To objForm.grdCentroLocal.MaxRows
+'
+'            With objForm.grdCentroLocal
+'
+'                .Col = 3        'Centro Funcional ID
+'                .Row = ilLinha
+'
+'                If CentroFuncionalID = .Text Then
+'                    .Col = 2
+'                    .Text = ""
+'
+'                End If
+'            End With
+'
+'        Next ilLinha
+'    End If
+    
+End Function
+
+
+Public Function InformaOCSelecionarOTS(ByVal oobjOCSelecionarOTS As clsgenOC_SelecionarOTS)
+
+On Error GoTo ErrorHandler:
+
+    InformaOCSelecionarOTS = False
+    
+    Set objOCSelecionarOTS = oobjOCSelecionarOTS
+    
+    InformaOCSelecionarOTS = True
+    
+    GoTo Finalizar
+    
+Finalizar:
+
+    Exit Function
+    
+ErrorHandler:
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                            "Houve um erro de execução no Método:" & _
+                            "InformaOCSelecionarOTS da classe clsblfOc_TratarCentroLocal"
+    
+    GoTo Finalizar
+
+End Function
+
+Public Function AtualizarListaOTS() As Boolean
+
+    objOCSelecionarOTS.ExibirListaOTS
+        
+End Function
+
+Private Sub Class_Terminate()
+
+    Set objDadosPendencia = Nothing
+    Set objMensagem = Nothing
+    
+    Set objDadosTratarCentroLocal = Nothing
+    Set objForm = Nothing
+    Set objDadosDuracaoFase = Nothing
+
+End Sub
+Public Function Imprime_OTS() As Boolean
+    
+'    Dim objnOTS As clsblf_OTS
+'
+'    Set objnOTS = New clsblf_OTS
+'
+'    objnOTS.InformaBanco frmgenMDI_SGAPlus.objBanco
+'    objnOTS.ImprimeOTS (lIdServico)
+'
+'    Imprime_OTS = True
+
+End Function
+
+Public Function ExcluirDados(pDataFinalizacao As String) As Long
+
+    Dim objdadosServico           As New clsGenServico
+    Dim objDadosFase              As New clsgenFase
+    
+    Dim sSituacaoOTS              As String
+    Dim bRetorno                  As Boolean
+    Dim FlagIniciouTransacao      As Boolean
+    Dim numUltimaFaseRealizada    As Long
+    Dim FlagManterPeriodo         As Boolean
+    
+    Dim bPermiteAtualizar         As Boolean
+    
+    On Error GoTo ErrorHandler
+    
+    bPermiteAtualizar = False
+    FlagIniciouTransacao = False
+    
+    ExcluirDados = False
+    'Verfica se a OTS selecionada ainda encontra-se em andamento
+    objdadosServico.InformaBanco frmgenMDI_SGAPlus.objBanco
+    
+    'Seta o objeto mensagem da classe de dados
+    objdadosServico.InformaMensagem objMensagem
+    
+    sSituacaoOTS = objdadosServico.RecuperarSituacaoOTS(Servico_ID)
+    
+    Set objdadosServico = Nothing
+    
+    If objMensagem.TipoMsg <> "" Then
+       
+       GoTo ErrorHandler
+       
+    End If
+    
+    If sSituacaoOTS = "CAN" Or sSituacaoOTS = "CR" Then
+       
+       objMensagem.TipoMsg = "A"
+       objMensagem.Descricao = "Esta OTS foi paralisada pelo SOE!"
+       objMensagem.ExibeMensagem
+       
+       Set objMensagem = Nothing
+       
+       GoTo Finalizar
+       
+    End If
+
+    'Verifica se fase ainda encontra-se em Andamento
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+
+    If (Not objDadosFase.RecuperarSituacaoFase(Fase_ID)) And _
+       pDataFinalizacao = "" Then
+
+       Set objDadosFase = Nothing
+
+       objMensagem.ExibeMensagem
+
+       ExcluirDados = True
+
+       GoTo Finalizar
+    Else
+       
+       objMensagem.TipoMsg = ""
+    
+    End If
+
+    'Obtem o número da última fase realizada
+    numUltimaFaseRealizada = objDadosFase.ObtemSequenciaUltimaFaseRealizada(Servico_ID, GbCodigoFaseProgramarCPE)
+    
+    If objMensagem.TipoMsg <> "" Then
+       
+       objMensagem.ExibeMensagem
+       GoTo Finalizar
+    
+    End If
+    
+    If numUltimaFaseRealizada > Sequencia_Acao Then
+    
+       objMensagem.TipoMsg = "A"
+       objMensagem.Descricao = "Os dados desta fase não poderão excluídos! Pois, a fase seguinte já foi iniciada."
+       objMensagem.ExibeMensagem
+       
+       Set objMensagem = Nothing
+       ExcluirDados = True
+       
+       GoTo Finalizar
+    
+    End If
+
+    If objDadosPendencia.ColecaoPendencia.Count <> 0 Then
+    
+        objMensagem.TipoMsg = "A"
+        objMensagem.Descricao = "Existe(m) Pendência(s) cadastrada(s) para esta fase! " & _
+                                "A exclusão não poderá ser realizada!"
+        objMensagem.ExibeMensagem
+        
+        GoTo Finalizar
+        
+    End If
+
+    'Seta o objeto mensagem da classe de dados
+    objDadosTratarCentroLocal.InformaMensagem objMensagem
+    objDadosTratarCentroLocal.InformaBanco frmgenMDI_SGAPlus.objBanco
+
+    bRetorno = frmgenMDI_SGAPlus.objBanco.Iniciar_Transacao()
+        
+    If Not bRetorno Then
+    
+       GoTo ErrorHandler
+       
+    End If
+    
+    FlagIniciouTransacao = True
+    
+    'Exclui dados de Tratar Centro Local
+    ExcluirDados = objDadosTratarCentroLocal.ExcluirDados(Fase_ID)
+   
+    If Not ExcluirDados Then
+       
+       GoTo ErrorHandler
+    
+    End If
+    
+    'objForm.SpdDataConclusao.Text = ""
+    
+    'Checa se o produto pode alocar vários CFs para a fase Tratar Centro Local
+    '''If objDadosDuracaoFase.ChecaPermissaoMultiplosCF(Produto_ID, _
+                GbCodigoFaseCentroLocal) Then
+        
+    If bPermiteAtualizar Then
+        bRetorno = objDadosFase.ExcluiData_VariosCFS(Fase_ID, CentroFuncionalID)
+        
+        If objMensagem.TipoMsg <> "" Then
+           
+           objMensagem.ExibeMensagem
+           GoTo Finalizar
+        
+        End If
+    End If
+    
+    '''End If
+
+    objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    objDadosFase.InformaMensagem objMensagem
+    
+    objDadosFase.ID_Servico = Servico_ID
+    objDadosFase.Id_Fase = Fase_ID
+    
+    'Quando for OTS de Desativacao ou Cancelamento, o periodo previsto para a fase seguinte
+    'deverá ser mantido já que as fases para estas ações serão executadas em paralelo.
+    
+    If Sigla_Acao = "DES" Or Sigla_Acao = "CAN" Then
+    
+        FlagManterPeriodo = True
+        
+    Else
+    
+        FlagManterPeriodo = False
+    
+    End If
+    
+    bRetorno = objDadosFase.RetirarFinalizacaoFase(Servico_ID, Fase_ID, Sequencia_Acao, FlagManterPeriodo)
+
+    If objMensagem.TipoMsg <> "" Then
+       
+       Set objDadosFase = Nothing
+       GoTo ErrorHandler
+    
+    End If
+    
+    'Grava Anotacao da fase Vazia
+    If Trim(TextoAnotacao) <> "" Then
+       
+       objDadosFase.GravarAnotacao Fase_ID, ""
+         
+       If objMensagem.TipoMsg <> "" Then
+            
+          GoTo ErrorHandler
+      
+       End If
+    
+    End If
+    
+    Set objDadosFase = Nothing
+    
+    bRetorno = frmgenMDI_SGAPlus.objBanco.Finalizar_Transacao
+    
+    If Not bRetorno Then
+        
+        GoTo ErrorHandler
+    
+    End If
+    
+    ExcluirDados = True
+    
+    GoTo Finalizar
+    
+Finalizar:
+    
+    Set objdadosServico = Nothing
+    Set objDadosFase = Nothing
+    
+    Exit Function
+    
+ErrorHandler:
+       
+    ' Cancelar Transação
+    If FlagIniciouTransacao Then
+       
+       bRetorno = frmgenMDI_SGAPlus.objBanco.Cancelar_Transacao
+    
+    End If
+    
+    If Err.Number <> 0 Then
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "ExcluirDados " & _
+                   "da classe clsblfOC_TratarCentroLocal "
+    End If
+       
+    objMensagem.ExibeMensagem
+    
+    GoTo Finalizar
+
+End Function
+
+Public Function CamposAgendPreenchidosOK() As Boolean
+
+    Dim objDadosFase    As clsgenFase
+    Dim bRetorno        As Boolean
+    Dim sDataFim        As String
+    
+    CamposAgendPreenchidosOK = False
+
+
+    Set objDadosFase = New clsgenFase
+    
+    'objDadosFase.InformaBanco frmgenMDI_SGAPlus.objBanco
+    'objDadosFase.InformaMensagem objMensagem
+    
+    'sDataFim = objDadosFase.ObtemDataFimRealFaseAnterior(Servico_ID, Sequencia_Acao)
+    
+    'Set objDadosFase = Nothing
+    objMensagem.TipoMsg = ""
+    objMensagem.Descricao = ""
+    
+    If objForm.optDataApartir.Value = False And objForm.optPeriodo.Value = False And objForm.optProxJanelaDisponivel.Value = False Then
+    
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Favor escolher uma opção para o Agendamento."
+            
+            
+    End If
+    
+    If objForm.optPeriodo.Value = True Or objForm.optDataApartir.Value = True Then
+    
+            
+            'Verifica se a difirença entre os campos de período do De / Para fica maior que 30 dias
+            'objForm.spdDataPeriodoDe.Col = 1
+            
+            If IsDate(objForm.spdDtInicial.Text) = False Then
+                   
+                    objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Data não válida."
+                    
+                    objForm.spdDtInicial.SetFocus
+                    
+                    GoTo ErrorHandler
+                    
+            End If
+            
+           
+            If DateDiff("d", Date, objForm.spdDtInicial.Text) > 28 Then
+        
+                    objMensagem.TipoMsg = "A"
+                    objMensagem.Descricao = "Data inicial não pode ser superior a 28 dias."
+        
+                    objForm.spdDtInicial.SetFocus
+        
+                    GoTo ErrorHandler
+        
+                Exit Function
+            End If
+    
+    End If
+    
+    If objForm.optPeriodo.Value = True Then
+       
+       If DateDiff("d", objForm.spdDtInicial.Text, objForm.spdDtInFim.Text) > 30 Then
+
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Período Superior maior de que 30 dias."
+
+            objForm.spdDtInFim.SetFocus
+
+            GoTo ErrorHandler
+
+            Exit Function
+        End If
+        
+        If CDate(objForm.spdDtInicial.Text) > CDate(objForm.spdDtInFim.Text) Then
+
+                objMensagem.TipoMsg = "A"
+                objMensagem.Descricao = "Data de período Inicial Maior que a data de período Final."
+
+                objForm.spdDtInicial.SetFocus
+
+                GoTo ErrorHandler
+
+        End If
+        
+        If IsDate(objForm.spdDtInFim.Text) = False Then
+                
+                objMensagem.TipoMsg = "A"
+                objMensagem.Descricao = "Data não válida."
+                
+                objForm.spdDtInFim.SetFocus
+                
+                GoTo ErrorHandler
+    
+        End If
+        
+    End If
+    
+    'Inicio - Release BDR - 21/12/2009 - Bernardo Fontes
+    If (objForm.txtEmail_pvt.Visible = True) Then
+        If objForm.txtEmail_pvt.Text = "" Then
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "E-mail do PVT em branco"
+            objForm.txtEmail_pvt.SetFocus
+            GoTo ErrorHandler
+        ElseIf InStr(objForm.txtEmail_pvt.Text, "@") <= 0 Then
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "E-mail do PVT invalido."
+            objForm.txtEmail_pvt.SetFocus
+            GoTo ErrorHandler
+        End If
+    End If
+
+    If (objForm.txtEmail_gc.Visible = True) Then
+        If objForm.txtEmail_gc.Text = "" Then
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "E-mail do GC/GRC em branco"
+            objForm.txtEmail_gc.SetFocus
+            GoTo ErrorHandler
+        ElseIf InStr(objForm.txtEmail_gc.Text, "@") <= 0 Then
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "E-mail do GC/GRC invalido."
+            objForm.txtEmail_gc.SetFocus
+            GoTo ErrorHandler
+        End If
+    End If
+    
+    'Não criticar o email do gev
+'    If (objForm.txtEmail_gev.Visible = True) Then
+'        If objForm.txtEmail_gev.Text = "" Then
+'            objMensagem.TipoMsg = "A"
+'            objMensagem.Descricao = "E-mail do GEV em branco"
+'            objForm.txtEmail_gev.SetFocus
+'            GoTo ErrorHandler
+'        ElseIf InStr(objForm.txtEmail_gev.Text, "@") <= 0 Then
+'            objMensagem.TipoMsg = "A"
+'            objMensagem.Descricao = "E-mail do GEV invalido."
+'            objForm.txtEmail_gev.SetFocus
+'            GoTo ErrorHandler
+'        End If
+'    End If
+    'Fim - Release BDR - 21/12/2009 - Bernardo Fontes
+    
+    CamposAgendPreenchidosOK = True
+
+
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    
+    Exit Function
+        
+ErrorHandler:
+
+    objMensagem.ExibeMensagem
+    
+    GoTo Finalizar
+
+End Function
+
+Public Function CamposEstornoPreenchidosOK() As Boolean
+
+    Dim objDadosFase    As clsgenFase
+    Dim bRetorno        As Boolean
+    Dim sDataFim        As String
+    
+    CamposEstornoPreenchidosOK = False
+    
+    objMensagem.TipoMsg = ""
+    objMensagem.Descricao = ""
+
+    If Trim(objForm.TxtFraudeDescricao.Text) = "" Then
+    
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Descrever o motivo da estorno."
+            
+            objForm.TxtFraudeDescricao.SetFocus
+            
+            GoTo ErrorHandler
+            
+    End If
+
+    
+    CamposEstornoPreenchidosOK = True
+
+
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    
+    
+    Exit Function
+        
+ErrorHandler:
+
+    objMensagem.ExibeMensagem
+    
+    GoTo Finalizar
+
+End Function
+
+Public Function InformaBanco(ByVal objNomeBanco As SGAPLUSBanco.clsBanco)
+
+On Error GoTo ErrorHandler:
+
+    InformaBanco = False
+    
+    Set objBanco = objNomeBanco
+    
+    InformaBanco = True
+    
+Finalizar:
+
+    Exit Function
+    
+ErrorHandler:
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                            "Houve um erro de execução no método: InformaBanco " & _
+                            "da classe clsgenServico"
+    
+    GoTo Finalizar
+
+End Function
+
+Public Function InformaMensagem(ByVal objNomeMensagem As clsgenMensagem)
+
+On Error GoTo ErrorHandler:
+
+    InformaMensagem = False
+    
+    Set objMensagem = objNomeMensagem
+    
+    InformaMensagem = True
+    
+Finalizar:
+
+    Exit Function
+    
+ErrorHandler:
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                            "Houve um erro de execução no método: InformaMensagem " & _
+                            "da classe clsgenServico"
+    
+    GoTo Finalizar
+
+End Function
+
+'Inicio - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+'Public Function RecuperarDemaisItens(plItem_Servico_ID As Long, _
+'                                     plProduto As Long, _
+'                                     plAcao As Long) As Boolean
+
+Public Function RecuperarDemaisItens() As Boolean
+
+On Error GoTo ErrorHandler:
+
+    Dim sSql            As String ' Guardar a concatenação do comando SQL
+    Dim bRetorno        As Boolean ' Controla o retorno dos métodos do banco
+    Dim rsListaOTS      As ADODB.Recordset
+    Dim cColecao        As New Collection
+    Dim objInterOC_Agendamento As clsInterOC_Agendamento
+    
+    RecuperarDados = False
+
+    sSql = ""
+    sSql = "SELECT "
+    sSql = sSql & " VD.SERVICO_ID, " & Chr(10)
+    sSql = sSql & " VD.ACAO, " & Chr(10)
+    sSql = sSql & " VD.ACAO_ID, " & Chr(10)
+    sSql = sSql & " VD.CENTRO_FUNCIONAL_ID, " & Chr(10)
+    sSql = sSql & " VD.CODIGO_TIPO_FASE, " & Chr(10)
+    sSql = sSql & " AIS.CONTRATO_ID, " & Chr(10)
+    sSql = sSql & " VD.DATA_OTS, " & Chr(10)
+    sSql = sSql & " VD.DATA_FINALIZACAO_OTS, " & Chr(10)
+    sSql = sSql & " VD.CD_AREA, " & Chr(10)
+    sSql = sSql & " VD.FASE_ID, " & Chr(10)
+    sSql = sSql & " VD.CIRCUITO_ID, " & Chr(10)
+    sSql = sSql & " AP.IND_QUARENTENA, " & Chr(10)
+    sSql = sSql & " AIS.IND_PORTABILIDADE, " & Chr(10)
+    sSql = sSql & " VD.PRODUTO_ID, " & Chr(10)
+    sSql = sSql & " VD.SERVICO_ANTERIOR_ID, " & Chr(10)
+    sSql = sSql & " VD.CD_TELEF " & Chr(10)
+    
+    sSql = sSql & "FROM "
+    sSql = sSql & " VSGAPLUS_LISTA_OTS VD, " & Chr(10)
+    sSql = sSql & " ATEN_ADM.ATEN_ITEM_SERVICO AIS, " & Chr(10)
+    sSql = sSql & " ATEN_ADM.ATEN_PORTABILIDADE AP " & Chr(10)
+    
+    sSql = sSql & "WHERE VD.ITEM_SERVICO_ID = AIS.ITEM_SERVICO_ID " & Chr(10)
+    sSql = sSql & "  AND VD.ITEM_SERVICO_ID = AP.ITEM_SERVICO_ID (+) " & Chr(10)
+    sSql = sSql & "  AND VD.PRODUTO_ID = " & Produto_ID & Chr(10)
+    sSql = sSql & "  AND AIS.CD_ACAO  = '" & Acao & "'" & Chr(10)
+    sSql = sSql & "  AND AIS.IC_TIPO_SERVICO = 'V' " & Chr(10)
+    sSql = sSql & "  AND AIS.CD_STATUS  = 'AN' " & Chr(10)
+    sSql = sSql & "  AND VD.CODIGO_TIPO_FASE = " & CodigoFase & Chr(10)
+    'sSql = sSql & "  AND AIS.SERVICO_ID <> " & Servico_ID & Chr(10)
+    sSql = sSql & "  AND AIS.PACOTE_ID IN " & Chr(10)
+    sSql = sSql & "                       (SELECT AIS1.PACOTE_ID " & Chr(10)
+    sSql = sSql & "                       FROM ATEN_ITEM_SERVICO AIS1 " & Chr(10)
+    sSql = sSql & "                       WHERE AIS1.SERVICO_ID = " & Servico_ID & Chr(10)
+    sSql = sSql & "                       )" & Chr(10)
+    sSql = sSql & "ORDER BY AIS.IND_PORTABILIDADE DESC" & Chr(10)
+    
+    Set rsListaOTS = objBanco.Obter_Recordset(sSql, "", "", 30)
+
+    If rsListaOTS.EOF Then
+
+        GoTo Finalizar
+
+    End If
+
+    Do While Not rsListaOTS.EOF
+ 
+        If Not IsNull(rsListaOTS!Servico_ID) Then
+        
+            ' Instanciar a classe de lista de OTS
+            Set objInterOC_Agendamento = New clsInterOC_Agendamento
+            
+            'Atribui os valores do campos nas propriedades
+            objInterOC_Agendamento.Servico_ID = rsListaOTS!Servico_ID
+            objInterOC_Agendamento.Acao = rsListaOTS!Acao
+            objInterOC_Agendamento.Acao_ID = rsListaOTS!Acao_ID
+            objInterOC_Agendamento.Centro_Funcional_ID = rsListaOTS!Centro_Funcional_ID
+            objInterOC_Agendamento.CodigoFase = rsListaOTS!Codigo_Tipo_Fase
+            objInterOC_Agendamento.ContratoID = IIf(IsNull(rsListaOTS!Contrato_ID), 0, rsListaOTS!Contrato_ID)
+            objInterOC_Agendamento.DataFinalizacao = IIf(IsNull(rsListaOTS!Data_OTS), 0, rsListaOTS!Data_OTS)
+            objInterOC_Agendamento.DataFinalizacaoOTS = IIf(IsNull(rsListaOTS!Data_Finalizacao_OTS), 0, rsListaOTS!Data_Finalizacao_OTS)
+            objInterOC_Agendamento.DDD = rsListaOTS!CD_AREA
+            objInterOC_Agendamento.Fase_ID = rsListaOTS!Fase_ID
+            objInterOC_Agendamento.IdCircuito = rsListaOTS!Circuito_ID
+            objInterOC_Agendamento.Ind_Quarentena = IIf(IsNull(rsListaOTS!Ind_Quarentena), "", rsListaOTS!Ind_Quarentena)
+            objInterOC_Agendamento.IndPortab = rsListaOTS!IND_PORTABILIDADE
+            objInterOC_Agendamento.Produto_ID = rsListaOTS!Produto_ID
+            objInterOC_Agendamento.Servico_ID_Anterior = IIf(IsNull(rsListaOTS!SERVICO_ANTERIOR_ID), 0, rsListaOTS!SERVICO_ANTERIOR_ID)
+            objInterOC_Agendamento.Sigla_Acao = rsListaOTS!Acao
+            objInterOC_Agendamento.Telefone = rsListaOTS!CD_TELEF
+            
+            cColecao.Add objInterOC_Agendamento
+            
+        End If
+        
+        rsListaOTS.MoveNext
+
+    Loop
+    
+    ' Atribui os dados da coleção na variável que guarda a coleção de lista de OTS's
+    Set cLista = cColecao
+    
+    rsListaOTS.Close
+    Set rsListaOTS = Nothing
+    
+    RecuperarDemaisItens = True
+    
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+
+ErrorHandler:
+
+    If objBanco.objErro Is Nothing Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                           vbCrLf & "Houve um erro de execução no método: " & vbCrLf & vbCrLf & "RecuperarDemaisItens " & _
+                          "da classe clsInterOC_Agendamento"
+    
+    Else
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & objBanco.objErro(0).Number & " - " & objBanco.objErro(0).Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "RecuperarDemaisItens " & _
+                   "da classe clsInterOC_Agendamento"
+    
+    End If
+
+    GoTo Finalizar
+   
+End Function
+'Fim - Tratamento Causa Raiz - PTS 721 - 16/07/2009 - Joao Carlos
+
+'Inicio - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos
+'Retorna o Status do Telefone
+Public Function VerificaStatusTelefone() As Boolean
+
+On Error GoTo ErrorHandler:
+
+    Dim sSql            As String ' Guardar a concatenação do comando SQL
+    Dim bRetorno        As Boolean ' Controla o retorno dos métodos do banco
+    Dim rsLista         As ADODB.Recordset
+    Dim sStatus         As String
+    Dim sDataIniPrev    As String
+    Dim sDataFimPrev    As String
+    Dim sDataIniReal    As String
+    Dim sDataFimReal    As String
+    Dim sDataPortab     As String
+    Dim lNumBilhete     As Long
+    Dim sIndDoadorAutoriz   As String
+    Dim iStatusPortab   As Integer
+    
+    VerificaStatusTelefone = False
+
+    sSql = ""
+    sSql = "SELECT "
+    sSql = sSql & " AIS.CD_STATUS, " & Chr(10)
+    sSql = sSql & " F.DATA_INICIO_PREVISTO, " & Chr(10)
+    sSql = sSql & " F.DATA_FIM_PREVISTO, " & Chr(10)
+    sSql = sSql & " F.DATA_INICIO_REAL, " & Chr(10)
+    sSql = sSql & " F.DATA_FIM_REAL, " & Chr(10)
+    sSql = sSql & " AP.DT_HR_PREVISTA_PORTAB, " & Chr(10)
+    sSql = sSql & " AP.NUM_BILHETE_PORTAB_ATUAL, " & Chr(10)
+    sSql = sSql & " AP.IND_DOADOR_AUTORIZ_PORTAB, " & Chr(10)
+    sSql = sSql & " AP.STATUS_PORTABILIDADE " & Chr(10)
+    
+    sSql = sSql & "FROM "
+    sSql = sSql & " ATEN_ADM.ATEN_ITEM_SERVICO AIS, " & Chr(10)
+    sSql = sSql & " ATEN_ADM.ATEN_PORTABILIDADE AP, " & Chr(10)
+    sSql = sSql & " SGAPLUS_ADM.FASE F, " & Chr(10)
+    sSql = sSql & " SGAPLUS_ADM.DURACAO_FASE DF " & Chr(10)
+    
+    sSql = sSql & "WHERE AIS.ITEM_SERVICO_ID = AP.ITEM_SERVICO_ID " & Chr(10)
+    sSql = sSql & "  AND AP.SERVICO_ID = F.SERVICO_ID " & Chr(10)
+    sSql = sSql & "  AND F.DURACAO_FASE_ID = DF.ID " & Chr(10)
+    sSql = sSql & "  AND AIS.SERVICO_ID = " & Servico_ID & Chr(10)
+    sSql = sSql & "  AND DF.CODIGO_TIPO_FASE = " & CodigoFase & Chr(10)
+    sSql = sSql & "  AND ROWNUM = 1" & Chr(10)
+    
+    Set rsLista = objBanco.Obter_Recordset(sSql, "", "", 30)
+
+    If rsLista.EOF Then
+
+        GoTo Finalizar
+
+    End If
+
+    sStatus = IIf(IsNull(rsLista!CD_STATUS), "", rsLista!CD_STATUS)
+    sDataIniPrev = IIf(IsNull(rsLista!Data_Inicio_Previsto), "", rsLista!Data_Inicio_Previsto)
+    sDataFimPrev = IIf(IsNull(rsLista!Data_Fim_Previsto), "", rsLista!Data_Fim_Previsto)
+    sDataIniReal = IIf(IsNull(rsLista!Data_Inicio_Real), "", rsLista!Data_Inicio_Real)
+    sDataFimReal = IIf(IsNull(rsLista!Data_Fim_Real), "", rsLista!Data_Fim_Real)
+    sDataPortab = IIf(IsNull(rsLista!DT_HR_PREVISTA_PORTAB), "", rsLista!DT_HR_PREVISTA_PORTAB)
+    lNumBilhete = IIf(IsNull(rsLista!NUM_BILHETE_PORTAB_ATUAL), 0, rsLista!NUM_BILHETE_PORTAB_ATUAL)
+    sIndDoadorAutoriz = IIf(IsNull(rsLista!IND_DOADOR_AUTORIZ_PORTAB), "", rsLista!IND_DOADOR_AUTORIZ_PORTAB)
+    iStatusPortab = IIf(IsNull(rsLista!STATUS_PORTABILIDADE), 0, rsLista!STATUS_PORTABILIDADE)
+    
+    If sStatus = "AN" And sDataIniPrev <> "00:00:00" And sDataFimPrev <> "00:00:00" And sDataPortab = "" And lNumBilhete = 0 Then
+        StatusTelefone = "Para Agendar"
+    ElseIf sStatus = "AN" And sDataIniPrev <> "00:00:00" And sDataFimPrev <> "00:00:00" And sDataPortab <> "00:00:00" And lNumBilhete = 0 Then
+        StatusTelefone = "Aguardando Número do Bilhete"
+    ElseIf sStatus = "AN" And sDataIniPrev <> "00:00:00" And sDataFimPrev <> "00:00:00" And sDataPortab <> "00:00:00" And lNumBilhete > 0 And sIndDoadorAutoriz = "" And Not (iStatusPortab = 1 Or iStatusPortab = 9 Or iStatusPortab = 10) Then
+        StatusTelefone = "Aguardando Resposta Doadora"
+    ElseIf sStatus = "AN" And sDataIniPrev <> "00:00:00" And sDataFimPrev <> "00:00:00" And sDataPortab <> "00:00:00" And lNumBilhete > 0 And sIndDoadorAutoriz = "S" Then
+        StatusTelefone = "Agendamento Confirmado"
+    ElseIf sStatus = "AN" And sDataIniPrev <> "00:00:00" And sDataFimPrev <> "00:00:00" And iStatusPortab = 1 Then
+        StatusTelefone = "Conflito"
+    ElseIf sStatus = "AN" And sDataIniPrev <> "00:00:00" And sDataFimPrev <> "00:00:00" And (iStatusPortab = 9 Or iStatusPortab = 10) Then
+        StatusTelefone = "Cancelado"
+    'Inicio - Release BDR - 17/12/2009 - Renato Moraes
+    ElseIf sStatus = "AN" And sDataIniPrev <> "00:00:00" And sDataFimPrev <> "00:00:00" And (iStatusPortab = 11) Then
+        StatusTelefone = "Suspenso"
+    'Fim - Release BDR - 17/12/2009 - Renato Moraes
+    ElseIf sStatus = "AN" And sDataIniPrev <> "00:00:00" And sDataFimPrev <> "00:00:00" And sDataIniReal <> "00:00:00" And sDataFimReal <> "00:00:00" Then
+        StatusTelefone = "Realizado"
+    ElseIf sStatus = "FF" Then
+        StatusTelefone = "Finalizado"
+    End If
+
+    rsLista.Close
+    Set rsLista = Nothing
+    
+    VerificaStatusTelefone = True
+    
+Finalizar:
+    
+    On Error GoTo 0
+    
+    Exit Function
+
+ErrorHandler:
+
+    If objBanco.objErro Is Nothing Then
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                           vbCrLf & "Houve um erro de execução no método: " & vbCrLf & vbCrLf & "VerificaStatusTelefone " & _
+                          "da classe clsInterOC_Agendamento"
+    
+    Else
+       
+       objMensagem.TipoMsg = "E"
+       objMensagem.Descricao = "Erro: " & objBanco.objErro(0).Number & " - " & objBanco.objErro(0).Description & vbCrLf & vbCrLf & _
+                   "Houve um erro de execução no Método: " & vbCrLf & vbCrLf & "VerificaStatusTelefone " & _
+                   "da classe clsInterOC_Agendamento"
+    
+    End If
+
+    GoTo Finalizar
+   
+End Function
+'Fim - Tratamento Causa Raiz - PTS 754 - 27/07/2009 - Joao Carlos

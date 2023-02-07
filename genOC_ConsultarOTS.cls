@@ -1,0 +1,1200 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+  Persistable = 0  'NotPersistable
+  DataBindingBehavior = 0  'vbNone
+  DataSourceBehavior  = 0  'vbNone
+  MTSTransactionMode  = 0  'NotAnMTSObject
+END
+Attribute VB_Name = "clsgenOC_ConsultarOTS"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = True
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Explicit
+
+' Declara as classes utilizadas
+Private objMensagem          As clsgenMensagem
+Private objCentroFuncional   As clsgenCentroFuncional
+Private objServico           As clsGenServico
+Private objListaOTS          As New clsgenListaOTS
+Private objProduto           As clsGenProduto
+Private lProduto_ID          As Long
+Private lGrupo_ID            As Long
+Private objFormConsultarOTS  As frmgenConsultaOTS
+
+' Declara variáveis
+Private aListaProduto()      As Variant
+Private sFamilia_Produto     As String
+
+Public Property Get Familia_Produto() As String
+
+    Familia_Produto = sFamilia_Produto
+
+End Property
+
+Public Property Let Familia_Produto(ByVal sNewValue As String)
+
+    sFamilia_Produto = sNewValue
+    
+End Property
+
+Public Property Get Produto_ID() As Long
+
+    Produto_ID = lProduto_ID
+
+End Property
+
+Public Property Let Produto_ID(ByVal vNewValue As Long)
+
+    lProduto_ID = vNewValue
+
+End Property
+
+Public Property Get Grupo_ID() As Long
+
+    Grupo_ID = lGrupo_ID
+
+End Property
+
+Public Property Let Grupo_ID(ByVal vNewValue As Long)
+
+    lGrupo_ID = vNewValue
+
+End Property
+
+Public Function TelaConsultarOTS(ByVal psTitulo As String) As Boolean
+
+On Error GoTo ErrorHandler:
+
+    Dim bRetorno As Boolean
+    'RN_SGAD_21148YBJ
+    Dim vTodos As String
+    
+    vTodos = "[Todos]"
+     
+    Screen.MousePointer = vbArrowHourglass
+     
+    ' Intância a classe de mensagem
+    Set objMensagem = New clsgenMensagem
+     
+    '#################
+    'adeil RN-SGAD-14971ZKH 28/10/2003
+    'se o form passado por parâmetro já estiver aberto, fecha-lo.
+    'inicio
+    If Familia_Produto = "I" Then
+        If Verifica_Janela_Aberta("frmgenConsultaOTS", "Produtos de Internet - Consultar OTS") Then
+            GoTo Finalizar
+        End If
+    Else
+        If Verifica_Janela_Aberta("frmgenConsultaOTS", "Produtos de Dados - Consultar OTS") Then
+            GoTo Finalizar
+        End If
+    End If
+    'fim
+    '#################
+     
+    Set objFormConsultarOTS = New frmgenConsultaOTS
+    
+    ' Define período
+    objFormConsultarOTS.dtpDataIni.Value = Format(Date - 10, "dd/mm/yyyy")
+    objFormConsultarOTS.dtpDataFim.Value = Format(Date, "dd/mm/yyyy")
+    
+    ' Executar o método de exibição da primeira combo de centros funcionais
+    bRetorno = ExibirListaCentroFuncional(objFormConsultarOTS.cboCentroFunc1)
+    
+    If Not bRetorno Then
+        
+        Unload objFormConsultarOTS
+        
+        GoTo Finalizar
+        
+    End If
+    
+    objFormConsultarOTS.cboCentroFunc1.ListIndex = 0
+    
+    
+    ' Executar o método de exibição da segunda combo de centros funcionais
+    bRetorno = ExibirListaCentroFuncional(objFormConsultarOTS.cboCentroFunc2)
+    
+    If (Not bRetorno) Then
+        
+        Unload objFormConsultarOTS
+        
+        GoTo Finalizar
+        
+    End If
+    
+    'RN_SGAD_21148YBJ
+    If (GbFlagRN_SGAD_21148YBJ) Then
+        
+        objFormConsultarOTS.cboCentroFunc2.AddItem vTodos
+        objFormConsultarOTS.cboCentroFunc2.ItemData(objFormConsultarOTS.cboCentroFunc2.NewIndex) = 0
+        
+    End If
+        
+    objFormConsultarOTS.cboCentroFunc2.ListIndex = 0
+    
+    
+    ' Informar o objeto controlador
+    objFormConsultarOTS.informa_OC Me
+    
+    ' Executar o método de exibição dos produtos
+    bRetorno = ExibirListaProduto(objFormConsultarOTS.CboServico, Familia_Produto)
+    
+    If Not bRetorno Then
+    
+        GoTo Finalizar
+        
+    End If
+    
+    objFormConsultarOTS.CboServico.AddItem "", 0
+    
+    '*****************************************************
+    'CALBAT - 11/06/2008
+    '*****************************************************
+    objFormConsultarOTS.CboServico.AddItem vTodos
+    objFormConsultarOTS.CboServico.ItemData(objFormConsultarOTS.CboServico.NewIndex) = 0
+    '*****************************************************
+    '*****************************************************
+'    objFormConsultarOTS.ProdutoID = Produto_ID
+    
+    If Familia_Produto = "I" Then
+    
+        objFormConsultarOTS.Caption = "Produtos de Internet/IP - Consultar OTS"
+        
+    Else
+    
+        objFormConsultarOTS.Caption = "Produtos de Dados - Consultar OTS"
+    
+    End If
+    
+    
+    objFormConsultarOTS.Show
+     
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    
+    On Error GoTo 0
+    
+    If objMensagem.TipoMsg <> "" Then
+    
+        objMensagem.ExibeMensagem
+        
+    End If
+    
+    Set objMensagem = Nothing
+    
+    Exit Function
+        
+ErrorHandler:
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                            "Houve um erro de execução no método: TelaConsultarOTS " & _
+                            "da classe clsGenOC_ConsultarOTS"
+    GoTo Finalizar
+
+End Function
+
+Public Function ExibirListaCentroFuncional(ByRef cbo As ComboBox) As Boolean
+
+On Error GoTo ErrorHandler:
+
+    Dim bRetorno As Boolean
+    Dim aListaCentroFuncional() As Variant
+    
+    ExibirListaCentroFuncional = False
+    
+    ' Intância a classe de mensagem
+    Set objMensagem = New clsgenMensagem
+    
+    ' Limpa a combo
+    cbo.Clear
+    
+    ' Instância a classe de centro funcional
+    Set objCentroFuncional = New clsgenCentroFuncional
+
+    ' Informar o nome do banco desejado
+    objCentroFuncional.InformaBanco frmgenMDI_SGAPlus.objBanco
+                
+    ' Informar o nome do objeto de mensagem
+    objCentroFuncional.InformaMensagem objMensagem
+    
+    ' Executar o método de montagem da lista de centro funcional na classe de analisar order entry
+    bRetorno = objCentroFuncional.MontarListaCentroFuncional(aListaCentroFuncional)
+    
+    ' Se ocorreu algum erro na DLL exibi-lo
+    If Not bRetorno Then
+        
+        GoTo Finalizar
+    
+    End If
+    
+    PreencheCombo cbo, aListaCentroFuncional
+
+    ExibirListaCentroFuncional = True
+    
+    GoTo Finalizar
+       
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    
+    If objMensagem.TipoMsg <> "" Then
+    
+        objMensagem.ExibeMensagem
+        
+    End If
+    
+    Set objCentroFuncional = Nothing
+    
+    Exit Function
+        
+ErrorHandler:
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                            "Houve um erro de execução no método: ExibirListaCentroFuncional " & _
+                            "da classe clsgenOC_ConsultarOTS"
+    
+    GoTo Finalizar
+
+End Function
+
+Public Function ExibirListaOTS() As Boolean
+
+On Error GoTo ErrorHandler:
+
+    Dim bRetorno As Boolean
+    Dim sTipoConsulta As String
+    Dim sAcao As String
+    Dim sContaCliente As String
+    Dim sStatus As String
+    Dim lCentroFuncional1 As Long
+    Dim lCentroFuncional2 As Long
+    
+    ExibirListaOTS = False
+    
+    ' Intância a classe de mensagem
+    Set objMensagem = New clsgenMensagem
+    
+    ' Instância a classe de serviço
+    Set objServico = New clsGenServico
+    
+    ' Define o tipo da consulta
+    '
+    ' Consulta por OTS
+    If objFormConsultarOTS.ChkPorNumeroOTS.Value = 1 Then
+    
+        sTipoConsulta = "1"
+        
+    ' Consulta por Designação do Circuito
+    ElseIf objFormConsultarOTS.ChkPorDesigIP.Value = 1 Then
+    
+        sTipoConsulta = "2"
+    
+    ' Consulta por Designação de Facilidade
+    ElseIf objFormConsultarOTS.ChkPorDesigFac.Value = 1 Then
+    
+        sTipoConsulta = "3"
+        
+    ' Consulta por Conta Corrente
+    ElseIf objFormConsultarOTS.ChkPorConta.Value = 1 Then
+    
+        sTipoConsulta = "4"
+        
+    ' Consulta por Telefone
+    ElseIf objFormConsultarOTS.ChkNumeroTelefone.Value = 1 Then
+    
+        sTipoConsulta = "6"
+    ElseIf objFormConsultarOTS.ChkPorContrato.Value = 1 Then
+        sTipoConsulta = "7"
+    Else
+        sTipoConsulta = "5"
+    
+    End If
+
+    ' Criticar os campos da tela
+    bRetorno = CriticarCamposTela(sTipoConsulta)
+    
+    If Not bRetorno Then
+    
+        GoTo Finalizar
+        
+    End If
+
+    ' Define melhor a AÇÃO para ser passada como parâmetro
+    sAcao = Trim(objFormConsultarOTS.cboAcao.Text)
+    
+    If sAcao = "Ativação" Then
+    
+        sAcao = "ATV"
+        
+    ElseIf sAcao = "Alteração" Then
+    
+        sAcao = "ALT"
+        
+    ElseIf sAcao = "Cancelamento" Then
+    
+        sAcao = "CAN"
+        
+    ElseIf sAcao = "Desativação" Then
+    
+        sAcao = "DES"
+        
+    ElseIf sAcao = "Correção (Ativação)" Then
+    
+        sAcao = "ATG"
+    
+    ElseIf sAcao = "Correção (Alteração)" Then
+    
+        sAcao = "ALG"
+        
+    End If
+    ' Concatena a conta corrente
+    sContaCliente = objFormConsultarOTS.txtContaCorrente & objFormConsultarOTS.txtSubConta
+    
+    ' Status
+    If (objFormConsultarOTS.chkStemAndamento.Value = 1) And _
+       (objFormConsultarOTS.chkStAtivado.Value = 1) Then
+    
+        sStatus = "'AN', 'FF'"
+        
+    ElseIf (objFormConsultarOTS.chkStAtivado.Value = 1) And _
+       (objFormConsultarOTS.chkStemAndamento.Value = 0) Then
+    
+        sStatus = "'FF'"
+        
+    ElseIf (objFormConsultarOTS.chkStemAndamento.Value = 1) And _
+       (objFormConsultarOTS.chkStAtivado.Value = 0) Then
+    
+        sStatus = "'AN'"
+        
+    End If
+    
+    If objFormConsultarOTS.cboCentroFunc1.ListIndex > -1 Then
+    
+        lCentroFuncional1 = objFormConsultarOTS.cboCentroFunc1.ItemData(objFormConsultarOTS.cboCentroFunc1.ListIndex)
+    Else
+    
+        lCentroFuncional1 = 0
+        
+    End If
+    
+    If objFormConsultarOTS.CboServico.ListIndex > -1 Then
+        
+        lProduto_ID = objFormConsultarOTS.CboServico.ItemData(objFormConsultarOTS.CboServico.ListIndex)
+    
+    Else
+        
+        lProduto_ID = 0
+    
+    End If
+    
+    ' Informar o nome do banco desejado
+    objServico.InformaBanco frmgenMDI_SGAPlus.objBanco
+            
+    ' Informar o nome do objeto de mensagem
+    objServico.InformaMensagem objMensagem
+    
+    ' Executar o método de montagem da lista na classe de serviço
+    If sTipoConsulta <> "6" Then  '
+        bRetorno = objServico.MontarConsultaOTS(lCentroFuncional1, _
+                                            CLng("0" & objFormConsultarOTS.TxtNumeroOTS.Text), _
+                                            CLng("0" & objFormConsultarOTS.TxtAnoOTS.Text), _
+                                            objFormConsultarOTS.txtCNLIP.Text, _
+                                            CLng("0" & objFormConsultarOTS.txtSeqIP.Text), _
+                                            sContaCliente, _
+                                            Format(objFormConsultarOTS.dtpDataIni.Value, "dd/mm/yyyy"), _
+                                            Format(objFormConsultarOTS.dtpDataFim.Value, "dd/mm/yyyy"), _
+                                            objFormConsultarOTS.cboCentroFunc2.ItemData(objFormConsultarOTS.cboCentroFunc2.ListIndex), _
+                                            sAcao, _
+                                            sStatus, _
+                                            sTipoConsulta, _
+                                            lProduto_ID, _
+                                            objFormConsultarOTS.TxtCNLPontaA, _
+                                            objFormConsultarOTS.TxtCNLPontaB, _
+                                            objFormConsultarOTS.txtNP, _
+                                            objFormConsultarOTS.txtSeqDesig, _
+                                            objFormConsultarOTS.TxtCdDiretRegio.Text, _
+                                            objFormConsultarOTS.TxtNrContr.Text, _
+                                            objFormConsultarOTS.TxtAAContr.Text, _
+                                            objFormConsultarOTS.txtServIP.Text)
+    Else
+        bRetorno = objServico.MontarConsultaOTSNetPhone(lCentroFuncional1, _
+                                            CLng("0" & objFormConsultarOTS.TxtNumeroOTS.Text), _
+                                            CLng("0" & objFormConsultarOTS.TxtAnoOTS.Text), _
+                                            sContaCliente, _
+                                            Format(objFormConsultarOTS.dtpDataIni.Value, "dd/mm/yyyy"), _
+                                            Format(objFormConsultarOTS.dtpDataFim.Value, "dd/mm/yyyy"), _
+                                            objFormConsultarOTS.cboCentroFunc2.ItemData(objFormConsultarOTS.cboCentroFunc2.ListIndex), _
+                                            sAcao, _
+                                            sStatus, _
+                                            sTipoConsulta, _
+                                            lProduto_ID, objFormConsultarOTS.txtCodAreaTelef, objFormConsultarOTS.TxtNumTelefone)
+    
+    End If
+   ' Se ocorreu algum erro na DLL exibi-lo
+    If Not bRetorno Then
+        
+        GoTo Finalizar
+    
+    End If
+    
+    ' Preenche a grid
+    If lProduto_ID <> 12 Then 'Produto diferente de NETPHONE
+        
+        bRetorno = PreencheGrid()
+    
+    Else
+        
+        bRetorno = PreencheGridNetPhone()
+    
+    End If
+    
+    If Not bRetorno Then
+        
+        GoTo Finalizar
+    
+    End If
+    
+    ExibirListaOTS = True
+    
+    GoTo Finalizar
+       
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    
+    If objMensagem.TipoMsg <> "" Then
+    
+        objMensagem.ExibeMensagem
+        
+    End If
+    
+    'Set objServico = Nothing
+    Set objMensagem = Nothing
+    
+    Exit Function
+        
+ErrorHandler:
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                            "Houve um erro de execução no método: ExibirListaOTS " & _
+                            "da classe clsgenOC_ConsultarOTS"
+    
+    GoTo Finalizar
+
+End Function
+
+Public Function PreencheGrid() As Boolean
+
+    Dim iLinha As Integer
+    Dim sStatus As String
+    Dim sOrdem  As String
+    
+    iLinha = 0
+    
+    PreencheGrid = False
+    objFormConsultarOTS.spdCircuitos.Visible = True
+    objFormConsultarOTS.SpdServicosNETPhone.Visible = False
+    objFormConsultarOTS.spdCircuitos.Redraw = False
+    
+    Set objProduto = New clsGenProduto
+        
+'    ' Classe de produto
+    objProduto.InformaBanco frmgenMDI_SGAPlus.objBanco
+'    ' Classe de produto
+    objProduto.InformaMensagem objMensagem
+    
+    lGrupo_ID = objProduto.ObtemIDGrupo(CLng(Produto_ID))
+    
+    'A o objeto de coleção da lista de OE's
+    For Each objListaOTS In objServico.ListaOTS
+
+        iLinha = iLinha + 1
+        objFormConsultarOTS.spdCircuitos.MaxRows = iLinha
+        '-------------------------------------------------------------------
+        'MTLP - 24/07/04: Obtém o nr. OTS migrada do SGA-Dados
+        '-------------------------------------------------------------------
+        If objFormConsultarOTS.CboServico.ItemData(objFormConsultarOTS.CboServico.ListIndex) = 0 Then
+            objFormConsultarOTS.spdCircuitos.MaxCols = 8
+            objFormConsultarOTS.spdCircuitos.ColWidth(8) = 0
+        Else
+            objFormConsultarOTS.spdCircuitos.MaxCols = 7
+            objFormConsultarOTS.spdCircuitos.ColWidth(7) = 0
+        End If
+        
+        
+        
+        '-------------------------------------------------------------------
+        
+
+        With objFormConsultarOTS.spdCircuitos
+
+            ' Atribui o valor da linha e define um range para cores
+            .Row = iLinha
+            .Col = 1
+            
+            ' Verifica o status da fase, para definir a cor
+            '
+            ' Ativado
+            If objListaOTS.StatusOTS = "FF" Then
+            
+                sStatus = "Finalizado"
+            
+            ' Em Andamento
+            ElseIf objListaOTS.StatusOTS = "AN" Then
+            
+                sStatus = "Em Andamento"
+            
+            ' Cancelada
+            ElseIf objListaOTS.StatusOTS = "CAN" Then
+            
+                sStatus = "Cancelada"
+                
+            ' Corrigida
+            ElseIf objListaOTS.StatusOTS = "CR" Then
+            
+                sStatus = "Corrigida"
+            
+            End If
+            
+            ' Ação
+            .Col = 1
+            If objListaOTS.Acao = "ATV" Then
+        
+                .Text = "Ativação"
+                
+            ElseIf objListaOTS.Acao = "ALT" Then
+            
+                .Text = "Alteração"
+                
+            ElseIf objListaOTS.Acao = "DES" Then
+            
+                'Comentando - Aline - 30/07/2010
+                'If objListaOTS.Origem = "SOE" Then
+                
+                    .Text = "Desativação"
+                
+                'Else
+                
+                '    .Text = "Desativação (ALT)"
+                
+                'End If
+                'Comentando - Aline - 30/07/2010
+                
+            ElseIf objListaOTS.Acao = "CAN" Then
+            
+                .Text = "Cancelamento"
+                
+            ElseIf (objListaOTS.Acao = "ATG") Or _
+                   (objListaOTS.Acao = "ALG") Then
+            
+                .Text = "Correção"
+                
+            '================================================
+            'CALBAT - 25/08/2008
+            'Inclusão da ação de Bloqueio
+            '================================================
+            ElseIf (objListaOTS.Acao = "BLQ") Then
+                .Text = "Bloqueio"
+            '================================================
+            '================================================
+            End If
+        
+                'Padronização do número de OTS implementado a pedido do SPRADO em 08/09/2003
+        
+            ' Número da OTS
+            .Col = 2
+            
+            .Text = objListaOTS.CentroFuncional & _
+                    " - " & _
+                    ("" & Trim(objListaOTS.Produto)) & _
+                    " - " & _
+                    CStr(objListaOTS.NumeroOTS) & _
+                    "/" & _
+                    "" & objListaOTS.AnoOTS
+
+' XXX999 - Trocar o hardcode do produto na designação do circuito por uma propriedade
+            
+            ' Designação do Circuito
+            .Col = 3
+                If (Produto_ID = GbIDProdutoWID) Or _
+                   (Produto_ID = GbIDProdutoVPN_RA) Or _
+                   (Produto_ID = GbIDProdutoVPN_DIRECT) Then
+               .Text = objListaOTS.CNL_Ponta_A & _
+                       "/WD/" & _
+                       Format(objListaOTS.NumeroDesignacao, "00000")
+            ElseIf (Produto_ID = GbIDProdutoDiginet) Or _
+                   (Produto_ID = GbIDProdutoEmbratelIPL) Then
+                   
+               If objListaOTS.CNL_Ponta_A <> "" Or _
+                  objListaOTS.CNL_Ponta_B <> "" Then
+                  
+                   If (Produto_ID = GbIDProdutoDiginet) Then
+                       
+                       .Text = objListaOTS.CNL_Ponta_A & " " & _
+                               objListaOTS.CNL_Ponta_B & " " & _
+                               objListaOTS.Codigo_NP & " " & _
+                               Format(objListaOTS.NumeroDesignacao, "0000")
+                   Else
+                        
+                        .Text = objListaOTS.CNL_Ponta_A & " " & _
+                                objListaOTS.CNL_Ponta_B & " " & _
+                                objListaOTS.Codigo_NP & " " & _
+                                Format(objListaOTS.NumeroDesignacao, "0000000")
+                   End If
+               End If
+            
+            'BLF
+            ElseIf (Produto_ID = GbIDProdutoBLF) Then
+               
+               .Text = objListaOTS.CNL_Ponta_A & _
+                       "/BF/" & _
+                       Format(objListaOTS.NumeroDesignacao, "00000")
+            'BLD
+            'ElseIf (Produto_ID = GbIDProdutoBLD Or _
+                        lProduto_ID = GbIDProdutoVOIP) Then
+             'RedeVip
+             ElseIf (lGrupo_ID = GbIDGrupoBLD Or _
+                        lProduto_ID = GbIDProdutoVOIP) Then
+               
+               .Text = objListaOTS.CNL_Ponta_A & _
+                       "/IP/" & _
+                       Format(objListaOTS.NumeroDesignacao, "00000")
+            'JAH
+            ElseIf (Produto_ID = GbIDProdutoJAH) Then
+               
+               .Text = objListaOTS.CNL_Ponta_A & _
+                       "/JAH/" & _
+                       Format(objListaOTS.NumeroDesignacao, "00000")
+            'IP PN
+            ElseIf (Produto_ID = GbIDProdutoBIV) Then
+                   'IP VPN
+                   'Itens de Topologia e Extranet não têm Designação
+                   If objListaOTS.CNL_Ponta_A <> "" Then
+                   
+                    .Text = objListaOTS.CNL_Ponta_A & _
+                            "/" & objListaOTS.Produto & "/" & _
+                            Format(objListaOTS.NumeroDesignacao, "00000")
+                    Else
+                        If (objListaOTS.TipoItem = GbItem_TOPOLOGIA) Then
+                        
+                            .Text = "ITEM DE TOPOLOGIA"
+                            
+                        ElseIf (objListaOTS.TipoItem = GbItem_EXTRNET) Then
+                        
+                            .Text = "ITEM DE EXTRANET"
+
+                        End If
+                    End If
+                
+            ElseIf (Produto_ID = GbIDProdutoNetPhone) Then
+            
+            'AGRC - SO-TIEMP-49824BGM - 15/11/2017
+            ElseIf (Produto_ID = GbIDProdutoClaroFone) Then
+            
+            'VipLineIP
+            ElseIf (Produto_ID = GbIDProdutoVIP) Then
+               .Text = objListaOTS.CNL_Ponta_A & _
+                       "-VLI-" & _
+                       Format(objListaOTS.NumeroDesignacao, "00000")
+                       
+            ElseIf (Produto_ID = GbIDProdutoAAC) Then
+               .Text = objListaOTS.CNL_Ponta_A & _
+                       "-AAC-" & _
+                       Format(objListaOTS.NumeroDesignacao, "00000")
+                       
+            ElseIf (Produto_ID = GbIDProdutoVBL) Then
+               .Text = objListaOTS.CNL_Ponta_A & _
+                       "/VBL/" & _
+                       Format(objListaOTS.NumeroDesignacao, "00000")
+            End If
+               
+            ' Nome do Cliente
+            .Col = 4
+            .Text = objListaOTS.NomeCliente
+            
+            ' Data Finalização
+            .Col = 5
+            
+            If objListaOTS.DataFimReal <> "00:00:00" Then
+            
+                .Text = Format(objListaOTS.DataFimReal, "dd/mm/yyyy")
+                
+            Else
+            
+                .Text = ""
+                
+            End If
+        
+            ' Status
+            .Col = 6
+            .Text = sStatus
+            
+            '-------------------------------------------------------------------
+            'MTLP - 24/07/04: Obtém o nr. OTS migrada do SGA-Dados
+            '-------------------------------------------------------------------
+'            .Col = 8
+'            .Text = sOrdem
+'
+'            If (Produto_ID = GbIDProdutoBLD Or _
+'                    lProduto_ID = GbIDProdutoVOIP) Then
+'                .ColWidth(7) = 15
+'                .Text = objListaOTS.Nr_OTS_SGAD
+'            End If
+            '-------------------------------------------------------------------
+            
+            '==========================================================
+            'CALBAT - 11/06/2008
+            '==========================================================
+            If objFormConsultarOTS.CboServico.ItemData(objFormConsultarOTS.CboServico.ListIndex) = 0 Then
+                .Col = 7 '8
+                .ColWidth(7) = 25
+                .Text = objListaOTS.NomeProduto
+                
+                .Col = 9
+                .Text = objListaOTS.ID_PRODUTO
+                
+            End If
+            '==========================================================
+            '==========================================================
+             
+        End With
+    
+    Next
+    objFormConsultarOTS.spdCircuitos.Redraw = True
+    
+    PreencheGrid = True
+
+End Function
+
+Public Function PreencheGridNetPhone() As Boolean
+
+    Dim iLinha As Integer
+    Dim sStatus As String
+    Dim sOrdem  As String
+    
+    iLinha = 0
+    
+    objFormConsultarOTS.spdCircuitos.Visible = False
+    objFormConsultarOTS.SpdServicosNETPhone.Visible = True
+    
+    PreencheGridNetPhone = False
+    
+    objFormConsultarOTS.SpdServicosNETPhone.Redraw = False
+    
+    'A o objeto de coleção da lista de OE's
+    For Each objListaOTS In objServico.ListaOTS
+
+        iLinha = iLinha + 1
+        objFormConsultarOTS.SpdServicosNETPhone.MaxRows = iLinha
+
+        With objFormConsultarOTS.SpdServicosNETPhone
+
+            ' Atribui o valor da linha e define um range para cores
+            .Row = iLinha
+            .Col = 1
+            
+            ' Verifica o status da fase, para definir a cor
+            '
+            ' Ativado
+            If objListaOTS.StatusOTS = "FF" Then
+            
+                sStatus = "Finalizado"
+            
+            ' Em Andamento
+            ElseIf objListaOTS.StatusOTS = "AN" Then
+            
+                sStatus = "Em Andamento"
+            
+            ' Cancelada
+            ElseIf objListaOTS.StatusOTS = "CAN" Then
+            
+                sStatus = "Cancelada"
+                
+            ' Corrigida
+            ElseIf objListaOTS.StatusOTS = "CR" Then
+            
+                sStatus = "Corrigida"
+            
+            End If
+            
+            ' Ação
+            .Col = 1
+            If objListaOTS.Acao = "ATV" Then
+        
+                .Text = "Ativação"
+                
+            ElseIf objListaOTS.Acao = "ALT" Then
+            
+                .Text = "Alteração"
+                
+            ElseIf objListaOTS.Acao = "DES" Then
+            
+                If objListaOTS.Origem = "SOE" Then
+                
+                    .Text = "Desativação"
+                    
+                Else
+                
+                    .Text = "Desativação"
+                
+                End If
+                
+            ElseIf objListaOTS.Acao = "CAN" Then
+            
+                .Text = "Cancelamento"
+                
+            ElseIf (objListaOTS.Acao = "ATG") Or _
+                   (objListaOTS.Acao = "ALG") Then
+            
+                .Text = "Correção"
+                
+            End If
+        
+                'Padronização do número de OTS implementado a pedido do SPRADO em 08/09/2003
+        
+            ' Número da OTS
+            .Col = 2
+            
+            .Text = objListaOTS.CentroFuncional & _
+                    " - " & _
+                    ("" & Trim(objListaOTS.Produto)) & _
+                    " - " & _
+                    CStr(objListaOTS.NumeroOTS) & _
+                    "/" & _
+                    "" & objListaOTS.AnoOTS
+                            
+            ' Numero Telefone
+            .Col = 3
+            .Text = "(" & objListaOTS.Cd_Area_Telef & ") " & objListaOTS.Cd_Telefone
+               
+            ' Nome do Cliente
+            .Col = 4
+            .Text = objListaOTS.NomeCliente
+            
+            ' Data Finalização
+            .Col = 5
+            
+            If objListaOTS.DataFimReal <> "00:00:00" Then
+            
+                .Text = Format(objListaOTS.DataFimReal, "dd/mm/yyyy")
+                
+            Else
+            
+                .Text = ""
+                
+            End If
+        
+            ' Status
+            .Col = 6
+            .Text = sStatus
+            
+            .Col = 7
+            .Text = "" & objListaOTS.Nome_FQDN
+            
+            .Col = 8
+            .Text = "" & objListaOTS.PortaAcessoFQDN
+        
+        End With
+    
+    Next
+    objFormConsultarOTS.SpdServicosNETPhone.Redraw = True
+    
+    PreencheGridNetPhone = True
+
+End Function
+Public Sub MontarImpressaoOTS(plProdutoID As Long)
+
+On Error GoTo ErrorHandler:
+
+    Dim bRetorno As Boolean
+
+    ' Intância a classe de mensagem
+    Set objMensagem = New clsgenMensagem
+    
+    
+    'Executa a função Imprime_OTS do modulo funções. JAH
+    bRetorno = Imprime_OTS(plProdutoID, _
+                objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).ID_Servico, _
+                objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).ID_Servico_Anterior, _
+                objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).Acao)
+        
+    If (Not bRetorno) Then
+
+        GoTo Finalizar
+
+    End If
+        
+    
+'''    If (plProdutoID = GbIDProdutoWID) Or _
+'''       (plProdutoID = GbIDProdutoVPN_RA) Or _
+'''       (plProdutoID = GbIDProdutoVPN_DIRECT) Or _
+'''       (plProdutoID = GbIDProdutoBLF) Then
+'''
+'''        bRetorno = OTS_ProdInternet(plProdutoID, _
+'''                                    objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).ID_Servico, _
+'''                                    objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).ID_Servico_Anterior, _
+'''                                    objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).Acao)
+'''
+'''    ElseIf plProdutoID = GbIDProdutoDiginet Or plProdutoID = GbIDProdutoEmbratelIPL Then
+'''
+'''        bRetorno = OTS_ProdDados(plProdutoID, _
+'''                                 objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).ID_Servico, _
+'''                                 objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).ID_Servico_Anterior, _
+'''                                 objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).Acao)
+'''
+'''    'IP VPN
+'''    ElseIf plProdutoID = GbIDProdutoBIV Then
+'''
+'''        bRetorno = OTS_ProdIPVPN(plProdutoID, _
+'''                                 objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).ID_Servico, _
+'''                                 objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).ID_Servico_Anterior, _
+'''                                 objServico.ListaOTS(objFormConsultarOTS.spdCircuitos.ActiveRow).Acao)
+'''
+'''    End If
+'''
+'''    ' Se ocorreu algum erro na DLL exibi-lo
+'''    If Not bRetorno Then
+'''
+'''        GoTo Finalizar
+'''
+'''    End If
+
+
+Finalizar:
+
+    Screen.MousePointer = vbDefault
+    
+    If objMensagem.TipoMsg <> "" Then
+    
+        objMensagem.ExibeMensagem
+        
+    End If
+    
+    Set objMensagem = Nothing
+    
+    Exit Sub
+        
+ErrorHandler:
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                            "Houve um erro de execução no método: MontarImpressaoOTS " & _
+                            "da classe clsgenOC_ConsultarOTS"
+    
+    GoTo Finalizar
+
+End Sub
+Private Function CriticarCamposTela(ByVal psTipoConsulta As String) As Boolean
+
+On Error GoTo ErrorHandler:
+
+    Dim objMensagem As clsgenMensagem
+    Dim bRetorno As Boolean
+
+    ' Intância a classe de mensagem
+    Set objMensagem = New clsgenMensagem
+
+    CriticarCamposTela = False
+    
+    ' Produto não selecionado
+    If objFormConsultarOTS.CboServico.ListIndex = -1 Then
+    
+        objMensagem.TipoMsg = "A"
+        objMensagem.Descricao = "Produto não selecionado."
+        objFormConsultarOTS.CboServico.SetFocus
+        
+        GoTo Finalizar
+    
+    End If
+        
+    ' Se o tipo de consulta for por período
+    If psTipoConsulta = "5" Then
+    
+        If (objFormConsultarOTS.chkStemAndamento.Value = 0) And _
+           (objFormConsultarOTS.chkStAtivado.Value = 0) Then
+        
+            objMensagem.TipoMsg = "A"
+            objMensagem.Descricao = "Status obrigatório."
+            
+            objFormConsultarOTS.chkStemAndamento.SetFocus
+            
+            GoTo Finalizar
+        
+        End If
+    
+    End If
+    
+        '==========================================================================
+        'CALBAT - 13/06/2008
+        '==========================================================================
+        
+        Set objProduto = New clsGenProduto
+        
+        ' Informar o nome do banco desejado
+        objProduto.InformaBanco frmgenMDI_SGAPlus.objBanco
+                
+        ' Informar o nome do objeto de mensagem
+        objProduto.InformaMensagem objMensagem
+                
+        If objFormConsultarOTS.CboServico.ItemData(objFormConsultarOTS.CboServico.ListIndex) > 0 Then
+        
+                bRetorno = objProduto.RecuperarDados(objFormConsultarOTS.CboServico.ItemData(objFormConsultarOTS.CboServico.ListIndex))
+                
+                If bRetorno = False Then
+                    GoTo Finalizar
+                End If
+            
+            'Valida se, caso haja uma designação digitada na tela , se o serviço digitado é igual ao serviço selecionado
+            If objFormConsultarOTS.txtServIP.Text <> "" And _
+                                       (objFormConsultarOTS.txtServIP.Text <> objProduto.Sigla) Then
+            
+                objMensagem.TipoMsg = "A"
+                
+                objMensagem.Descricao = "Sigla do Produto diferente da cadastrada."
+                
+                objFormConsultarOTS.txtServIP.SetFocus
+                
+                GoTo Finalizar
+            
+            End If
+                
+        End If
+        '==========================================================================
+        '==========================================================================
+    
+    CriticarCamposTela = True
+
+Finalizar:
+
+    If objMensagem.TipoMsg <> "" Then
+    
+        Screen.MousePointer = vbDefault
+        
+        objMensagem.ExibeMensagem
+        
+    End If
+    
+    On Error GoTo 0
+    
+    'Set objProduto = Nothing
+    
+    Exit Function
+        
+ErrorHandler:
+
+    objMensagem.TipoMsg = "E"
+    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+                            "Houve um erro de execução no método: CriticarCamposTela " & _
+                            "da classe clsgenOC_ConsultarOTS"
+    
+    GoTo Finalizar
+
+End Function
+
+'Private Function ExibirListaProduto() As Boolean
+'
+'On Error GoTo ErrorHandler:
+'
+'    Dim bRetorno As Boolean
+'    Dim iContador As Integer
+'
+'    Screen.MousePointer = vbArrowHourglass
+'
+'    ExibirListaProduto = False
+'
+'    ' Instância as classes
+'    '
+'    ' Classe de produto
+'    Set objProduto = New clsGenProduto
+'
+'    ' Informar o objeto do banco para as classes
+'    '
+'    ' Classe de produto
+'    objProduto.InformaBanco frmgenMDI_SGAPlus.ObjBanco
+'
+'    ' Informar o objeto de mensagem para as classes
+'    '
+'    ' Classe de produto
+'    objProduto.InformaMensagem objMensagem
+'
+'    ' Limpa a combo
+'    objFormConsultarOTS.CboServico.Clear
+'
+'    ' Executar o método de montagem da lista de produto na classe de produto
+'    bRetorno = objProduto.MontarListaProduto(aListaProduto, _
+'                                             sFamilia_Produto)
+'
+'    ' Se ocorreu algum erro na DLL exibi-lo
+'    If Not bRetorno Then
+'
+'        GoTo Finalizar
+'
+'    End If
+'
+'    If objMensagem.TipoMsg = "" Then
+'
+'        ' Preenche a combo de produto
+'        For iContador = 1 To UBound(aListaProduto, 2)
+'
+'            If Not IsEmpty(aListaProduto(0, iContador)) Then
+'
+'                objFormConsultarOTS.CboServico.AddItem aListaProduto(1, iContador)
+'
+'            Else
+'
+'                Exit For
+'
+'            End If
+'
+'        Next
+'
+'    End If
+'
+'    lProduto_ID = aListaProduto(0, 1)
+'
+'    ExibirListaProduto = True
+'
+'Finalizar:
+'
+'    Screen.MousePointer = vbDefault
+'
+'    If objMensagem.TipoMsg <> "" Then
+'
+'        objMensagem.ExibeMensagem
+'        objMensagem.TipoMsg = ""
+'
+'    End If
+'
+'    Set objProduto = Nothing
+'
+'    On Error GoTo 0
+'
+'    Exit Function
+'
+'ErrorHandler:
+'
+'    objMensagem.TipoMsg = "E"
+'    objMensagem.Descricao = "Erro: " & Err.Number & " - " & Err.Description & vbCrLf & vbCrLf & _
+'                            "Houve um erro de execução no método: ExibirListaProduto " & _
+'                            "da classe clsgenOC_ConsultarOTS"
+'
+'    GoTo Finalizar
+'
+'End Function
+'
+Private Sub Class_Terminate()
+
+    Set objMensagem = Nothing
+    Set objCentroFuncional = Nothing
+    Set objServico = Nothing
+    Set objListaOTS = Nothing
+    Set objProduto = Nothing
+    
+End Sub
